@@ -30,7 +30,7 @@ input[type=checkbox] {
   background-repeat: no-repeat;
 }
 .custom-hero-bg {
-  background-image: url('hero background.jpg');
+  background-image: url('images/hero background.jpg');
   background-size: cover;
   background-position: center;
 }
