@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Admin - Menu Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-neutral-950 text-white p-4 sm:p-8 min-h-screen">
+    <div class="max-w-5xl mx-auto space-y-8">
+        
+        <!-- Top Bar -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-neutral-900 p-6 rounded-3xl border border-yellow-400/10 gap-4 shadow-xl">
+            <div>
+                <h1 class="text-2xl font-black text-yellow-400 tracking-tight">Main Admin Dashboard</h1>
+                <p class="text-xs text-neutral-400 mt-1">Organize categories, manage items, and update details live</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="menu.html" target="_blank" class="bg-neutral-800 hover:bg-neutral-700 text-yellow-400 px-4 py-2 rounded-xl text-xs font-bold border border-yellow-400/20 transition flex items-center gap-1.5">
+                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Storefront
+                </a>
+                <button onclick="logout()" class="bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition">
+                    Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- Toast Feedback Notification Banner -->
+        <div id="toast" class="hidden text-xs p-3.5 rounded-2xl font-semibold text-center transition-all shadow-lg"></div>
+
+        <!-- Add Item Form Section -->
+        <section class="bg-neutral-900 p-6 rounded-3xl border border-yellow-400/10 shadow-xl">
+            <h2 class="text-xl font-bold text-yellow-400 mb-4 flex items-center gap-2">
+                <i data-lucide="plus-circle" class="w-5 h-5"></i> Add New Menu Item
+            </h2>
+            <form id="add-item-form" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs text-neutral-400 mb-1 font-semibold">Item Name *</label>
+                        <input type="text" id="name" required class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2.5 text-white text-sm focus:outline-none focus:border-yellow-400" placeholder="e.g., Zinger Burger">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-neutral-400 mb-1 font-semibold">Category *</label>
+                        <input type="text" id="category" required class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2.5 text-white text-sm focus:outline-none focus:border-yellow-400" placeholder="e.g., Burgers, Deals, Pizza" list="category-datalist">
+                        <datalist id="category-datalist"></datalist>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-neutral-400 mb-1 font-semibold">Price *</label>
+                        <input type="text" id="price" required class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2.5 text-white text-sm focus:outline-none focus:border-yellow-400" placeholder="350 or 550/- (S)">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs text-neutral-400 mb-1 font-semibold">Tag / Badge</label>
+                        <input type="text" id="tag" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2.5 text-white text-sm" placeholder="e.g., Deal, Special, Hot">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-neutral-400 mb-1 font-semibold">Image URL (Web Link)</label>
+                        <input type="url" id="imageUrl" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2.5 text-white text-sm" placeholder="https://images.unsplash.com/...">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-neutral-400 mb-1 font-semibold">Or Upload File</label>
+                        <input type="file" id="imageFile" accept="image/*" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-1.5 text-white text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-yellow-500 file:text-neutral-950 hover:file:bg-yellow-600">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs text-neutral-400 mb-1 font-semibold">Description</label>
+                    <textarea id="description" rows="2" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2.5 text-white text-sm focus:outline-none focus:border-yellow-400" placeholder="Crispy chicken fillet with spicy garlic mayo..."></textarea>
+                </div>
+
+                <button type="submit" id="add-btn" class="w-full bg-yellow-500 hover:bg-yellow-600 text-neutral-950 font-bold p-3 rounded-xl transition">
+                    Save to Database
+                </button>
+            </form>
+        </section>
+
+        <!-- Grouped Menu Inventory by Category -->
+        <section class="bg-neutral-900 p-6 rounded-3xl border border-yellow-400/10 space-y-6 shadow-xl">
+            <div class="flex justify-between items-center border-b border-neutral-800 pb-4">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="layers" class="w-5 h-5 text-yellow-400"></i>
+                    <h2 class="text-xl font-bold text-yellow-400">Menu Inventory (By Category)</h2>
+                </div>
+                <span id="menu-counter" class="text-xs bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 px-3 py-1 rounded-full font-bold">0 Items</span>
+            </div>
+
+            <!-- Category Container -->
+            <div id="categories-container" class="space-y-6">
+                <p class="text-neutral-400 text-xs text-center py-6">Loading inventory from database...</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div id="edit-item-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-neutral-900 p-6 rounded-3xl border border-yellow-400/20 max-w-lg w-full space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-neutral-800 pb-3">
+                <h3 class="font-bold text-yellow-400 text-lg flex items-center gap-2">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i> Edit Menu Item
+                </h3>
+                <button onclick="closeEditModal()" class="text-neutral-400 hover:text-white p-1">✕</button>
+            </div>
+            
+            <form id="edit-item-form" class="space-y-3 text-xs">
+                <input type="hidden" id="edit-id">
+                <div>
+                    <label class="block text-neutral-400 mb-1 font-semibold">Item Name *</label>
+                    <input type="text" id="edit-name" required class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2.5 text-white">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-neutral-400 mb-1 font-semibold">Category *</label>
+                        <select id="edit-category-select" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-yellow-400">
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-neutral-400 mb-1 font-semibold">Price *</label>
+                        <input type="text" id="edit-price" required class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2.5 text-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-neutral-400 mb-1 font-semibold">Image URL (Web Link)</label>
+                    <input type="url" id="edit-imageUrl" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2.5 text-white">
+                </div>
+
+                <div>
+                    <label class="block text-neutral-400 mb-1 font-semibold">Or Replace with Uploaded Image</label>
+                    <input type="file" id="edit-imageFile" accept="image/*" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-1.5 text-white file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-yellow-500 file:text-neutral-950 hover:file:bg-yellow-600">
+                </div>
+
+                <div>
+                    <label class="block text-neutral-400 mb-1 font-semibold">Description</label>
+                    <textarea id="edit-desc" rows="2" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2.5 text-white"></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeEditModal()" class="flex-1 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold p-2.5 rounded-xl transition">
+                        Cancel
+                    </button>
+                    <button type="submit" id="edit-submit-btn" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-neutral-950 font-bold p-2.5 rounded-xl transition">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Category Modal -->
+    <div id="edit-cat-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-neutral-900 p-6 rounded-3xl border border-yellow-400/20 max-w-sm w-full space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-neutral-800 pb-3">
+                <h3 class="font-bold text-yellow-400 text-base flex items-center gap-2">
+                    <i data-lucide="folder-edit" class="w-4 h-4"></i> Rename Category
+                </h3>
+                <button onclick="closeCategoryModal()" class="text-neutral-400 hover:text-white p-1">✕</button>
+            </div>
+            <form id="edit-category-form" class="space-y-4 text-xs">
+                <input type="hidden" id="edit-old-category">
+                <div>
+                    <label class="block text-neutral-400 mb-1 font-semibold">Current Category Name</label>
+                    <input type="text" id="display-old-category" disabled class="w-full bg-neutral-800/50 border border-neutral-700 text-neutral-400 rounded-lg p-2.5">
+                </div>
+                <div>
+                    <label class="block text-neutral-400 mb-1 font-semibold">New Category Name *</label>
+                    <input type="text" id="new-category-name" required class="w-full bg-neutral-800 border border-neutral-700 text-white rounded-lg p-2.5 focus:outline-none focus:border-yellow-400">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeCategoryModal()" class="flex-1 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold p-2.5 rounded-xl transition">
+                        Cancel
+                    </button>
+                    <button type="submit" id="cat-submit-btn" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-neutral-950 font-bold p-2.5 rounded-xl transition">
+                        Save Category
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let cachedItems = [];
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.className = isSuccess
+                ? "text-xs p-3.5 rounded-2xl font-semibold text-center transition-all bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                : "text-xs p-3.5 rounded-2xl font-semibold text-center transition-all bg-red-500/20 text-red-400 border border-red-500/30";
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 4000);
+        }
+
+        // Group array of items by category
+        function groupItemsByCategory(items) {
+            return items.reduce((acc, item) => {
+                const cat = item.category?.trim() || 'Uncategorized';
+                if (!acc[cat]) acc[cat] = [];
+                acc[cat].push(item);
+                return acc;
+            }, {});
+        }
+
+        // Fetch items and render hierarchical view
+        async function loadAdminMenu() {
+            const container = document.getElementById('categories-container');
+            const counter = document.getElementById('menu-counter');
+            const datalist = document.getElementById('category-datalist');
+
+            try {
+                const res = await fetch('http://localhost:5000/api/menu');
+                if (!res.ok) throw new Error('Could not retrieve items from server.');
+                
+                cachedItems = await res.json();
+                counter.innerText = `${cachedItems.length} Items`;
+                container.innerHTML = '';
+
+                if (cachedItems.length === 0) {
+                    container.innerHTML = '<p class="text-neutral-500 text-xs py-8 text-center">No menu items found in database.</p>';
+                    return;
+                }
+
+                const grouped = groupItemsByCategory(cachedItems);
+                const categories = Object.keys(grouped).sort();
+
+                // Update datalist for autocompletion
+                if (datalist) {
+                    datalist.innerHTML = categories.map(c => `<option value="${c}"></option>`).join('');
+                }
+
+                // Render each Category card
+                categories.forEach(catName => {
+                    const items = grouped[catName];
+                    const catCard = document.createElement('div');
+                    catCard.className = "bg-neutral-800/70 border border-neutral-700/80 rounded-2xl p-5 space-y-4 shadow-sm";
+
+                    catCard.innerHTML = `
+                        <!-- Category Header -->
+                        <div class="flex justify-between items-center border-b border-neutral-700/60 pb-3">
+                            <div class="flex items-center gap-3">
+                                <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
+                                <h3 class="text-base font-extrabold text-white">${catName}</h3>
+                                <span class="text-[11px] bg-neutral-700/60 text-neutral-300 font-semibold px-2 py-0.5 rounded-full">${items.length} items</span>
+                            </div>
+                            <button onclick="openCategoryModal('${encodeURIComponent(catName)}')" class="bg-neutral-900 hover:bg-neutral-700 text-yellow-400 border border-yellow-400/20 text-xs px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 font-semibold">
+                                <i data-lucide="edit-2" class="w-3 h-3"></i> Rename
+                            </button>
+                        </div>
+
+                        <!-- Sub-Items List -->
+                        <div class="space-y-2.5">
+                            ${items.map(item => {
+                                const encodedItem = encodeURIComponent(JSON.stringify(item));
+                                return `
+                                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-neutral-900/80 p-3 rounded-xl border border-neutral-700/40 gap-3 hover:border-yellow-400/20 transition">
+                                        <div class="flex items-center gap-3.5">
+                                            <img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover rounded-xl bg-neutral-800 border border-neutral-700/60 shrink-0">
+                                            <div class="space-y-0.5">
+                                                <h4 class="font-bold text-sm text-white">${item.name}</h4>
+                                                <p class="text-xs text-yellow-400 font-semibold">${item.price}</p>
+                                                ${item.desc ? `<p class="text-[11px] text-neutral-400 line-clamp-1">${item.desc}</p>` : ''}
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+                                            <button onclick="openEditModal('${encodedItem}')" class="bg-blue-500/10 hover:bg-blue-500 text-blue-400 hover:text-white text-xs px-3 py-1.5 rounded-lg transition font-semibold flex items-center gap-1">
+                                                <i data-lucide="edit-3" class="w-3 h-3"></i> Edit
+                                            </button>
+                                            <button onclick="deleteItem('${item._id}')" class="bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white text-xs px-3 py-1.5 rounded-lg transition font-semibold flex items-center gap-1">
+                                                <i data-lucide="trash-2" class="w-3 h-3"></i> Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                    container.appendChild(catCard);
+                });
+
+                if (window.lucide) lucide.createIcons();
+            } catch (err) {
+                container.innerHTML = '<p class="text-red-400 text-xs py-4 text-center">Failed to load items. Verify backend is running.</p>';
+            }
+        }
+
+        // --- Category Modal Logic ---
+        function openCategoryModal(encodedCat) {
+            const catName = decodeURIComponent(encodedCat);
+            document.getElementById('edit-old-category').value = catName;
+            document.getElementById('display-old-category').value = catName;
+            document.getElementById('new-category-name').value = catName;
+            document.getElementById('edit-cat-modal').classList.remove('hidden');
+        }
+
+        function closeCategoryModal() {
+            document.getElementById('edit-cat-modal').classList.add('hidden');
+        }
+
+        document.getElementById('edit-category-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const oldCategory = document.getElementById('edit-old-category').value;
+            const newCategory = document.getElementById('new-category-name').value.trim();
+            const btn = document.getElementById('cat-submit-btn');
+
+            if (!newCategory || oldCategory === newCategory) {
+                closeCategoryModal();
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Renaming...";
+
+            try {
+                const res = await fetch('http://localhost:5000/api/menu/admin/categories', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ oldCategory, newCategory })
+                });
+
+                if (res.ok) {
+                    closeCategoryModal();
+                    showToast(`Category renamed to '${newCategory}' successfully!`);
+                    await loadAdminMenu();
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    showToast(data.error || 'Failed to rename category.', false);
+                }
+            } catch (err) {
+                showToast("Server connection error during category update.", false);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Save Category";
+            }
+        });
+
+        // --- Edit Item Modal Logic ---
+        function openEditModal(encodedItem) {
+            const item = JSON.parse(decodeURIComponent(encodedItem));
+            document.getElementById('edit-id').value = item._id;
+            document.getElementById('edit-name').value = item.name || '';
+            document.getElementById('edit-price').value = item.price || '';
+            document.getElementById('edit-desc').value = item.desc || item.description || '';
+            document.getElementById('edit-imageUrl').value = item.image.startsWith('http') ? item.image : '';
+            document.getElementById('edit-imageFile').value = '';
+
+            // Populate category select options with existing categories
+            const categories = [...new Set(cachedItems.map(i => i.category?.trim()).filter(Boolean))];
+            const select = document.getElementById('edit-category-select');
+            select.innerHTML = categories.map(c => 
+                `<option value="${c}" ${c === item.category ? 'selected' : ''}>${c}</option>`
+            ).join('');
+
+            document.getElementById('edit-item-modal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-item-modal').classList.add('hidden');
+        }
+
+        document.getElementById('edit-item-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const btn = document.getElementById('edit-submit-btn');
+
+            const formData = new FormData();
+            formData.append('name', document.getElementById('edit-name').value);
+            formData.append('category', document.getElementById('edit-category-select').value);
+            formData.append('price', document.getElementById('edit-price').value);
+            formData.append('desc', document.getElementById('edit-desc').value);
+
+            const imgUrl = document.getElementById('edit-imageUrl').value.trim();
+            if (imgUrl) formData.append('imageUrl', imgUrl);
+
+            const fileInput = document.getElementById('edit-imageFile');
+            if (fileInput.files[0]) formData.append('imageFile', fileInput.files[0]);
+
+            btn.disabled = true;
+            btn.innerText = "Saving...";
+
+            try {
+                const res = await fetch(`http://localhost:5000/api/menu/admin/items/${id}`, {
+                    method: 'PUT',
+                    body: formData
+                });
+
+                if (res.ok) {
+                    closeEditModal();
+                    showToast("Item updated successfully!");
+                    await loadAdminMenu();
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    showToast(data.error || "Failed to update item.", false);
+                }
+            } catch (err) {
+                showToast("Server error occurred while saving.", false);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Save Changes";
+            }
+        });
+
+        // --- Delete Item Function ---
+        async function deleteItem(id) {
+            if (!confirm("Are you sure you want to permanently delete this item?")) return;
+            try {
+                const res = await fetch(`http://localhost:5000/api/menu/admin/items/${id}`, { 
+                    method: 'DELETE' 
+                });
+                if (res.ok) {
+                    showToast("Item deleted successfully.");
+                    await loadAdminMenu();
+                } else {
+                    showToast("Failed to delete item.", false);
+                }
+            } catch (err) {
+                showToast("Server error during item deletion.", false);
+            }
+        }
+
+        // --- Create New Item ---
+        document.getElementById('add-item-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('add-btn');
+            const formData = new FormData();
+
+            formData.append('name', document.getElementById('name').value);
+            formData.append('category', document.getElementById('category').value);
+            formData.append('price', document.getElementById('price').value);
+            formData.append('tag', document.getElementById('tag').value || 'Special');
+            formData.append('desc', document.getElementById('description').value);
+
+            const urlVal = document.getElementById('imageUrl').value.trim();
+            if (urlVal) formData.append('imageUrl', urlVal);
+
+            const file = document.getElementById('imageFile').files[0];
+            if (file) formData.append('imageFile', file);
+
+            if (!urlVal && !file) {
+                showToast("Please provide an Image URL or an uploaded image file.", false);
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Saving to Database...";
+
+            try {
+                const res = await fetch('http://localhost:5000/api/menu/admin/items', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (res.ok) {
+                    showToast("Item added successfully!");
+                    document.getElementById('add-item-form').reset();
+                    await loadAdminMenu();
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    showToast(data.error || "Failed to create item.", false);
+                }
+            } catch (err) {
+                showToast("Network error: Could not reach backend server.", false);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Save to Database";
+            }
+        });
+
+        // Initial Load
+        loadAdminMenu();
+    </script>
+</body>
+</html>

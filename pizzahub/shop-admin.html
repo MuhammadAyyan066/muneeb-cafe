@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Admin - Orders Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-neutral-950 text-white min-h-screen p-4 sm:p-8">
+    <div class="max-w-5xl mx-auto space-y-6">
+        
+        <!-- Header Bar -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-neutral-900 p-6 rounded-3xl border border-yellow-400/10 shadow-xl">
+            <div>
+                <div class="flex items-center gap-2.5">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <h2 class="text-2xl font-black text-yellow-400 tracking-tight">Shop Admin Dashboard</h2>
+                </div>
+                <p class="text-xs sm:text-sm text-neutral-400 mt-1">Live customer orders, kitchen status, and direct rider dispatch</p>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <button onclick="loadOrders()" class="flex-1 sm:flex-none bg-neutral-800 hover:bg-neutral-700 text-yellow-400 px-4 py-2 rounded-xl text-xs font-bold border border-yellow-400/20 transition flex items-center justify-center gap-1.5">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
+                </button>
+                <button onclick="logout()" class="flex-1 sm:flex-none bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition">
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Orders Section -->
+        <div class="bg-neutral-900 p-6 rounded-3xl border border-yellow-400/10 shadow-xl space-y-4">
+            <div class="flex justify-between items-center border-b border-neutral-800 pb-4">
+                <div class="flex items-center gap-2">
+                    <h3 class="text-lg font-bold text-white">Incoming Orders</h3>
+                    <span id="order-count-badge" class="bg-yellow-400 text-neutral-950 text-xs font-black px-2.5 py-0.5 rounded-full">0</span>
+                </div>
+                <div id="connection-status" class="text-xs text-neutral-400 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Live Online
+                </div>
+            </div>
+
+            <!-- Orders Container -->
+            <div id="orders-list" class="space-y-4 pt-2">
+                <p class="text-neutral-400 text-sm text-center py-8">Loading orders...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // Status badge styling
+        function renderStatusBadge(status) {
+            switch(status) {
+                case 'Pending':
+                    return `<span class="bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Pending</span>`;
+                case 'In Delivery':
+                    return `<span class="bg-sky-500/15 text-sky-400 border border-sky-500/30 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">In Delivery</span>`;
+                case 'Done':
+                    return `<span class="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Done</span>`;
+                case 'Cancelled':
+                    return `<span class="bg-red-500/15 text-red-400 border border-red-500/30 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Cancelled</span>`;
+                default:
+                    return `<span class="bg-neutral-800 text-neutral-300 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase">${status}</span>`;
+            }
+        }
+
+        // WhatsApp Share Handler
+        function shareToWhatsApp(orderStr) {
+            const order = JSON.parse(decodeURIComponent(orderStr));
+            const phoneVal = order.customerPhone || order.phone || 'N/A';
+            const addressVal = order.deliveryAddress || order.address || 'Address Not Provided';
+            
+            const itemsList = Array.isArray(order.items) && order.items.length > 0
+                ? order.items.map(i => `• ${i.name} x${i.quantity} (Rs. ${(i.price || 0) * (i.quantity || 1)})`).join('\n')
+                : 'No item data available';
+
+            const message = 
+`*Muneeb Fast Food - Order Details*
+------------------------------------
+*Customer:* ${order.customerName || 'Customer'}
+*Phone:* ${phoneVal}
+*Address:* ${addressVal}
+------------------------------------
+*Items:*
+${itemsList}
+------------------------------------
+*Total Amount:* Rs. ${order.totalAmount}/-
+*Current Status:* ${order.status}
+------------------------------------`;
+
+            let cleanPhone = phoneVal.replace(/[^0-9]/g, '');
+            if (cleanPhone.startsWith('0')) {
+                cleanPhone = '92' + cleanPhone.substring(1);
+            }
+
+            const targetUrl = cleanPhone.length >= 10
+                ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`
+                : `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+            
+            window.open(targetUrl, '_blank');
+        }
+
+        // Fetch and render orders
+        async function loadOrders() {
+            const container = document.getElementById('orders-list');
+            const statusIndicator = document.getElementById('connection-status');
+            const countBadge = document.getElementById('order-count-badge');
+
+            try {
+                const res = await fetch('http://localhost:5000/api/orders');
+                if (!res.ok) throw new Error('API server returned error');
+                
+                const orders = await res.json();
+                statusIndicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Live Online`;
+                countBadge.innerText = orders.length;
+                container.innerHTML = '';
+
+                if (!orders || orders.length === 0) {
+                    container.innerHTML = `<p class="text-neutral-500 text-sm text-center py-10">No orders placed yet.</p>`;
+                    return;
+                }
+
+                orders.forEach(order => {
+                    const encodedOrder = encodeURIComponent(JSON.stringify(order));
+                    const phoneVal = order.customerPhone || order.phone || 'N/A';
+                    const addressVal = order.deliveryAddress || order.address || 'No Delivery Address Specified';
+
+                    // Google Maps link fallback (GPS Coords vs. Plain Address)
+                    const mapUrl = (order.locationCoords?.lat && order.locationCoords?.lng)
+                        ? `https://www.google.com/maps?q=${order.locationCoords.lat},${order.locationCoords.lng}`
+                        : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressVal)}`;
+
+                    const card = document.createElement('div');
+                    card.className = "bg-neutral-800/80 p-5 rounded-2xl border border-neutral-700/80 space-y-4 hover:border-yellow-400/30 transition shadow-md";
+                    
+                    card.innerHTML = `
+                        <!-- Customer Info & Status Header -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-700/60 pb-3">
+                            <div>
+                                <div class="flex items-center gap-2.5">
+                                    <h4 class="font-extrabold text-base text-white">${order.customerName || 'Anonymous Customer'}</h4>
+                                    <a href="tel:${phoneVal}" class="text-xs text-yellow-400 hover:underline flex items-center gap-1 font-semibold">
+                                        <i data-lucide="phone" class="w-3 h-3"></i> ${phoneVal}
+                                    </a>
+                                </div>
+                                <p class="text-[11px] text-neutral-400 mt-0.5">
+                                    Placed: ${order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Recent'}
+                                </p>
+                            </div>
+                            <div>
+                                ${renderStatusBadge(order.status)}
+                            </div>
+                        </div>
+
+                        <!-- Delivery Address Box -->
+                        <div class="bg-neutral-900/90 p-3.5 rounded-xl border border-neutral-700/70 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                            <div class="space-y-0.5">
+                                <span class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Delivery Address</span>
+                                <p class="text-xs sm:text-sm text-neutral-200 font-medium leading-snug">${addressVal}</p>
+                            </div>
+                            <a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="shrink-0 bg-neutral-800 hover:bg-neutral-700 text-yellow-400 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition border border-yellow-400/20">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-orange-500"></i> Open Maps
+                            </a>
+                        </div>
+
+                        <!-- Ordered Items -->
+                        <div class="space-y-1.5">
+                            <span class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Order Items</span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                ${Array.isArray(order.items) && order.items.length > 0 ? order.items.map(item => `
+                                    <div class="flex justify-between items-center bg-neutral-900/50 px-3 py-1.5 rounded-lg text-xs border border-neutral-700/40">
+                                        <span class="text-neutral-300 font-medium">${item.name} <strong class="text-yellow-400">×${item.quantity}</strong></span>
+                                        <span class="text-neutral-400">Rs. ${(item.price || 0) * (item.quantity || 1)}</span>
+                                    </div>
+                                `).join('') : '<p class="text-xs text-neutral-500">No items listed</p>'}
+                            </div>
+                        </div>
+
+                        <!-- Bill & Actions Row -->
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-neutral-700/60">
+                            <div>
+                                <span class="text-xs text-neutral-400 font-medium">Total Bill:</span>
+                                <span class="text-base font-black text-yellow-400 ml-1">Rs. ${order.totalAmount}/-</span>
+                            </div>
+
+                            <!-- Status Controls & WhatsApp -->
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button onclick="updateStatus('${order._id}', 'Pending')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${order.status === 'Pending' ? 'bg-amber-500 text-neutral-950' : 'bg-neutral-900 text-amber-400 hover:bg-neutral-700 border border-amber-500/30'}">
+                                    Pending
+                                </button>
+                                <button onclick="updateStatus('${order._id}', 'In Delivery')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${order.status === 'In Delivery' ? 'bg-sky-500 text-white' : 'bg-neutral-900 text-sky-400 hover:bg-neutral-700 border border-sky-500/30'}">
+                                    In Delivery
+                                </button>
+                                <button onclick="updateStatus('${order._id}', 'Done')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${order.status === 'Done' ? 'bg-emerald-500 text-white' : 'bg-neutral-900 text-emerald-400 hover:bg-neutral-700 border border-emerald-500/30'}">
+                                    Done
+                                </button>
+
+                                <button onclick="shareToWhatsApp('${encodedOrder}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ml-auto sm:ml-2 shadow-sm">
+                                    <i data-lucide="share-2" class="w-3.5 h-3.5"></i> WhatsApp
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            } catch (err) {
+                statusIndicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Offline`;
+                container.innerHTML = `
+                    <div class="bg-red-500/10 border border-red-500/30 p-6 rounded-2xl text-center space-y-2">
+                        <p class="text-sm font-semibold text-red-400">Unable to load orders from backend server.</p>
+                        <p class="text-xs text-neutral-400">Make sure your Node.js Express server is running at http://localhost:5000</p>
+                    </div>`;
+            }
+        }
+
+        // Update Order Status API call
+        async function updateStatus(id, status) {
+            try {
+                const res = await fetch(`http://localhost:5000/api/orders/${id}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+
+                if (res.ok) {
+                    loadOrders();
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    alert(errData.error || "Failed to update order status");
+                }
+            } catch (err) {
+                alert("Network error: Could not reach backend server.");
+            }
+        }
+
+        // Initial fetch and automatic polling every 6 seconds
+        loadOrders();
+        setInterval(loadOrders, 6000);
+    </script>
+</body>
+</html>

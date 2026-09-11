@@ -1,0 +1,36 @@
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: #000000;
+  color: #facc15;
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: 'Outfit', sans-serif;
+  color: #facc15;
+}
+
+.font-serif-title {
+  font-family: 'DM Serif Display', serif;
+  color: #facc15;
+}
+
+input[type=range] {
+  accent-color: #e14d2a;
+}
+
+input[type=checkbox] {
+  accent-color: #e14d2a;
+}
+
+/* Custom CSS rule for hero background image */
+.custom-hero-bg {
+  background-image: url('hero image.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.custom-hero-bg {
+  background-image: url('hero background.jpg');
+  background-size: cover;
+  background-position: center;
+}
