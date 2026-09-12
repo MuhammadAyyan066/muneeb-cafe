@@ -58,17 +58,17 @@
 
         // Status badge styling
         function renderStatusBadge(status) {
-            switch(status) {
-                case 'Pending':
-                    return `<span class="bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Pending</span>`;
-                case 'In Delivery':
-                    return `<span class="bg-sky-500/15 text-sky-400 border border-sky-500/30 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">In Delivery</span>`;
-                case 'Done':
-                    return `<span class="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Done</span>`;
-                case 'Cancelled':
-                    return `<span class="bg-red-500/15 text-red-400 border border-red-500/30 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Cancelled</span>`;
-                default:
-                    return `<span class="bg-neutral-800 text-neutral-300 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase">${status}</span>`;
+            const clean = (status || 'Pending').toLowerCase().trim();
+            if (clean === 'pending') {
+                return `<span class="bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Pending</span>`;
+            } else if (clean === 'in delivery' || clean === 'delivering' || clean === 'out for delivery') {
+                return `<span class="bg-sky-500/15 text-sky-400 border border-sky-500/30 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">In Delivery</span>`;
+            } else if (clean === 'done' || clean === 'completed') {
+                return `<span class="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Done</span>`;
+            } else if (clean === 'cancelled') {
+                return `<span class="bg-red-500/15 text-red-400 border border-red-500/30 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Cancelled</span>`;
+            } else {
+                return `<span class="bg-neutral-800 text-neutral-300 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase">${status}</span>`;
             }
         }
 
@@ -121,19 +121,29 @@ ${itemsList}
                 const orders = await res.json();
                 statusIndicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Live Online`;
                 countBadge.innerText = orders.length;
-                container.innerHTML = '';
 
                 if (!orders || orders.length === 0) {
                     container.innerHTML = `<p class="text-neutral-500 text-sm text-center py-10">No orders placed yet.</p>`;
                     return;
                 }
 
+                container.innerHTML = '';
+
                 orders.forEach(order => {
                     const encodedOrder = encodeURIComponent(JSON.stringify(order));
-                    const phoneVal = order.customerPhone || order.phone || 'N/A';
-                    const addressVal = order.deliveryAddress || order.address || 'No Delivery Address Specified';
+                    const phoneVal = order.phone || order.customerPhone || 'N/A';
+                    
+                    // Comprehensive Address extraction fallback
+                    const addressVal = order.address || 
+                                       order.deliveryAddress || 
+                                       (order.locationCoords?.lat ? `Lat: ${order.locationCoords.lat}, Lng: ${order.locationCoords.lng}` : 'No Delivery Address Specified');
 
-                    // Google Maps link fallback (GPS Coords vs. Plain Address)
+                    const currentStatus = (order.status || 'Pending').toLowerCase().trim();
+                    const isPending = currentStatus === 'pending';
+                    const isInDelivery = currentStatus === 'in delivery' || currentStatus === 'delivering';
+                    const isDone = currentStatus === 'done' || currentStatus === 'completed';
+
+                    // Google Maps fallback link
                     const mapUrl = (order.locationCoords?.lat && order.locationCoords?.lng)
                         ? `https://www.google.com/maps?q=${order.locationCoords.lat},${order.locationCoords.lng}`
                         : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressVal)}`;
@@ -146,7 +156,7 @@ ${itemsList}
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-700/60 pb-3">
                             <div>
                                 <div class="flex items-center gap-2.5">
-                                    <h4 class="font-extrabold text-base text-white">${order.customerName || 'Anonymous Customer'}</h4>
+                                    <h4 class="font-extrabold text-base text-white">${order.customerName || 'Customer'}</h4>
                                     <a href="tel:${phoneVal}" class="text-xs text-yellow-400 hover:underline flex items-center gap-1 font-semibold">
                                         <i data-lucide="phone" class="w-3 h-3"></i> ${phoneVal}
                                     </a>
@@ -193,13 +203,13 @@ ${itemsList}
 
                             <!-- Status Controls & WhatsApp -->
                             <div class="flex flex-wrap items-center gap-2">
-                                <button onclick="updateStatus('${order._id}', 'Pending')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${order.status === 'Pending' ? 'bg-amber-500 text-neutral-950' : 'bg-neutral-900 text-amber-400 hover:bg-neutral-700 border border-amber-500/30'}">
+                                <button onclick="updateStatus('${order._id}', 'Pending')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${isPending ? 'bg-amber-500 text-neutral-950 font-black' : 'bg-neutral-900 text-amber-400 hover:bg-neutral-700 border border-amber-500/30'}">
                                     Pending
                                 </button>
-                                <button onclick="updateStatus('${order._id}', 'In Delivery')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${order.status === 'In Delivery' ? 'bg-sky-500 text-white' : 'bg-neutral-900 text-sky-400 hover:bg-neutral-700 border border-sky-500/30'}">
+                                <button onclick="updateStatus('${order._id}', 'In Delivery')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${isInDelivery ? 'bg-sky-500 text-white font-black' : 'bg-neutral-900 text-sky-400 hover:bg-neutral-700 border border-sky-500/30'}">
                                     In Delivery
                                 </button>
-                                <button onclick="updateStatus('${order._id}', 'Done')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${order.status === 'Done' ? 'bg-emerald-500 text-white' : 'bg-neutral-900 text-emerald-400 hover:bg-neutral-700 border border-emerald-500/30'}">
+                                <button onclick="updateStatus('${order._id}', 'Done')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${isDone ? 'bg-emerald-500 text-white font-black' : 'bg-neutral-900 text-emerald-400 hover:bg-neutral-700 border border-emerald-500/30'}">
                                     Done
                                 </button>
 
@@ -225,14 +235,23 @@ ${itemsList}
             }
         }
 
-        // Update Order Status API call
+        // Update Order Status API call with smart fallback
         async function updateStatus(id, status) {
             try {
-                const res = await fetch(`http://localhost:5000/api/orders/${id}/status`, {
+                let res = await fetch(`http://localhost:5000/api/orders/${id}/status`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status })
                 });
+
+                // Agar schema mein 'In Delivery' ki bajaye 'Delivering' ho
+                if (!res.ok && status === 'In Delivery') {
+                    res = await fetch(`http://localhost:5000/api/orders/${id}/status`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'Delivering' })
+                    });
+                }
 
                 if (res.ok) {
                     loadOrders();
