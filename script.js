@@ -68,9 +68,7 @@ const menuItems = [
   { name: "Arabic Roll", category: "Wraps", price: "450/-", time: "10 min", rating: "4.7 (85)", desc: "Authentic Arabic style chicken wrap with garlic dip", tag: "Wrap", image: "images/shawarma.jpg" },
   { name: "Smoky Grill Wrap", category: "Wraps", price: "450/-", time: "12 min", rating: "4.8 (90)", desc: "Smoky flavored grilled chicken wrap", tag: "Wrap", image: "images/shawarma.jpg" },
 
-  // --- SANDWICH ---
-  { name: "Panini Grill Sandwich", category: "Sandwich", price: "400/-", time: "10 min", rating: "4.7 (110)", desc: "Pressed panini bread filled with seasoned chicken", tag: "Sandwich", image: "images/burgers.jpg" },
-  { name: "House & Club Sandwich", category: "Sandwich", price: "400/-", time: "12 min", rating: "4.8 (160)", desc: "Triple layered classic club sandwich with fries", tag: "Sandwich", image: "images/burgers.jpg" },
+  
 
   // --- FRIES ---
   { name: "Plain Fries", category: "Fries", price: "200/- (S)", time: "8 min", rating: "4.6 (300)", desc: "Crispy golden french fries", tag: "Fries", image: "images/burgers.jpg" },
@@ -447,3 +445,125 @@ window.addEventListener('DOMContentLoaded', async () => {
     lucide.createIcons();
   }
 });
+let currentSelectingProduct = null;
+let selectedSizeObj = null;
+
+// Renders a card on the customer menu
+function renderProductCard(product) {
+  const isPizza = product.category === 'Pizzas' || product.category === 'Muneeb Special Pizzas' || product.hasSizes;
+  
+  const displayPrice = isPizza && product.sizes?.length
+    ? `From Rs. ${Math.min(...product.sizes.map(s => s.price))}`
+    : `Rs. ${product.price}`;
+
+  return `
+    <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 flex flex-col justify-between">
+      <div>
+        <img src="${product.image || 'placeholder.jpg'}" alt="${product.name}" class="w-full h-36 object-cover rounded-xl mb-3">
+        <h4 class="font-bold text-base text-white">${product.name}</h4>
+        <p class="text-xs text-neutral-400 line-clamp-2 mt-1">${product.description || ''}</p>
+      </div>
+      <div class="flex items-center justify-between mt-4">
+        <span class="text-yellow-400 font-extrabold text-sm">${displayPrice}</span>
+        <button onclick="handleAddToCartClick(${JSON.stringify(product).replace(/"/g, '&quot;')})" 
+          class="bg-yellow-400 hover:bg-yellow-500 text-neutral-950 px-3.5 py-1.5 rounded-xl text-xs font-black transition">
+          ${isPizza ? 'Select Size' : 'Add to Cart'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Click Trigger
+function handleAddToCartClick(product) {
+  const isPizza = product.category === 'Pizzas' || product.category === 'Muneeb Special Pizzas' || product.hasSizes;
+
+  if (isPizza && product.sizes && product.sizes.length > 0) {
+    openSizeModal(product);
+  } else {
+    // Normal single-price item
+    addItemToCart({
+      productId: product._id,
+      name: product.name,
+      size: null,
+      price: product.price,
+      quantity: 1
+    });
+  }
+}
+
+function openSizeModal(product) {
+  currentSelectingProduct = product;
+  document.getElementById('modal-item-name').innerText = product.name;
+  
+  const container = document.getElementById('modal-sizes-container');
+  container.innerHTML = '';
+
+  // Default selection is first size
+  selectedSizeObj = product.sizes[0];
+
+  product.sizes.forEach((s, index) => {
+    const isSelected = index === 0;
+    const btn = document.createElement('div');
+    btn.className = `size-option flex items-center justify-between p-3 rounded-xl border cursor-pointer transition ${
+      isSelected ? 'border-yellow-400 bg-yellow-400/10 text-yellow-400 font-bold' : 'border-neutral-800 bg-neutral-950 text-neutral-300'
+    }`;
+    btn.dataset.size = s.size;
+    btn.dataset.price = s.price;
+    btn.innerHTML = `
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full ${isSelected ? 'bg-yellow-400' : 'bg-neutral-600'}"></span>
+        <span class="text-sm">${s.size}</span>
+      </div>
+      <span class="text-sm font-black">Rs. ${s.price}</span>
+    `;
+
+    btn.onclick = () => {
+      document.querySelectorAll('.size-option').forEach(el => {
+        el.className = 'size-option flex items-center justify-between p-3 rounded-xl border cursor-pointer transition border-neutral-800 bg-neutral-950 text-neutral-300';
+        el.querySelector('span').className = 'w-2.5 h-2.5 rounded-full bg-neutral-600';
+      });
+      btn.className = 'size-option flex items-center justify-between p-3 rounded-xl border cursor-pointer transition border-yellow-400 bg-yellow-400/10 text-yellow-400 font-bold';
+      btn.querySelector('span').className = 'w-2.5 h-2.5 rounded-full bg-yellow-400';
+      selectedSizeObj = s;
+    };
+
+    container.appendChild(btn);
+  });
+
+  document.getElementById('modal-confirm-btn').onclick = () => {
+    if (!selectedSizeObj) return;
+    addItemToCart({
+      productId: currentSelectingProduct._id,
+      name: `${currentSelectingProduct.name} (${selectedSizeObj.size})`,
+      size: selectedSizeObj.size,
+      price: selectedSizeObj.price,
+      quantity: 1
+    });
+    closeSizeModal();
+  };
+
+  document.getElementById('size-modal').classList.remove('hidden');
+}
+
+function closeSizeModal() {
+  document.getElementById('size-modal').classList.add('hidden');
+  currentSelectingProduct = null;
+  selectedSizeObj = null;
+}
+
+function addItemToCart(item) {
+  let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+  
+  // Match both by ID and specific size variant
+  const existingIndex = cart.findIndex(c => c.productId === item.productId && c.size === item.size);
+
+  if (existingIndex > -1) {
+    cart[existingIndex].quantity += item.quantity;
+  } else {
+    cart.push(item);
+  }
+
+  localStorage.setItem('cart', JSON.stringify(cart));
+  if (typeof updateCartUI === 'function') updateCartUI();
+}
