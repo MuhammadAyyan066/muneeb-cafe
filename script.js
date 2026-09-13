@@ -339,7 +339,13 @@ async function placeOrder() {
     return;
   }
 
-  const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const totalAmount = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
+
+  const formattedItems = cart.map(item => ({
+    name: item.name,
+    price: Number(item.price) || 0,
+    quantity: Number(item.quantity) || 1
+  }));
 
   // 2. Button Loading State
   if (orderBtn) {
@@ -355,11 +361,11 @@ async function placeOrder() {
     `;
   }
 
-  // 3. API Dispatch (Fixed Payload: Both keys provided for full compatibility)
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 9000);
+  // 3. API Dispatch (45-second timeout for Atlas network overhead)
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 45000);
 
+  try {
     const response = await fetch('http://localhost:5000/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -367,11 +373,11 @@ async function placeOrder() {
       body: JSON.stringify({
         customerName,
         customerPhone: phone,
-        phone: phone,                  // Satisfies backend Mongoose schema { phone: { required: true } }
+        phone: phone,
         deliveryAddress: address,
-        address: address,              // Backward compatibility key
+        address: address,
         locationCoords: detectedCoords,
-        items: cart,
+        items: formattedItems,
         totalAmount
       })
     });
@@ -384,9 +390,12 @@ async function placeOrder() {
       updateCartUI();
       detectedCoords = { lat: null, lng: null };
       
-      document.getElementById('customer-name').value = '';
-      document.getElementById('customer-phone').value = '';
-      document.getElementById('customer-address').value = '';
+      const nameInput = document.getElementById('customer-name');
+      const phoneInput = document.getElementById('customer-phone');
+      const addressInput = document.getElementById('customer-address');
+      if (nameInput) nameInput.value = '';
+      if (phoneInput) phoneInput.value = '';
+      if (addressInput) addressInput.value = '';
 
       setTimeout(() => {
         closeCartDrawer();
@@ -396,6 +405,7 @@ async function placeOrder() {
       showCheckoutNotification(errData.error || "Failed to place order. Verify your details.", "error");
     }
   } catch (err) {
+    clearTimeout(timeoutId);
     if (err.name === 'AbortError') {
       showCheckoutNotification("Request timed out. Server took too long to respond.", "error");
     } else {
