@@ -1,3 +1,5 @@
+const API_URL = 'https://muneeb-fast-food.vercel.app';
+
 function toggleSizeFields() {
   const categoryEl = document.getElementById('prod-category');
   if (!categoryEl) return;
@@ -55,7 +57,7 @@ async function handleSaveProduct(e) {
   }
 
   try {
-    const res = await fetch('http://localhost:5000/api/products', {
+    const res = await fetch(`${API_URL}/api/products`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -73,7 +75,7 @@ async function handleSaveProduct(e) {
     }
   } catch (error) {
     console.error('Save product error:', error);
-    alert('Server connection failed on port 5000.');
+    alert('Server connection failed. Please check network.');
   }
 }
 

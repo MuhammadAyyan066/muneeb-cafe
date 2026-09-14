@@ -1,3 +1,6 @@
+const API_URL = 'https://muneeb-fast-food.vercel.app';
+const API_BASE_URL = `${API_URL}/api/products`;
+
 async function handleProductSubmit(e) {
   e.preventDefault();
 
@@ -30,7 +33,8 @@ async function handleProductSubmit(e) {
   }
 
   try {
-    const res = await fetch('http://localhost:5000/api/products', {
+    // Live backend URL variable use karein:
+    const res = await fetch(API_BASE_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)

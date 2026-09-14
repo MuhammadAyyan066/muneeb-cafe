@@ -1,6 +1,7 @@
 // ==========================================
 // 0. API CONFIGURATION
 // ==========================================
+const API_URL = 'https://muneeb-fast-food.vercel.app';
 const API_BASE_URL = 'http://127.0.0.1:5000/api/orders';
 const MENU_API_URL = 'http://127.0.0.1:5000/api/menu';
 
