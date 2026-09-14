@@ -348,3 +348,346 @@ input[type=checkbox] {
     padding: 8px 0;
   }
 }
+/* Header Admin Button */
+.shop-admin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(225, 77, 42, 0.15);
+  border: 1px solid rgba(225, 77, 42, 0.4);
+  color: #ff6b4a;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  flex-shrink: 0;
+}
+
+.shop-admin-btn:hover {
+  background: #e14d2a;
+  border-color: #e14d2a;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(225, 77, 42, 0.35);
+}
+
+.shop-admin-btn .admin-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Modal Overlay */
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 100;
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.admin-modal-backdrop.hidden {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Modal Card */
+.admin-modal-card {
+  background-color: #121212;
+  border: 1px solid rgba(250, 204, 21, 0.2);
+  border-radius: 24px;
+  max-width: 380px;
+  width: 100%;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+  animation: modalPop 0.25s ease-out forwards;
+}
+
+@keyframes modalPop {
+  0% {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.admin-modal-icon-wrap {
+  width: 48px;
+  height: 48px;
+  background: rgba(225, 77, 42, 0.15);
+  border: 1px solid rgba(225, 77, 42, 0.3);
+  color: #e14d2a;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.modal-lock-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.admin-modal-title {
+  color: #facc15;
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.admin-modal-desc {
+  color: #a1a1aa;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  margin-bottom: 22px;
+}
+
+.admin-modal-desc strong {
+  color: #ffffff;
+}
+
+/* Actions */
+.admin-modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-cancel {
+  flex: 1;
+  background: #1e1e1e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e4e4e7;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-cancel:hover {
+  background: #27272a;
+}
+
+.btn-confirm {
+  flex: 1;
+  background: #e14d2a;
+  border: none;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-confirm:hover {
+  background: #c83818;
+}/* Modals Common Overlay */
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 100;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.admin-modal-backdrop.hidden {
+  display: none;
+}
+
+/* Modal Card */
+.admin-modal-card {
+  background-color: #121212;
+  border: 1px solid rgba(250, 204, 21, 0.25);
+  border-radius: 20px;
+  max-width: 380px;
+  width: 100%;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+  animation: modalScale 0.2s ease-out forwards;
+}
+
+@keyframes modalScale {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-icon-badge {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(225, 77, 42, 0.15);
+  border: 1px solid rgba(225, 77, 42, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px auto;
+}
+
+.modal-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.btn-close-x {
+  background: transparent;
+  border: none;
+  color: #71717a;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.btn-close-x:hover {
+  color: #ffffff;
+}
+
+.modal-title {
+  color: #facc15;
+  font-size: 1.15rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.modal-header-row .modal-title {
+  text-align: left;
+}
+
+.modal-desc {
+  color: #a1a1aa;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  text-align: center;
+  margin-top: 6px;
+  margin-bottom: 20px;
+}
+
+.modal-header-row + .modal-desc {
+  text-align: left;
+}
+
+/* Actions */
+.modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-cancel {
+  flex: 1;
+  background: #1e1e1e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e4e4e7;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-cancel:hover {
+  background: #27272a;
+}
+
+.btn-confirm {
+  flex: 1;
+  background: #e14d2a;
+  border: none;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-confirm:hover {
+  background: #c83818;
+}
+
+/* Login Form Elements */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-form label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #a1a1aa;
+}
+
+.login-form input {
+  background: #1a1a1a;
+  border: 1px solid #333333;
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.login-form input:focus {
+  border-color: #facc15;
+}
+
+.btn-login-submit {
+  background: #facc15;
+  color: #000000;
+  border: none;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 11px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: background 0.15s;
+}
+
+.btn-login-submit:hover {
+  background: #eab308;
+}
+
+.login-alert {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  font-size: 0.78rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  text-align: center;
+  font-weight: 600;
+}

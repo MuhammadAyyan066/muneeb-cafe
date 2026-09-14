@@ -861,7 +861,6 @@ async function initializeApp() {
 
     const dbItems = await res.json();
 
-    // Primary Flow: Sirf aur sirf DB items render honge
     if (Array.isArray(dbItems) && dbItems.length > 0) {
       console.log(`[Data Flow] Live DB connected. Rendered ${dbItems.length} products.`);
       activeMenuItems = dbItems;
@@ -871,7 +870,6 @@ async function initializeApp() {
 
   } catch (err) {
     clearTimeout(timeoutId);
-    // Fallback Flow: DB down hone par local items render honge
     console.warn('[Data Flow] Backend unavailable. Using local catalog:', err.message);
     activeMenuItems = [...fallbackMenuItems];
   }
@@ -879,7 +877,6 @@ async function initializeApp() {
   renderMenu();
   updateCartUI();
 
-  // URL query parameter support (e.g., menu.html?cat=Deals)
   const urlParams = new URLSearchParams(window.location.search);
   const catParam = urlParams.get('cat');
   if (catParam) {
@@ -892,6 +889,108 @@ async function initializeApp() {
       filterByCategory(catParam);
     }
   }
+
+  // Ensure all icons are created on DOM load
+  if (window.lucide) {
+    lucide.createIcons();
+  }
 }
 
 window.addEventListener('DOMContentLoaded', initializeApp);
+
+// ==========================================
+// 9. SHOP ADMIN AUTHENTICATION FLOW (2-STEP)
+// ==========================================
+(function initShopAdminFlow() {
+  const MAX_ATTEMPTS = 3;
+  let failedAttempts = 0;
+
+  const VALID_USER = "admin";
+  const VALID_PASS = "muneeb123";
+
+  // Elements
+  const shopAdminOpenBtn = document.getElementById('shopAdminOpenBtn');
+  const confirmModal = document.getElementById('adminConfirmModal');
+  const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+  const confirmProceedBtn = document.getElementById('confirmProceedBtn');
+
+  const loginModal = document.getElementById('adminLoginModal');
+  const loginCloseBtn = document.getElementById('loginCloseBtn');
+  const loginForm = document.getElementById('adminLoginForm');
+  const loginErrorMsg = document.getElementById('loginErrorMsg');
+  const userInput = document.getElementById('adminUsername');
+  const passInput = document.getElementById('adminPassword');
+
+  // Step 1: Open Confirmation Modal
+  if (shopAdminOpenBtn && confirmModal) {
+    shopAdminOpenBtn.addEventListener('click', () => {
+      confirmModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      if (window.lucide) lucide.createIcons();
+    });
+  }
+
+  // Cancel Confirmation
+  if (confirmCancelBtn && confirmModal) {
+    confirmCancelBtn.addEventListener('click', () => {
+      confirmModal.classList.add('hidden');
+      document.body.style.overflow = '';
+    });
+  }
+
+  // Step 2: Confirmation Accepted -> Open Login Modal
+  if (confirmProceedBtn && confirmModal && loginModal) {
+    confirmProceedBtn.addEventListener('click', () => {
+      confirmModal.classList.add('hidden');
+      loginModal.classList.remove('hidden');
+      userInput.value = '';
+      passInput.value = '';
+      if (loginErrorMsg) loginErrorMsg.classList.add('hidden');
+      userInput.focus();
+      if (window.lucide) lucide.createIcons();
+    });
+  }
+
+  // Close Login Modal Manually
+  if (loginCloseBtn && loginModal) {
+    loginCloseBtn.addEventListener('click', () => {
+      loginModal.classList.add('hidden');
+      document.body.style.overflow = '';
+      failedAttempts = 0;
+    });
+  }
+
+  // Step 3: Handle Login & 3-Attempts Limit
+  if (loginForm) {
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const enteredUser = userInput.value.trim();
+      const enteredPass = passInput.value.trim();
+
+      if (enteredUser === VALID_USER && enteredPass === VALID_PASS) {
+        failedAttempts = 0;
+        sessionStorage.setItem('isAdminAuthenticated', 'true');
+        window.location.href = 'admin.html';
+      } else {
+        failedAttempts += 1;
+        const remaining = MAX_ATTEMPTS - failedAttempts;
+
+        if (failedAttempts >= MAX_ATTEMPTS) {
+          alert("Bohat zyada ghalat attempts! Access block kar di gayi hai.");
+          loginModal.classList.add('hidden');
+          document.body.style.overflow = '';
+          failedAttempts = 0;
+          window.location.href = 'index.html';
+        } else {
+          if (loginErrorMsg) {
+            loginErrorMsg.textContent = `Ghalat credentials! Aapke paas ${remaining} koshish baqi hain.`;
+            loginErrorMsg.classList.remove('hidden');
+          }
+          passInput.value = '';
+          passInput.focus();
+        }
+      }
+    });
+  }
+})();
