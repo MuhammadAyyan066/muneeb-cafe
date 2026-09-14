@@ -2,8 +2,8 @@
 // 0. API CONFIGURATION
 // ==========================================
 const API_URL = 'https://muneeb-fast-food.vercel.app';
-const API_BASE_URL = 'http://127.0.0.1:5000/api/orders';
-const MENU_API_URL = 'http://127.0.0.1:5000/api/menu';
+const API_BASE_URL = `${API_URL}/api/orders`;
+const MENU_API_URL = `${API_URL}/api/menu`;
 
 // ==========================================
 // 1. FALLBACK / STATIC CATALOG ITEMS
@@ -824,12 +824,12 @@ async function placeOrder() {
       setTimeout(() => closeCartDrawer(), 1500);
     } else {
       const errData = await response.json().catch(() => ({}));
-      showCheckoutNotification(errData.error || "Failed to place order.", "error");
+      showCheckoutNotification(errData.error || errData.message || "Order submit nahi ho saka. Please try again.", "error");
     }
   } catch (err) {
     clearTimeout(timeoutId);
     console.error("Order submission error:", err);
-    showCheckoutNotification("Server not reachable on port 5000.", "error");
+    showCheckoutNotification(err.name === 'AbortError' ? "Request timeout. Server responded slowly." : "Live server connect nahi ho raha. Check backend Vercel status.", "error");
   } finally {
     if (orderBtn) {
       orderBtn.disabled = false;
@@ -843,7 +843,7 @@ async function placeOrder() {
 // ==========================================
 async function initializeApp() {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 3500);
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
 
   try {
     const res = await fetch(MENU_API_URL, {
