@@ -47,8 +47,9 @@
 </head>
 <body class="antialiased overflow-x-hidden bg-black text-yellow-400">
 
-  <header class="sticky top-0 z-50 bg-black/90 backdrop-blur-md transition-all duration-200 border-b border-yellow-400/10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+  <!-- Top Main Header (Sticky 80px / h-20) -->
+  <header class="sticky top-0 z-50 bg-black/90 backdrop-blur-md transition-all duration-200 border-b border-yellow-400/10 h-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
       
       <a href="index.html" class="flex items-center gap-3 group">
         <div class="w-12 h-12 rounded-2xl overflow-hidden shadow-lg bg-neutral-900 border border-yellow-400/30 flex items-center justify-center p-0.5 group-hover:scale-105 transition-transform">
@@ -89,9 +90,24 @@
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20 bg-black">
+  <!-- Sticky Horizontal Scrollable Category Bar (Locks below the header at 80px) -->
+  <nav class="sticky-category-nav" id="categoryNav">
+    <div class="category-scroll-container">
+      <button type="button" id="cat-ALL" class="cat-pill active" onclick="selectCategory(this, 'ALL')">All Items</button>
+      <button type="button" id="cat-Deals" class="cat-pill" onclick="selectCategory(this, 'Deals')">Special Deals</button>
+      <button type="button" id="cat-Pizza" class="cat-pill" onclick="selectCategory(this, 'Pizza')">Pizzas</button>
+      <button type="button" id="cat-Muneeb-Special-Pizza" class="cat-pill" onclick="selectCategory(this, 'Muneeb Special Pizzas')">Muneeb Specials</button>
+      <button type="button" id="cat-Burgers" class="cat-pill" onclick="selectCategory(this, 'Burgers')">Burgers</button>
+      <button type="button" id="cat-Shawarma" class="cat-pill" onclick="selectCategory(this, 'Shawarma')">Shawarma</button>
+      <button type="button" id="cat-Pratha-Roll" class="cat-pill" onclick="selectCategory(this, 'Pratha Roll')">Pratha Roll</button>
+      <button type="button" id="cat-Wings" class="cat-pill" onclick="selectCategory(this, 'Wings')">Hot Wings</button>
+      <button type="button" id="cat-Fries" class="cat-pill" onclick="selectCategory(this, 'Fries')">Fries</button>
+    </div>
+  </nav>
 
-    <section class="pt-4 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-20 bg-black">
+
+    <section class="pt-4 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-6">
       <div>
         <nav class="flex items-center gap-2 text-xs font-medium text-neutral-400 mb-2">
           <a href="index.html" class="hover:underline">Home</a>
@@ -107,54 +123,27 @@
           <i data-lucide="search" class="w-4 h-4 text-neutral-400 ml-3 shrink-0"></i>
           <input 
             type="text" 
-            id="search-input"
-            onkeyup="searchMenu()"
+            id="search-input" 
+            onkeyup="searchMenu()" 
             placeholder="Search burgers, pizza, deals..." 
-            class="w-full bg-transparent px-3 text-xs sm:text-sm placeholder:text-neutral-500 focus:outline-none text-yellow-400"
+            class="w-full bg-transparent px-3 text-xs sm:text-sm placeholder:text-neutral-500 focus:outline-none text-yellow-400" 
           />
         </div>
       </div>
     </section>
 
-    <div class="flex flex-col lg:flex-row items-start gap-8">
-      
-      <aside class="w-full lg:w-64 bg-neutral-900 rounded-3xl p-6 border border-yellow-400/10 shadow-soft space-y-7 shrink-0">
-        
-        <div class="flex items-center justify-between pb-3 border-b border-yellow-400/10">
-          <h2 class="font-bold text-yellow-400 text-base">Categories</h2>
-          <button onclick="filterByCategory('ALL')" class="text-xs text-neutral-400 hover:text-brand-500 font-medium transition">Reset</button>
-        </div>
+    <!-- Main Menu Grid Section -->
+    <section class="w-full space-y-6">
+      <div class="flex items-center justify-between">
+        <h2 id="item-count-heading" class="text-sm sm:text-base font-extrabold text-yellow-400">Showing all items</h2>
+      </div>
 
-        <div class="space-y-2 text-sm text-neutral-300 max-h-[500px] overflow-y-auto">
-          <button onclick="filterByCategory('ALL')" id="cat-ALL" class="w-full text-left px-3 py-2 rounded-xl transition bg-brand-500 text-white font-bold">ALL ITEMS</button>
-          <button onclick="filterByCategory('Deals')" id="cat-Deals" class="w-full text-left px-3 py-2 rounded-xl transition hover:bg-neutral-800">Special Deals</button>
-          <button onclick="filterByCategory('Pizza')" id="cat-Pizza" class="w-full text-left px-3 py-2 rounded-xl transition hover:bg-neutral-800">Pizza's</button>
-          <button onclick="filterByCategory('Muneeb Special Pizza')" id="cat-Muneeb Special Pizza" class="w-full text-left px-3 py-2 rounded-xl transition hover:bg-neutral-800">Muneeb Special Pizza's</button>
-          <button onclick="filterByCategory('Shawarma')" id="cat-Shawarma" class="w-full text-left px-3 py-2 rounded-xl transition hover:bg-neutral-800">Shawarma</button>
-          <button onclick="filterByCategory('Pratha Roll')" id="cat-Pratha Roll" class="w-full text-left px-3 py-2 rounded-xl transition hover:bg-neutral-800">Pratha Roll</button>
-          <button onclick="filterByCategory('Wings')" id="cat-Wings" class="w-full text-left px-3 py-2 rounded-xl transition hover:bg-neutral-800">Hot Wings</button>
-          <button onclick="filterByCategory('Grill Leg Piece')" id="cat-Grill Leg Piece" class="w-full text-left px-3 py-2 rounded-xl transition hover:bg-neutral-800">Grill Leg Piece</button>
-          <button onclick="filterByCategory('Pasta')" id="cat-Pasta" class="w-full text-left px-3 py-2 rounded-xl transition hover:bg-neutral-800">Pasta</button>
-          <button onclick="filterByCategory('Burgers')" id="cat-Burgers" class="w-full text-left px-3 py-2 rounded-xl transition hover:bg-neutral-800">Burgers</button>
-          <button onclick="filterByCategory('Wraps')" id="cat-Wraps" class="w-full text-left px-3 py-2 rounded-xl transition hover:bg-neutral-800">Wraps</button>
-          <button onclick="filterByCategory('Sandwich')" id="cat-Sandwich" class="w-full text-left px-3 py-2 rounded-xl transition hover:bg-neutral-800">Sandwich</button>
-          <button onclick="filterByCategory('Fries')" id="cat-Fries" class="w-full text-left px-3 py-2 rounded-xl transition hover:bg-neutral-800">Fries</button>
-        </div>
-      </aside>
-
-      <section class="flex-1 w-full space-y-6">
-        <div class="flex items-center justify-between">
-          <h2 id="item-count-heading" class="text-sm sm:text-base font-extrabold text-yellow-400">Showing all items</h2>
-        </div>
-
-        <div id="menu-grid" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-6">
-        </div>
-      </section>
-
-    </div>
+      <div id="menu-grid" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-6"></div>
+    </section>
 
   </main>
 
+  <!-- Footer -->
   <footer class="bg-neutral-900 border-t border-yellow-400/10 pt-14 pb-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
       <div class="grid grid-cols-2 md:grid-cols-5 gap-8">
@@ -213,56 +202,55 @@
     </div>
   </footer>
 
-  <!-- Floating Cart Button at Bottom-Right -->
+  <!-- Floating Cart Button -->
   <button onclick="toggleCartDrawer()" style="position: fixed; bottom: 20px; right: 20px; z-index: 50;" class="bg-brand-500 hover:bg-brand-600 text-white p-4 rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 group">
-      <i data-lucide="shopping-cart" class="w-6 h-6"></i>
-      <span id="floating-cart-badge" class="absolute -top-1 -right-1 bg-yellow-400 text-black font-extrabold text-[11px] w-5 h-5 rounded-full flex items-center justify-center shadow-md">0</span>
+    <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+    <span id="floating-cart-badge" class="absolute -top-1 -right-1 bg-yellow-400 text-black font-extrabold text-[11px] w-5 h-5 rounded-full flex items-center justify-center shadow-md">0</span>
   </button>
 
-  <!-- Slide-in Cart Drawer (Hidden by default on initial page load) -->
+  <!-- Slide-in Cart Drawer -->
   <div id="cart-drawer" class="fixed inset-y-0 right-0 z-50 bg-neutral-900 border-l border-yellow-400/20 p-6 shadow-2xl max-w-sm w-full text-white space-y-4 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between">
-      <div class="space-y-4">
-          <div class="flex justify-between items-center border-b border-neutral-800 pb-3">
-              <h3 class="font-bold text-yellow-400 text-lg">Your Cart</h3>
-              <div class="flex items-center gap-3">
-                  <span id="cart-count" class="bg-brand-500 text-xs px-2.5 py-1 rounded-full font-bold">0 items</span>
-                  <button onclick="toggleCartDrawer()" class="text-neutral-400 hover:text-white p-1">✕</button>
-              </div>
-          </div>
-
-          <div id="cart-items" class="space-y-2 max-h-48 overflow-y-auto text-sm">
-              <p class="text-neutral-500 text-xs text-center py-2">Cart is empty</p>
-          </div>
-
-          <div class="flex justify-between items-center pt-2 border-t border-neutral-800 font-bold text-base">
-              <span>Total:</span>
-              <span id="cart-total" class="text-yellow-400">Rs. 0</span>
-          </div>
-
-          <!-- Customer Details & Geolocation Inputs -->
-          <div class="space-y-3 pt-2">
-              <input type="text" id="customer-name" placeholder="Customer Name" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" />
-              <input type="text" id="customer-phone" placeholder="Phone Number" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" />
-              
-              <div class="relative">
-                  <input type="text" id="customer-address" placeholder="Delivery Address" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" />
-                  <button onclick="fetchUserLocation()" type="button" title="Detect My Location" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-brand-500 hover:text-brand-400 transition">
-                      <i data-lucide="crosshair" class="w-4 h-4"></i>
-                  </button>
-              </div>
-
-              <button onclick="placeOrder()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-brand-500/20 text-sm">
-                  Place Order Now
-              </button>
-          </div>
+    <div class="space-y-4">
+      <div class="flex justify-between items-center border-b border-neutral-800 pb-3">
+        <h3 class="font-bold text-yellow-400 text-lg">Your Cart</h3>
+        <div class="flex items-center gap-3">
+          <span id="cart-count" class="bg-brand-500 text-xs px-2.5 py-1 rounded-full font-bold">0 items</span>
+          <button onclick="toggleCartDrawer()" class="text-neutral-400 hover:text-white p-1">✕</button>
+        </div>
       </div>
 
-      <!-- Explicit Continue Shopping Button -->
-      <div class="pt-4 border-t border-neutral-800">
-          <button onclick="closeCartDrawer()" class="w-full bg-neutral-800 hover:bg-neutral-700 text-yellow-400 font-semibold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2">
-              <i data-lucide="arrow-left" class="w-4 h-4"></i> Add More Items / Back to Menu Page
+      <div id="cart-items" class="space-y-2 max-h-48 overflow-y-auto text-sm">
+        <p class="text-neutral-500 text-xs text-center py-2">Cart is empty</p>
+      </div>
+
+      <div class="flex justify-between items-center pt-2 border-t border-neutral-800 font-bold text-base">
+        <span>Total:</span>
+        <span id="cart-total" class="text-yellow-400">Rs. 0</span>
+      </div>
+
+      <!-- Customer Details & Geolocation Inputs -->
+      <div class="space-y-3 pt-2">
+        <input type="text" id="customer-name" placeholder="Customer Name" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" />
+        <input type="text" id="customer-phone" placeholder="Phone Number" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" />
+        
+        <div class="relative">
+          <input type="text" id="customer-address" placeholder="Delivery Address" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" />
+          <button onclick="fetchUserLocation()" type="button" title="Detect My Location" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-brand-500 hover:text-brand-400 transition">
+            <i data-lucide="crosshair" class="w-4 h-4"></i>
           </button>
+        </div>
+
+        <button onclick="placeOrder()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-brand-500/20 text-sm">
+          Place Order Now
+        </button>
       </div>
+    </div>
+
+    <div class="pt-4 border-t border-neutral-800">
+      <button onclick="closeCartDrawer()" class="w-full bg-neutral-800 hover:bg-neutral-700 text-yellow-400 font-semibold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Add More Items / Back to Menu Page
+      </button>
+    </div>
   </div>
 
   <script src="script.js"></script>

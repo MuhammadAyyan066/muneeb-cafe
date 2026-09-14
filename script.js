@@ -1,8 +1,15 @@
-const menuItems = [
-  // ==========================================
+// ==========================================
+// 0. API CONFIGURATION
+// ==========================================
+const API_BASE_URL = 'http://127.0.0.1:5000/api/orders';
+const MENU_API_URL = 'http://127.0.0.1:5000/api/menu';
+
+// ==========================================
+// 1. FALLBACK / STATIC CATALOG ITEMS
+// (Rendered only when DB connection fails or returns empty)
+// ==========================================
+const fallbackMenuItems = [
   // --- PIZZA'S (Standard 4 Sizes) ---
-  // Small: 550, Medium: 1150, Large: 1600, Family: 1900
-  // ==========================================
   {
     name: "Chicken Tikah Pizza",
     category: "Pizzas",
@@ -164,10 +171,7 @@ const menuItems = [
     ]
   },
 
-  // ==========================================
-  // --- MUNEEB SPECIAL PIZZA'S (Special 4 Sizes) ---
-  // Small: 700, Medium: 1350, Large: 1750, Family: 2200
-  // ==========================================
+  // --- MUNEEB SPECIAL PIZZA'S ---
   {
     name: "Muneeb Special Pizza",
     category: "Muneeb Special Pizzas",
@@ -345,9 +349,7 @@ const menuItems = [
     ]
   },
 
-  // ==========================================
   // --- MUNEEB CAFÉ DEALS ---
-  // ==========================================
   { name: "Deal.1", category: "Deals", price: 800, time: "15 min", rating: "4.8 (45)", desc: "1 Small Pizza, 5 Hot Wings, Half Liter Drink", tag: "Deal", image: "images/pizza pic.jpg" },
   { name: "Deal.2", category: "Deals", price: 850, time: "15 min", rating: "4.7 (50)", desc: "2 Zinger Burger, Small Fries, Half Liter Drink", tag: "Deal", image: "images/burgers.jpg" },
   { name: "Deal.3", category: "Deals", price: 450, time: "12 min", rating: "4.6 (38)", desc: "1 Zinger Burger, 1 Regular Fries, 1 Regular Drink", tag: "Deal", image: "images/burgers.jpg" },
@@ -368,6 +370,7 @@ const menuItems = [
   { name: "Birthday Deal", category: "Deals", price: 6500, time: "35 min", rating: "5.0 (120)", desc: "2 Family Pizza, 5 Grill Burger, 20 Grill Wings, 1 Pound Cake, 4 Regular Fries, 2 Drink 1.5 Ltr", tag: "Party", image: "images/deals.jpg" },
   { name: "Limousine Pizza", category: "Deals", price: 3500, time: "30 min", rating: "5.0 (85)", desc: "Giant Limousine Pizza + 2 Ltr Drink", tag: "Special", image: "images/pizza pic.jpg" },
   { name: "Muneeb Special Plater", category: "Deals", price: 3000, time: "25 min", rating: "4.9 (78)", desc: "10 Nuggets, 10 Hot wings, 10 Grill wings, 1 Large Pizza, 1 Drink 1.5 Ltr", tag: "Plater", image: "images/deals.jpg" },
+
   // --- BURGERS ---
   { name: "Zinger Burger", category: "Burgers", price: 350, time: "10 min", rating: "4.8 (450)", desc: "Crispy chicken fillet with signature mayo and fresh lettuce", tag: "Burger", image: "images/burgers.jpg" },
   { name: "Beef Lover Burger", category: "Burgers", price: 500, time: "12 min", rating: "4.9 (210)", desc: "Juicy grilled beef patty with special sauce & cheese", tag: "Burger", image: "images/burgers.jpg" },
@@ -384,7 +387,7 @@ const menuItems = [
   { name: "Loaded Fries", category: "Fries", price: 360, time: "10 min", rating: "4.9 (290)", desc: "Fries topped with creamy cheese sauce and chicken bits", tag: "Fries", image: "images/burgers.jpg" }
 ];
 
-let activeMenuItems = [...menuItems];
+let activeMenuItems = [];
 let cart = JSON.parse(localStorage.getItem('muneeb_cart') || '[]');
 let detectedCoords = { lat: null, lng: null };
 
@@ -396,7 +399,7 @@ function escapeQuotes(str) {
 }
 
 // ==========================================
-// 3. UNIFIED CARD RENDERER
+// 3. CARD RENDERER
 // ==========================================
 function renderProductCard(item) {
   const isPizza = (item.category || '').toLowerCase().includes('pizza') || Boolean(item.hasSizes);
@@ -425,7 +428,7 @@ function renderProductCard(item) {
   const categoryTag = item.tag || item.category || 'Special';
   const description = item.desc || item.description || '';
 
-  // --- MULTI-SIZE PIZZA CARD ---
+  // Multi-Size Pizza Card
   if (isPizza && variants.length > 0) {
     const sizeRowsHtml = variants.map(v => `
       <div class="flex items-center justify-between py-1.5 px-3 rounded-xl bg-neutral-950/80 border border-neutral-800 text-xs">
@@ -465,7 +468,7 @@ function renderProductCard(item) {
     `;
   }
 
-  // --- REGULAR SINGLE-PRICE ITEM ---
+  // Regular Single-Price Item
   const rawPrice = typeof item.price === 'number' 
     ? item.price 
     : parseInt(String(item.price || '0').replace(/[^0-9]/g, ''), 10) || 0;
@@ -507,7 +510,7 @@ function renderMenu(itemsToRender = activeMenuItems) {
   const heading = document.getElementById('item-count-heading');
 
   if (!grid) return;
-  if (heading) heading.innerText = `${itemsToRender.length} Menu Items Available`;
+  if (heading) heading.innerText = `Showing ${itemsToRender.length} items`;
 
   if (itemsToRender.length === 0) {
     grid.innerHTML = `<p class="col-span-full text-center text-neutral-400 py-12">No menu items match your criteria.</p>`;
@@ -522,7 +525,55 @@ function renderMenu(itemsToRender = activeMenuItems) {
 }
 
 // ==========================================
-// 5. CART LOGIC (UNIFIED LOCALSTORAGE)
+// 5. STICKY TOP CATEGORY SCROLL & FILTER
+// ==========================================
+function selectCategory(buttonElement, category) {
+  document.querySelectorAll('.cat-pill').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  if (buttonElement) {
+    buttonElement.classList.add('active');
+    buttonElement.scrollIntoView({
+      behavior: 'smooth',
+      inline: 'center',
+      block: 'nearest'
+    });
+  }
+
+  filterByCategory(category);
+}
+
+function filterByCategory(category) {
+  if (category === 'ALL') {
+    renderMenu(activeMenuItems);
+  } else {
+    const target = category.toLowerCase().replace(/['s]/g, '').trim();
+    const filtered = activeMenuItems.filter(item => {
+      const itemCat = (item.category || '').toLowerCase().replace(/['s]/g, '').trim();
+      return itemCat.includes(target) || target.includes(itemCat);
+    });
+    renderMenu(filtered);
+  }
+
+  const gridHeading = document.getElementById('item-count-heading');
+  if (gridHeading) {
+    gridHeading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function searchMenu() {
+  const query = document.getElementById('search-input')?.value.toLowerCase().trim() || '';
+  const filtered = activeMenuItems.filter(item => 
+    item.name.toLowerCase().includes(query) || 
+    (item.desc && item.desc.toLowerCase().includes(query)) || 
+    (item.category && item.category.toLowerCase().includes(query))
+  );
+  renderMenu(filtered);
+}
+
+// ==========================================
+// 6. CART MANAGEMENT (LOCALSTORAGE)
 // ==========================================
 function addVariantToCart(productId, baseName, size, price) {
   const variantTitle = `${baseName} (${size})`;
@@ -563,6 +614,11 @@ function addStandardToCart(productId, name, price) {
 
   persistCart();
   showToast(`Added ${name}`);
+}
+
+function addToCart(name, priceStr) {
+  const numericPrice = parseInt(String(priceStr).replace(/[^0-9]/g, ''), 10) || 0;
+  addStandardToCart(null, name, numericPrice);
 }
 
 function persistCart() {
@@ -636,49 +692,6 @@ function toggleCartDrawer() {
 function closeCartDrawer() {
   const drawer = document.getElementById('cart-drawer');
   if (drawer) drawer.classList.add('translate-x-full');
-}
-
-// ==========================================
-// 6. CATEGORY FILTER & LIVE SEARCH
-// ==========================================
-function filterByCategory(category) {
-  const buttons = document.querySelectorAll('aside .space-y-2 button, .category-btn');
-  buttons.forEach(btn => {
-    btn.classList.remove('bg-brand-500', 'text-white', 'font-bold');
-    btn.classList.add('hover:bg-neutral-800');
-  });
-
-  const activeBtn = document.getElementById(`cat-${category}`);
-  if (activeBtn) {
-    activeBtn.classList.add('bg-brand-500', 'text-white', 'font-bold');
-    activeBtn.classList.remove('hover:bg-neutral-800');
-  }
-
-  if (category === 'ALL') {
-    renderMenu(activeMenuItems);
-  } else {
-    const target = category.toLowerCase().replace(/['s]/g, '').trim();
-    const filtered = activeMenuItems.filter(item => {
-      const itemCat = (item.category || '').toLowerCase().replace(/['s]/g, '').trim();
-      return itemCat.includes(target) || target.includes(itemCat);
-    });
-    renderMenu(filtered);
-  }
-
-  const gridSection = document.getElementById('menu-grid');
-  if (gridSection) {
-    gridSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-}
-
-function searchMenu() {
-  const query = document.getElementById('search-input')?.value.toLowerCase().trim() || '';
-  const filtered = activeMenuItems.filter(item => 
-    item.name.toLowerCase().includes(query) || 
-    (item.desc && item.desc.toLowerCase().includes(query)) || 
-    (item.category && item.category.toLowerCase().includes(query))
-  );
-  renderMenu(filtered);
 }
 
 // ==========================================
@@ -778,7 +791,10 @@ async function placeOrder() {
   try {
     const response = await fetch(API_BASE_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Bypass-Tunnel-Reminder': 'true'
+      },
       signal: controller.signal,
       body: JSON.stringify({
         customerName,
@@ -811,6 +827,7 @@ async function placeOrder() {
     }
   } catch (err) {
     clearTimeout(timeoutId);
+    console.error("Order submission error:", err);
     showCheckoutNotification("Server not reachable on port 5000.", "error");
   } finally {
     if (orderBtn) {
@@ -821,30 +838,60 @@ async function placeOrder() {
 }
 
 // ==========================================
-// 8. INITIALIZATION
+// 8. DYNAMIC DATA FETCHING & INITIALIZATION
 // ==========================================
-window.addEventListener('DOMContentLoaded', async () => {
+async function initializeApp() {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 3500);
+
   try {
-    const res = await fetch('http://localhost:5000/api/menu');
-    if (res.ok) {
-      const dbItems = await res.json();
-      if (Array.isArray(dbItems) && dbItems.length > 0) {
-        // Backend items aur static items merge without duplicate names
-        const dbNames = new Set(dbItems.map(i => i.name.toLowerCase().trim()));
-        const uniqueStatic = menuItems.filter(i => !dbNames.has(i.name.toLowerCase().trim()));
-        activeMenuItems = [...dbItems, ...uniqueStatic];
+    const res = await fetch(MENU_API_URL, {
+      signal: controller.signal,
+      headers: {
+        'Accept': 'application/json',
+        'Bypass-Tunnel-Reminder': 'true'
       }
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      throw new Error(`Database responded with HTTP status ${res.status}`);
     }
-  } catch (e) {
-    console.log('Backend menu endpoint unavailable; using local catalog.');
+
+    const dbItems = await res.json();
+
+    // Primary Flow: Sirf aur sirf DB items render honge
+    if (Array.isArray(dbItems) && dbItems.length > 0) {
+      console.log(`[Data Flow] Live DB connected. Rendered ${dbItems.length} products.`);
+      activeMenuItems = dbItems;
+    } else {
+      throw new Error("Empty product array received from database");
+    }
+
+  } catch (err) {
+    clearTimeout(timeoutId);
+    // Fallback Flow: DB down hone par local items render honge
+    console.warn('[Data Flow] Backend unavailable. Using local catalog:', err.message);
+    activeMenuItems = [...fallbackMenuItems];
   }
 
   renderMenu();
   updateCartUI();
 
+  // URL query parameter support (e.g., menu.html?cat=Deals)
   const urlParams = new URLSearchParams(window.location.search);
   const catParam = urlParams.get('cat');
   if (catParam) {
-    filterByCategory(catParam);
+    const targetPill = Array.from(document.querySelectorAll('.cat-pill')).find(
+      btn => btn.textContent.toLowerCase().includes(catParam.toLowerCase())
+    );
+    if (targetPill) {
+      selectCategory(targetPill, catParam);
+    } else {
+      filterByCategory(catParam);
+    }
   }
-});
+}
+
+window.addEventListener('DOMContentLoaded', initializeApp);
