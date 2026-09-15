@@ -136,6 +136,7 @@
             document.getElementById('badge-done').innerText = counts.done;
         }
 
+        // Customer Direct WhatsApp
         function shareToWhatsApp(orderStr) {
             const order = JSON.parse(decodeURIComponent(orderStr));
             const phoneVal = order.customerPhone || order.phone || 'N/A';
@@ -146,7 +147,7 @@
                 : 'No item data available';
 
             const message = 
-`*Muneeb Fast Food - Order Details*
+`*Muneeb Cafe - Order Details*
 ------------------------------------
 *Customer:* ${order.customerName || 'Customer'}
 *Phone:* ${phoneVal}
@@ -171,11 +172,46 @@ ${itemsList}
             window.open(targetUrl, '_blank');
         }
 
+        // Rider Dispatch WhatsApp (With exact Google Navigation Link)
+        function shareToRider(orderStr) {
+            const order = JSON.parse(decodeURIComponent(orderStr));
+            const phoneVal = order.customerPhone || order.phone || 'N/A';
+            const addressVal = order.deliveryAddress || order.address || 'Fatehpur';
+
+            let navigationUrl = '';
+            if (order.locationCoords && order.locationCoords.lat && order.locationCoords.lng) {
+                navigationUrl = `https://www.google.com/maps/dir/?api=1&destination=${order.locationCoords.lat},${order.locationCoords.lng}`;
+            } else {
+                navigationUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressVal + ', Fatehpur')}`;
+            }
+
+            const itemsList = Array.isArray(order.items) && order.items.length > 0
+                ? order.items.map(i => `• ${i.name} x${i.quantity}`).join('\n')
+                : 'No items listed';
+
+            const riderMessage = 
+`🛵 *MUNEEB CAFE - DELIVERY ORDER*
+------------------------------------
+👤 *Customer:* ${order.customerName || 'Customer'}
+📞 *Phone:* ${phoneVal}
+🏠 *Address:* ${addressVal}
+
+📦 *Items to Deliver:*
+${itemsList}
+
+💰 *Cash to Collect:* Rs. ${order.totalAmount}/-
+
+📍 *Open Turn-by-Turn GPS Navigation:*
+${navigationUrl}`;
+
+            const riderWhatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(riderMessage)}`;
+            window.open(riderWhatsappUrl, '_blank');
+        }
+
         async function loadOrders() {
             const statusIndicator = document.getElementById('connection-status');
 
             try {
-                // Simple standard GET request (Bina preflight/custom headers ke CORS error khatam)
                 const res = await fetch(API_BASE_URL);
                 if (!res.ok) throw new Error('API server returned error');
                 
@@ -307,8 +343,14 @@ ${itemsList}
                                 </button>
                             ` : ''}
 
-                            <button onclick="shareToWhatsApp('${encodedOrder}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ml-auto sm:ml-2 shadow-sm">
-                                <i data-lucide="share-2" class="w-3.5 h-3.5"></i> WhatsApp
+                            <!-- Customer WhatsApp Button -->
+                            <button onclick="shareToWhatsApp('${encodedOrder}')" title="Chat with Customer" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ml-auto sm:ml-2 shadow-sm">
+                                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> WhatsApp
+                            </button>
+
+                            <!-- Rider Dispatch Button (With GPS Navigation) -->
+                            <button onclick="shareToRider('${encodedOrder}')" title="Send GPS Location & Task to Rider" class="bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
+                                <i data-lucide="navigation" class="w-3.5 h-3.5"></i> Rider (Maps)
                             </button>
                         </div>
                     </div>
