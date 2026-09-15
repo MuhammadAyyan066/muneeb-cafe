@@ -70,6 +70,9 @@
     </div>
 
     <script>
+        const API_URL = 'https://muneeb-fast-food.vercel.app';
+        const API_BASE_URL = `${API_URL}/api/orders`;
+
         let cachedOrders = [];
         let currentFilter = 'All';
 
@@ -81,7 +84,6 @@
         function setFilter(status) {
             currentFilter = status;
             
-            // Tab active styling
             document.querySelectorAll('.filter-tab').forEach(tab => {
                 tab.className = "filter-tab px-3.5 py-2 rounded-xl font-bold transition flex items-center gap-1.5 bg-neutral-800/80 hover:bg-neutral-800 text-neutral-300 border border-neutral-700/50";
             });
@@ -173,7 +175,9 @@ ${itemsList}
             const statusIndicator = document.getElementById('connection-status');
 
             try {
-                const res = await fetch('http://localhost:5000/api/orders');
+                const res = await fetch(API_BASE_URL, {
+                    headers: { 'Bypass-Tunnel-Reminder': 'true' }
+                });
                 if (!res.ok) throw new Error('API server returned error');
                 
                 cachedOrders = await res.json();
@@ -181,18 +185,21 @@ ${itemsList}
                 updateCounts();
                 renderOrders();
             } catch (err) {
+                console.error("Order loading failed:", err);
                 statusIndicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Offline`;
                 const container = document.getElementById('orders-list');
                 container.innerHTML = `
                     <div class="bg-red-500/10 border border-red-500/30 p-6 rounded-2xl text-center space-y-2">
                         <p class="text-sm font-semibold text-red-400">Unable to load orders from backend server.</p>
-                        <p class="text-xs text-neutral-400">Make sure your Node.js Express server is running at http://localhost:5000</p>
+                        <p class="text-xs text-neutral-400">Target URL: ${API_BASE_URL}</p>
                     </div>`;
             }
         }
 
         function renderOrders() {
             const container = document.getElementById('orders-list');
+            if (!container) return;
+
             container.innerHTML = '';
 
             let filtered = cachedOrders;
@@ -279,34 +286,28 @@ ${itemsList}
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2">
-                            <!-- Pending Button -->
                             <button onclick="updateStatus('${order._id}', 'Pending')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${isPending ? 'bg-amber-500 text-neutral-950 font-black' : 'bg-neutral-900 text-amber-400 hover:bg-neutral-700 border border-amber-500/30'}">
                                 Pending
                             </button>
 
-                            <!-- Processing Button -->
                             <button onclick="updateStatus('${order._id}', 'Processing')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${isProcessing ? 'bg-purple-600 text-white font-black' : 'bg-neutral-900 text-purple-400 hover:bg-neutral-700 border border-purple-500/30'}">
                                 Processing
                             </button>
 
-                            <!-- In Delivery Button -->
                             <button onclick="updateStatus('${order._id}', 'In Delivery')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${isInDelivery ? 'bg-sky-500 text-white font-black' : 'bg-neutral-900 text-sky-400 hover:bg-neutral-700 border border-sky-500/30'}">
                                 In Delivery
                             </button>
 
-                            <!-- Done Button -->
                             <button onclick="updateStatus('${order._id}', 'Done')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${isDone ? 'bg-emerald-500 text-white font-black' : 'bg-neutral-900 text-emerald-400 hover:bg-neutral-700 border border-emerald-500/30'}">
                                 Done
                             </button>
 
-                            <!-- Delete / Remove Button for Completed Orders -->
                             ${isDone ? `
                                 <button onclick="deleteOrder('${order._id}')" class="bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition">
                                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Remove
                                 </button>
                             ` : ''}
 
-                            <!-- WhatsApp Dispatch -->
                             <button onclick="shareToWhatsApp('${encodedOrder}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ml-auto sm:ml-2 shadow-sm">
                                 <i data-lucide="share-2" class="w-3.5 h-3.5"></i> WhatsApp
                             </button>
@@ -323,7 +324,7 @@ ${itemsList}
 
         async function updateStatus(id, status) {
             try {
-                let res = await fetch(`http://localhost:5000/api/orders/${id}/status`, {
+                let res = await fetch(`${API_BASE_URL}/${id}/status`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status })
@@ -345,12 +346,11 @@ ${itemsList}
             if (!confirmed) return;
 
             try {
-                const res = await fetch(`http://localhost:5000/api/orders/${id}`, {
+                const res = await fetch(`${API_BASE_URL}/${id}`, {
                     method: 'DELETE'
                 });
 
                 if (res.ok) {
-                    // Update cache instantly
                     cachedOrders = cachedOrders.filter(o => o._id !== id);
                     updateCounts();
                     renderOrders();
@@ -367,6 +367,5 @@ ${itemsList}
         loadOrders();
         setInterval(loadOrders, 6000);
     </script>
-    
 </body>
 </html>
