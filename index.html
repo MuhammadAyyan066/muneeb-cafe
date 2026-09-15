@@ -62,12 +62,12 @@
       
       <!-- Brand Logo -->
       <a href="index.html" class="flex items-center gap-3 group">
-        <div class="w-12 h-12 rounded-2xl overflow-hidden shadow-lg bg-neutral-900 border border-yellow-400/30 flex items-center justify-center p-0.5 group-hover:scale-105 transition-transform">
-          <img src="images/logo MFF.png" alt="Muneeb Cafe Logo" class="w-full h-full object-contain rounded-xl">
+        <div class="w-12 h-12 rounded-xl overflow-hidden shadow-lg bg-neutral-900 border border-yellow-400/30 flex items-center justify-center p-0.5 group-hover:scale-105 transition-transform">
+          <img src="images/logo MFF.png" alt="Muneeb Cafe Logo" class="w-full h-full object-contain rounded-lg">
         </div>
         <div class="flex flex-col">
           <span class="text-xl font-bold tracking-tight text-yellow-400 font-display leading-tight">Muneeb</span>
-          <span class="text-[9px] uppercase tracking-widest text-brand-500 font-bold -mt-0.5">Cafe</span>
+          <span class="text-xs uppercase tracking-widest text-brand-500 font-bold -mt-0.5">Cafe</span>
         </div>
       </a>
 
@@ -84,47 +84,66 @@
         </a>
       </nav>
 
-      <!-- Far-Right Header Actions -->
-      <div class="flex items-center gap-1.5 sm:gap-3">
+      <!-- Far-Right Header Actions (Issue 11: ARIA labels and tooltips) -->
+      <div class="flex items-center gap-2 sm:gap-3">
         <!-- Shop Admin Button -->
         <button 
           type="button" 
           id="shopAdminOpenBtn" 
-          class="shop-admin-btn" 
+          class="shop-admin-btn inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-neutral-900 text-yellow-400 border border-yellow-400/30 hover:border-yellow-400 transition" 
           title="Shop Admin Access"
-          aria-label="Open Shop Admin"
+          aria-label="Open Shop Admin Panel"
         >
-          <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+          <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-brand-500"></i>
           <span class="admin-label">Shop Admin</span>
         </button>
 
-        <!-- Location Icon -->
-        <a href="https://maps.google.com/?q=Amir+Bashir+Plaza,+Shah+Sharaf+St,+Fatehpur" target="_blank" rel="noopener noreferrer" class="p-1.5 sm:p-2 text-yellow-400 hover:text-brand-500 rounded-full transition" title="View Location">
+        <!-- Location Icon Link -->
+        <a 
+          href="https://maps.google.com/?q=Amir+Bashir+Plaza,+Shah+Sharaf+St,+Fatehpur" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="p-2 text-yellow-400 hover:text-brand-500 rounded-full transition focus:outline-none focus:ring-1 focus:ring-yellow-400" 
+          title="View Store Location on Google Maps"
+          aria-label="View Location on Google Maps (opens in a new tab)"
+        >
           <i data-lucide="map-pin" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         </a>
 
-        <!-- WhatsApp Icon -->
-        <a href="https://wa.me/923045132070" target="_blank" rel="noopener noreferrer" class="p-1.5 sm:p-2 text-yellow-400 hover:text-emerald-400 rounded-full transition" title="WhatsApp Contact">
+        <!-- WhatsApp Icon Link -->
+        <a 
+          href="https://wa.me/923045132070" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="p-2 text-yellow-400 hover:text-emerald-400 rounded-full transition focus:outline-none focus:ring-1 focus:ring-emerald-400" 
+          title="Chat on WhatsApp"
+          aria-label="Chat with Muneeb Cafe on WhatsApp (opens in a new tab)"
+        >
           <i data-lucide="message-circle" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         </a>
 
-        <!-- Call Icon -->
-        <a href="tel:03045132070" class="p-1.5 sm:p-2 text-yellow-400 hover:text-brand-500 rounded-full transition" title="Call Now">
+        <!-- Phone Icon Link -->
+        <a 
+          href="tel:03045132070" 
+          class="p-2 text-yellow-400 hover:text-brand-500 rounded-full transition focus:outline-none focus:ring-1 focus:ring-yellow-400" 
+          title="Call 0304 5132070"
+          aria-label="Call Store directly at 0304 5132070"
+        >
           <i data-lucide="phone" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         </a>
 
         <!-- Order Now Button (Desktop Only) -->
-        <a href="menu.html" class="hidden md:inline-flex items-center justify-center bg-brand-500 hover:bg-brand-600 text-white text-xs sm:text-sm font-semibold px-4 py-2 sm:px-6 sm:py-2.5 rounded-full transition-all shadow-md active:scale-95">
+        <a href="menu.html" class="hidden md:inline-flex items-center justify-center bg-brand-500 hover:bg-brand-600 active:scale-95 text-white text-xs sm:text-sm font-semibold px-5 py-2.5 rounded-full transition shadow-md">
           Order Now
         </a>
       </div>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-24 pt-6 pb-20 bg-black">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20 pt-6 pb-20 bg-black">
 
     <!-- Hero Section -->
-    <section id="home" class="relative py-20 lg:py-32 px-6 sm:px-12 rounded-3xl overflow-hidden text-center lg:text-left flex flex-col justify-center items-center lg:items-start min-h-[520px] custom-hero-bg">
+    <section id="home" class="relative py-20 lg:py-28 px-6 sm:px-12 rounded-2xl overflow-hidden text-center lg:text-left flex flex-col justify-center items-center lg:items-start min-h-[500px] custom-hero-bg border border-yellow-400/10 shadow-soft">
       <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/80 to-black/60 z-0"></div>
 
       <div class="relative z-10 space-y-6 max-w-2xl">
@@ -154,10 +173,10 @@
     </section>
 
     <!-- Categories Section -->
-    <section id="categories" class="space-y-8">
+    <section id="categories" class="space-y-6">
       <div class="text-center space-y-1">
         <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-yellow-400">Featured Categories</h2>
-        <p class="text-sm text-neutral-400">Browse our most-loved food categories</p>
+        <p class="text-xs sm:text-sm text-neutral-400">Browse our most-loved food categories</p>
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 sm:gap-6">
@@ -166,7 +185,7 @@
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
           <div class="relative z-10">
             <span class="font-bold text-yellow-400 text-sm group-hover:text-brand-500 transition drop-shadow-md block">Deals</span>
-            <span class="text-[10px] text-neutral-300 mt-0.5 block drop-shadow">Special offers</span>
+            <span class="text-xs text-neutral-300 mt-0.5 block drop-shadow">Special offers</span>
           </div>
         </a>
 
@@ -175,7 +194,7 @@
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
           <div class="relative z-10">
             <span class="font-bold text-yellow-400 text-sm group-hover:text-brand-500 transition drop-shadow-md block">Pizza</span>
-            <span class="text-[10px] text-neutral-300 mt-0.5 block drop-shadow">Pizzas & Specials</span>
+            <span class="text-xs text-neutral-300 mt-0.5 block drop-shadow">Pizzas & Specials</span>
           </div>
         </a>
 
@@ -184,7 +203,7 @@
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
           <div class="relative z-10">
             <span class="font-bold text-yellow-400 text-sm group-hover:text-brand-500 transition drop-shadow-md block">Burgers</span>
-            <span class="text-[10px] text-neutral-300 mt-0.5 block drop-shadow">Juicy burgers</span>
+            <span class="text-xs text-neutral-300 mt-0.5 block drop-shadow">Juicy burgers</span>
           </div>
         </a>
 
@@ -193,7 +212,7 @@
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
           <div class="relative z-10">
             <span class="font-bold text-yellow-400 text-sm group-hover:text-brand-500 transition drop-shadow-md block">Shawarma</span>
-            <span class="text-[10px] text-neutral-300 mt-0.5 block drop-shadow">Rolls & Platters</span>
+            <span class="text-xs text-neutral-300 mt-0.5 block drop-shadow">Rolls & Platters</span>
           </div>
         </a>
 
@@ -202,7 +221,7 @@
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
           <div class="relative z-10">
             <span class="font-bold text-yellow-400 text-sm group-hover:text-brand-500 transition drop-shadow-md block">Hot Wings</span>
-            <span class="text-[10px] text-neutral-300 mt-0.5 block drop-shadow">Crispy wings</span>
+            <span class="text-xs text-neutral-300 mt-0.5 block drop-shadow">Crispy wings</span>
           </div>
         </a>
 
@@ -211,102 +230,116 @@
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
           <div class="relative z-10">
             <span class="font-bold text-yellow-400 text-sm group-hover:text-brand-500 transition drop-shadow-md block">Pasta</span>
-            <span class="text-[10px] text-neutral-300 mt-0.5 block drop-shadow">Creamy pasta</span>
+            <span class="text-xs text-neutral-300 mt-0.5 block drop-shadow">Creamy pasta</span>
           </div>
         </a>
       </div>
     </section>
 
-    <!-- New Arrivals Section -->
-    <section class="w-full max-w-7xl mx-auto px-0 py-2 font-sans">
-      <div class="flex items-end justify-between mb-6">
+    <!-- New Arrivals Section (Issues 6 & 8 resolved: Proximity of Price/Action & Header navigation) -->
+    <section class="w-full max-w-7xl mx-auto px-0 py-2 font-sans space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-yellow-400/10 pb-3">
         <div>
-          <h2 class="text-xl sm:text-3xl font-extrabold text-yellow-400 tracking-tight">New Arrivals</h2>
+          <div class="flex items-center gap-3">
+            <h2 class="text-xl sm:text-3xl font-extrabold text-yellow-400 tracking-tight">New Arrivals</h2>
+            <a href="menu.html?cat=Deals" class="text-xs font-semibold text-brand-500 hover:text-brand-400 transition flex items-center gap-1">
+              See All Deals <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
           <p class="text-xs sm:text-sm text-neutral-400 mt-0.5">Hot special deals freshly added</p>
         </div>
-        <a href="menu.html?cat=Deals" class="text-xs sm:text-sm font-semibold px-4 py-2 rounded-full border border-yellow-400/30 hover:bg-neutral-900 text-yellow-400 transition shadow-sm inline-block shrink-0">
-          See All Deals
-        </a>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
         <!-- Card 1 -->
-        <div class="bg-[#121212] rounded-xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
+        <div class="bg-[#121212] rounded-2xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
           <div>
-            <div class="relative w-full h-28 sm:h-44 rounded-lg overflow-hidden bg-neutral-800 mb-3">
-              <span class="absolute top-2 left-2 z-10 bg-[#e14d2a] text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Deal.1</span>
+            <div class="relative w-full h-28 sm:h-44 rounded-xl overflow-hidden bg-neutral-800 mb-3">
+              <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full uppercase">Deal.1</span>
               <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&auto=format&fit=crop&q=80" alt="Deal.1" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
             </div>
-            <h3 class="font-bold text-white group-hover:text-[#e14d2a] transition text-sm sm:text-base">Deal.1</h3>
-            <p class="text-[11px] sm:text-xs text-neutral-400 mt-1 line-clamp-2">1 Small Pizza, 5 Hot Wings, Half Liter Drink</p>
+            <h3 class="font-bold text-white group-hover:text-brand-500 transition text-sm sm:text-base">Deal.1</h3>
+            <p class="text-xs text-neutral-400 mt-1 line-clamp-2">1 Small Pizza, 5 Hot Wings, Half Liter Drink</p>
           </div>
           <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
-            <span class="text-sm sm:text-lg font-bold text-yellow-400">800/-</span>
-            <button onclick="addToCart('Deal.1', '800/-')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#e14d2a] hover:bg-[#c83818] text-white flex items-center justify-center transition active:scale-90 shadow-md">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <div class="flex flex-col">
+              <span class="text-xs text-neutral-400">Price</span>
+              <span class="text-sm sm:text-lg font-bold text-yellow-400">800/-</span>
+            </div>
+            <button onclick="addToCart('Deal.1', '800/-')" aria-label="Add Deal 1 to cart" class="flex items-center gap-1 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add
             </button>
           </div>
         </div>
 
         <!-- Card 2 -->
-        <div class="bg-[#121212] rounded-xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
+        <div class="bg-[#121212] rounded-2xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
           <div>
-            <div class="relative w-full h-28 sm:h-44 rounded-lg overflow-hidden bg-neutral-800 mb-3">
-              <span class="absolute top-2 left-2 z-10 bg-[#e14d2a] text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Deal.2</span>
+            <div class="relative w-full h-28 sm:h-44 rounded-xl overflow-hidden bg-neutral-800 mb-3">
+              <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full uppercase">Deal.2</span>
               <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop&q=80" alt="Deal.2" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
             </div>
-            <h3 class="font-bold text-white group-hover:text-[#e14d2a] transition text-sm sm:text-base">Deal.2</h3>
-            <p class="text-[11px] sm:text-xs text-neutral-400 mt-1 line-clamp-2">2 Zinger Burger, Small Fries, Half Liter Drink</p>
+            <h3 class="font-bold text-white group-hover:text-brand-500 transition text-sm sm:text-base">Deal.2</h3>
+            <p class="text-xs text-neutral-400 mt-1 line-clamp-2">2 Zinger Burger, Small Fries, Half Liter Drink</p>
           </div>
           <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
-            <span class="text-sm sm:text-lg font-bold text-yellow-400">850/-</span>
-            <button onclick="addToCart('Deal.2', '850/-')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#e14d2a] hover:bg-[#c83818] text-white flex items-center justify-center transition active:scale-90 shadow-md">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <div class="flex flex-col">
+              <span class="text-xs text-neutral-400">Price</span>
+              <span class="text-sm sm:text-lg font-bold text-yellow-400">850/-</span>
+            </div>
+            <button onclick="addToCart('Deal.2', '850/-')" aria-label="Add Deal 2 to cart" class="flex items-center gap-1 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add
             </button>
           </div>
         </div>
 
         <!-- Card 3 -->
-        <div class="bg-[#121212] rounded-xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
+        <div class="bg-[#121212] rounded-2xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
           <div>
-            <div class="relative w-full h-28 sm:h-44 rounded-lg overflow-hidden bg-neutral-800 mb-3">
-              <span class="absolute top-2 left-2 z-10 bg-[#e14d2a] text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Deal.3</span>
+            <div class="relative w-full h-28 sm:h-44 rounded-xl overflow-hidden bg-neutral-800 mb-3">
+              <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full uppercase">Deal.3</span>
               <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?w=500&auto=format&fit=crop&q=80" alt="Deal.3" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
             </div>
-            <h3 class="font-bold text-white group-hover:text-[#e14d2a] transition text-sm sm:text-base">Deal.3</h3>
-            <p class="text-[11px] sm:text-xs text-neutral-400 mt-1 line-clamp-2">1 Zinger Burger, 1 Regular Fries, 1 Regular Drink</p>
+            <h3 class="font-bold text-white group-hover:text-brand-500 transition text-sm sm:text-base">Deal.3</h3>
+            <p class="text-xs text-neutral-400 mt-1 line-clamp-2">1 Zinger Burger, 1 Regular Fries, 1 Regular Drink</p>
           </div>
           <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
-            <span class="text-sm sm:text-lg font-bold text-yellow-400">450/-</span>
-            <button onclick="addToCart('Deal.3', '450/-')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#e14d2a] hover:bg-[#c83818] text-white flex items-center justify-center transition active:scale-90 shadow-md">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <div class="flex flex-col">
+              <span class="text-xs text-neutral-400">Price</span>
+              <span class="text-sm sm:text-lg font-bold text-yellow-400">450/-</span>
+            </div>
+            <button onclick="addToCart('Deal.3', '450/-')" aria-label="Add Deal 3 to cart" class="flex items-center gap-1 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add
             </button>
           </div>
         </div>
 
         <!-- Card 4 -->
-        <div class="bg-[#121212] rounded-xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
+        <div class="bg-[#121212] rounded-2xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
           <div>
-            <div class="relative w-full h-28 sm:h-44 rounded-lg overflow-hidden bg-neutral-800 mb-3">
-              <span class="absolute top-2 left-2 z-10 bg-[#e14d2a] text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Deal.4</span>
+            <div class="relative w-full h-28 sm:h-44 rounded-xl overflow-hidden bg-neutral-800 mb-3">
+              <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full uppercase">Deal.4</span>
               <img src="https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=500&auto=format&fit=crop&q=80" alt="Deal.4" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
             </div>
-            <h3 class="font-bold text-white group-hover:text-[#e14d2a] transition text-sm sm:text-base">Deal.4</h3>
-            <p class="text-[11px] sm:text-xs text-neutral-400 mt-1 line-clamp-2">1 Small Pizza, 2 Peti Burger, 1 Small Fries, Half Liter Drink</p>
+            <h3 class="font-bold text-white group-hover:text-brand-500 transition text-sm sm:text-base">Deal.4</h3>
+            <p class="text-xs text-neutral-400 mt-1 line-clamp-2">1 Small Pizza, 2 Peti Burger, 1 Small Fries, Half Liter Drink</p>
           </div>
           <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
-            <span class="text-sm sm:text-lg font-bold text-yellow-400">1200/-</span>
-            <button onclick="addToCart('Deal.4', '1200/-')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#e14d2a] hover:bg-[#c83818] text-white flex items-center justify-center transition active:scale-90 shadow-md">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <div class="flex flex-col">
+              <span class="text-xs text-neutral-400">Price</span>
+              <span class="text-sm sm:text-lg font-bold text-yellow-400">1200/-</span>
+            </div>
+            <button onclick="addToCart('Deal.4', '1200/-')" aria-label="Add Deal 4 to cart" class="flex items-center gap-1 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add
             </button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Special Plater Promotion -->
-    <section class="relative bg-gradient-to-r from-neutral-900 via-neutral-900 to-brand-950/60 rounded-3xl p-8 sm:p-12 overflow-hidden border border-yellow-400/20 shadow-soft">
-      <div class="max-w-xl space-y-4">
+    <!-- Special Plater Promotion (Issue 9 resolved: reduced decorative watermark prominence) -->
+    <section class="relative bg-gradient-to-r from-neutral-900 via-neutral-900 to-brand-950/60 rounded-2xl p-8 sm:p-12 overflow-hidden border border-yellow-400/20 shadow-soft">
+      <div class="max-w-xl space-y-4 relative z-10">
         <div class="inline-block text-brand-500 font-extrabold text-2xl sm:text-3xl tracking-tight">
           Special Offer! — Muneeb Special Plater
         </div>
@@ -315,26 +348,26 @@
         </p>
         <div class="pt-2 flex items-center gap-4">
           <span class="text-xl font-bold text-yellow-400">3000/-</span>
-          <button onclick="addToCart('Muneeb Special Plater', '3000/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold px-7 py-3 rounded-full shadow-md shadow-brand-500/20 transition active:scale-95 inline-block">
+          <button onclick="addToCart('Muneeb Special Plater', '3000/-')" class="bg-brand-500 hover:bg-brand-600 active:scale-95 text-white text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full shadow-md transition inline-block">
             Order Plater Now
           </button>
         </div>
       </div>
 
-      <div class="absolute right-4 sm:right-12 -bottom-6 sm:bottom-0 flex items-center gap-2 pointer-events-none">
-        <div class="hidden md:block text-brand-500 font-black text-5xl lg:text-7xl font-display opacity-90 rotate-[-10deg]">
-          BEST <br /><span class="text-4xl lg:text-5xl font-light italic text-yellow-400">Deal</span>
+      <div class="absolute right-4 sm:right-12 -bottom-6 sm:bottom-0 flex items-center gap-2 pointer-events-none z-0" aria-hidden="true">
+        <div class="hidden md:block text-brand-500/10 font-black text-6xl lg:text-8xl font-display rotate-[-10deg] select-none">
+          BEST <br /><span class="text-5xl lg:text-6xl font-light italic text-yellow-400/15">Deal</span>
         </div>
         <img 
           src="https://images.unsplash.com/photo-1527477396000-e27163b481c2?w=600&auto=format&fit=crop&q=80" 
-          alt="Muneeb Special Plater promotion" 
-          class="w-44 sm:w-64 lg:w-80 h-auto object-cover drop-shadow-2xl rounded-2xl rotate-3 border border-yellow-400/20"
+          alt="" 
+          class="w-44 sm:w-64 lg:w-80 h-auto object-cover drop-shadow-2xl rounded-xl rotate-3 border border-yellow-400/20"
         />
       </div>
     </section>
 
     <!-- SECTION 1: Limousine Pizza Promotion -->
-    <section class="relative bg-gradient-to-r from-neutral-900 via-neutral-900 to-amber-950/40 rounded-3xl p-8 sm:p-12 overflow-hidden border border-yellow-400/20 shadow-soft">
+    <section class="relative bg-gradient-to-r from-neutral-900 via-neutral-900 to-amber-950/40 rounded-2xl p-8 sm:p-12 overflow-hidden border border-yellow-400/20 shadow-soft">
       <div class="max-w-xl space-y-4 relative z-10">
         <div class="inline-flex items-center gap-2 bg-yellow-400/10 border border-yellow-400/30 text-yellow-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
           🍕 Giant Size Feast
@@ -347,26 +380,26 @@
         </p>
         <div class="pt-2 flex items-center gap-4">
           <span class="text-2xl font-black text-yellow-400">3200/-</span>
-          <button onclick="addToCart('Limousine Pizza Special', '3200/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold px-7 py-3 rounded-full shadow-md shadow-brand-500/20 transition active:scale-95 inline-block">
+          <button onclick="addToCart('Limousine Pizza Special', '3200/-')" class="bg-brand-500 hover:bg-brand-600 active:scale-95 text-white text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full shadow-md transition inline-block">
             Order Limousine Now
           </button>
         </div>
       </div>
 
-      <div class="absolute right-4 sm:right-10 -bottom-6 sm:bottom-2 flex items-center gap-2 pointer-events-none opacity-80 lg:opacity-100">
-        <div class="hidden md:block text-yellow-400/20 font-black text-6xl lg:text-8xl font-display rotate-[-8deg]">
-          MEGA<br /><span class="text-brand-500/30 italic">PIZZA</span>
+      <div class="absolute right-4 sm:right-10 -bottom-6 sm:bottom-2 flex items-center gap-2 pointer-events-none z-0" aria-hidden="true">
+        <div class="hidden md:block text-yellow-400/10 font-black text-6xl lg:text-8xl font-display rotate-[-8deg] select-none">
+          MEGA<br /><span class="text-brand-500/15 italic">PIZZA</span>
         </div>
         <img 
           src="https://images.unsplash.com/photo-1590947132387-155cc02f3212?w=600&auto=format&fit=crop&q=80" 
-          alt="Limousine Pizza" 
-          class="w-48 sm:w-64 lg:w-80 h-auto object-cover drop-shadow-2xl rounded-2xl rotate-2 border border-yellow-400/20"
+          alt="" 
+          class="w-48 sm:w-64 lg:w-80 h-auto object-cover drop-shadow-2xl rounded-xl rotate-2 border border-yellow-400/20"
         />
       </div>
     </section>
 
     <!-- SECTION 2: Birthday Deal Pizza -->
-    <section class="relative bg-gradient-to-r from-neutral-900 via-neutral-900 to-purple-950/40 rounded-3xl p-8 sm:p-12 overflow-hidden border border-yellow-400/20 shadow-soft">
+    <section class="relative bg-gradient-to-r from-neutral-900 via-neutral-900 to-purple-950/40 rounded-2xl p-8 sm:p-12 overflow-hidden border border-yellow-400/20 shadow-soft">
       <div class="max-w-xl space-y-4 relative z-10">
         <div class="inline-flex items-center gap-2 bg-purple-400/10 border border-purple-400/30 text-purple-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
           🎉 Celebration Combo
@@ -379,62 +412,64 @@
         </p>
         <div class="pt-2 flex items-center gap-4">
           <span class="text-2xl font-black text-yellow-400">3500/-</span>
-          <button onclick="addToCart('Birthday Celebration Deal', '3500/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold px-7 py-3 rounded-full shadow-md shadow-brand-500/20 transition active:scale-95 inline-block">
+          <button onclick="addToCart('Birthday Celebration Deal', '3500/-')" class="bg-brand-500 hover:bg-brand-600 active:scale-95 text-white text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full shadow-md transition inline-block">
             Order Birthday Deal
           </button>
         </div>
       </div>
 
-      <div class="absolute right-4 sm:right-10 -bottom-6 sm:bottom-2 flex items-center gap-2 pointer-events-none opacity-80 lg:opacity-100">
-        <div class="hidden md:block text-purple-400/20 font-black text-6xl lg:text-8xl font-display rotate-[-8deg]">
-          PARTY<br /><span class="text-yellow-400/30 italic">COMBO</span>
+      <div class="absolute right-4 sm:right-10 -bottom-6 sm:bottom-2 flex items-center gap-2 pointer-events-none z-0" aria-hidden="true">
+        <div class="hidden md:block text-purple-400/10 font-black text-6xl lg:text-8xl font-display rotate-[-8deg] select-none">
+          PARTY<br /><span class="text-yellow-400/15 italic">COMBO</span>
         </div>
         <img 
           src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80" 
-          alt="Birthday Pizza Deal" 
-          class="w-48 sm:w-64 lg:w-80 h-auto object-cover drop-shadow-2xl rounded-2xl -rotate-2 border border-yellow-400/20"
+          alt="" 
+          class="w-48 sm:w-64 lg:w-80 h-auto object-cover drop-shadow-2xl rounded-xl -rotate-2 border border-yellow-400/20"
         />
       </div>
     </section>
 
-    <!-- Why Choose Muneeb Cafe -->
-    <section class="space-y-8">
+    <!-- Why Choose Muneeb Cafe (Issue 10 resolved: Cash Only visual icon alignment) -->
+    <section class="space-y-6">
       <div class="text-center space-y-1">
         <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-yellow-400">Why Choose Muneeb Cafe</h2>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
-        <div class="relative rounded-2xl overflow-hidden p-6 shadow-soft border border-yellow-400/20 flex flex-col justify-between group min-h-[160px]">
-          <img src="images/Always Fresh.jpg" alt="Always Fresh" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition duration-500">
+        <div class="relative rounded-2xl overflow-hidden p-6 shadow-soft border border-yellow-400/20 flex flex-col justify-between group min-h-[160px] bg-neutral-900">
+          <img src="images/Always Fresh.jpg" alt="Always Fresh food" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition duration-500 opacity-40">
           <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/80 to-black/60"></div>
-          <div class="relative z-10 space-y-3">
+          <div class="relative z-10 space-y-2">
             <h3 class="font-bold text-yellow-400 text-base drop-shadow">Always Fresh</h3>
             <p class="text-xs text-neutral-300 leading-relaxed drop-shadow">Cooked to order, never frozen, always piping hot.</p>
           </div>
         </div>
 
-        <div class="relative rounded-2xl overflow-hidden p-6 shadow-soft border border-yellow-400/20 flex flex-col justify-between group min-h-[160px]">
-          <img src="images/lightning fast.jpg" alt="Lightning Fast" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition duration-500">
+        <div class="relative rounded-2xl overflow-hidden p-6 shadow-soft border border-yellow-400/20 flex flex-col justify-between group min-h-[160px] bg-neutral-900">
+          <img src="images/lightning fast.jpg" alt="Lightning fast delivery" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition duration-500 opacity-40">
           <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/80 to-black/60"></div>
-          <div class="relative z-10 space-y-3">
+          <div class="relative z-10 space-y-2">
             <h3 class="font-bold text-yellow-400 text-base drop-shadow">Lightning Fast</h3>
             <p class="text-xs text-neutral-300 leading-relaxed drop-shadow">Avg delivery in ~10 to 20 minutes across Fatehpur.</p>
           </div>
         </div>
 
-        <div class="relative rounded-2xl overflow-hidden p-6 shadow-soft border border-yellow-400/20 flex flex-col justify-between group min-h-[160px]">
-          <img src="images/hot wings.jpg" alt="Crispy & Spicy" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition duration-500">
-          <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/80 to-black/60"></div>
-          <div class="relative z-10 space-y-3">
+        <div class="relative rounded-2xl overflow-hidden p-6 shadow-soft border border-yellow-400/20 flex flex-col justify-between group min-h-[160px] bg-neutral-900">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/80 to-black/60 z-0"></div>
+          <div class="relative z-10 space-y-2">
+            <div class="w-9 h-9 rounded-xl bg-yellow-400/10 border border-yellow-400/30 flex items-center justify-center text-yellow-400">
+              <i data-lucide="banknote" class="w-5 h-5"></i>
+            </div>
             <h3 class="font-bold text-yellow-400 text-base drop-shadow">Cash Only</h3>
             <p class="text-xs text-neutral-300 leading-relaxed drop-shadow">Simple cash on delivery and counter payments.</p>
           </div>
         </div>
 
-        <div class="relative rounded-2xl overflow-hidden p-6 shadow-soft border border-yellow-400/20 flex flex-col justify-between group min-h-[160px]">
-          <img src="images/call support.jpg" alt="Call Support" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition duration-500">
+        <div class="relative rounded-2xl overflow-hidden p-6 shadow-soft border border-yellow-400/20 flex flex-col justify-between group min-h-[160px] bg-neutral-900">
+          <img src="images/call support.jpg" alt="Customer call support" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition duration-500 opacity-40">
           <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/80 to-black/60"></div>
-          <div class="relative z-10 space-y-3">
+          <div class="relative z-10 space-y-2">
             <h3 class="font-bold text-yellow-400 text-base drop-shadow">Call Support</h3>
             <p class="text-xs text-neutral-300 leading-relaxed drop-shadow">Call 0304 5132070 anytime for quick ordering.</p>
           </div>
@@ -443,7 +478,7 @@
     </section>
 
     <!-- Google Reviews Section -->
-    <section class="space-y-8">
+    <section class="space-y-6">
       <div class="text-center space-y-1">
         <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-yellow-400">Google Reviews (4.08 Stars)</h2>
         <p class="text-xs text-neutral-400">Authentic feedback from our customers in Fatehpur</p>
@@ -467,7 +502,7 @@
             <div class="w-9 h-9 rounded-full bg-brand-950 text-brand-400 font-bold flex items-center justify-center text-xs border border-brand-500/30">MC</div>
             <div>
               <p class="text-xs font-bold text-yellow-400">Local Customer</p>
-              <span class="text-[10px] text-neutral-400">Google Reviewer</span>
+              <span class="text-xs text-neutral-400">Google Reviewer</span>
             </div>
           </div>
         </div>
@@ -489,7 +524,7 @@
             <div class="w-9 h-9 rounded-full bg-emerald-950 text-emerald-400 font-bold flex items-center justify-center text-xs border border-emerald-500/30">AH</div>
             <div>
               <p class="text-xs font-bold text-yellow-400">Ahmed H.</p>
-              <span class="text-[10px] text-neutral-400">Verified Customer</span>
+              <span class="text-xs text-neutral-400">Verified Customer</span>
             </div>
           </div>
         </div>
@@ -511,14 +546,14 @@
             <div class="w-9 h-9 rounded-full bg-amber-950 text-amber-400 font-bold flex items-center justify-center text-xs border border-amber-500/30">ZM</div>
             <div>
               <p class="text-xs font-bold text-yellow-400">Zahid M.</p>
-              <span class="text-[10px] text-neutral-400">Verified Customer</span>
+              <span class="text-xs text-neutral-400">Verified Customer</span>
             </div>
           </div>
         </div>
 
         <div class="review-card empty-slot bg-[#121212] rounded-2xl p-6 shadow-soft flex flex-col items-center justify-center border border-dashed border-yellow-400/30 min-h-[160px] cursor-pointer hover:border-brand-500 transition group">
-          <div class="w-12 h-12 rounded-full bg-neutral-800 text-yellow-400 group-hover:text-brand-500 group-hover:scale-110 flex items-center justify-center transition">
-            <i data-lucide="plus" class="w-6 h-6"></i>
+          <div class="w-10 h-10 rounded-full bg-neutral-800 text-yellow-400 group-hover:text-brand-500 group-hover:scale-110 flex items-center justify-center transition">
+            <i data-lucide="plus" class="w-5 h-5"></i>
           </div>
           <span class="text-xs text-neutral-400 mt-2 font-medium">Add Your Review</span>
         </div>
@@ -526,19 +561,19 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="bg-neutral-900 rounded-3xl p-8 sm:p-14 text-center max-w-4xl mx-auto shadow-soft border border-yellow-400/20 space-y-4">
-      <h2 class="text-2xl sm:text-4xl font-extrabold text-yellow-400 tracking-tight">
+    <section class="bg-neutral-900 rounded-2xl p-8 sm:p-12 text-center max-w-4xl mx-auto shadow-soft border border-yellow-400/20 space-y-4">
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-yellow-400 tracking-tight">
         Call or WhatsApp to place your order
       </h2>
       <p class="text-xs sm:text-sm text-neutral-400 max-w-md mx-auto">
         Reach us directly at <strong class="text-yellow-400">0304 5132070</strong> or visit us at Amir Bashir Plaza, Shah Sharaf St, Fatehpur.
       </p>
 
-      <div class="pt-4 flex flex-wrap items-center justify-center gap-4">
-        <a href="https://wa.me/923045132070" target="_blank" rel="noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold px-8 py-3 rounded-full transition shadow-md flex items-center gap-2">
+      <div class="pt-2 flex flex-wrap items-center justify-center gap-4">
+        <a href="https://wa.me/923045132070" target="_blank" rel="noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full transition shadow-md flex items-center gap-2">
           <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp Us Now
         </a>
-        <a href="tel:03045132070" class="bg-brand-500 hover:bg-brand-600 text-white text-xs sm:text-sm font-semibold px-8 py-3 rounded-full transition shadow-md shadow-brand-500/20 flex items-center gap-2">
+        <a href="tel:03045132070" class="bg-brand-500 hover:bg-brand-600 active:scale-95 text-white text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full transition shadow-md flex items-center gap-2">
           <i data-lucide="phone" class="w-4 h-4"></i> Call 0304 5132070
         </a>
       </div>
@@ -546,9 +581,9 @@
 
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-neutral-900 border-t border-yellow-400/10 pt-14 pb-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+  <!-- Footer (Issue 5 resolved: semantic H3 headings instead of skipped H4s) -->
+  <footer class="bg-neutral-900 border-t border-yellow-400/10 pt-12 pb-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
       <div class="grid grid-cols-2 md:grid-cols-5 gap-8">
         
         <div class="col-span-2 space-y-4">
@@ -566,7 +601,7 @@
         </div>
 
         <div class="space-y-3">
-          <h4 class="font-bold text-xs uppercase tracking-wider text-yellow-400">Quick Links</h4>
+          <h3 class="font-bold text-xs uppercase tracking-wider text-yellow-400">Quick Links</h3>
           <ul class="space-y-2 text-xs text-neutral-400">
             <li><a href="index.html" class="hover:text-brand-500 transition">Home</a></li>
             <li><a href="menu.html" class="hover:text-brand-500 transition">Full Menu</a></li>
@@ -576,7 +611,7 @@
         </div>
 
         <div class="space-y-3">
-          <h4 class="font-bold text-xs uppercase tracking-wider text-yellow-400">Find Us</h4>
+          <h3 class="font-bold text-xs uppercase tracking-wider text-yellow-400">Find Us</h3>
           <ul class="space-y-2 text-xs text-neutral-400">
             <li><a href="https://maps.google.com/?q=Amir+Bashir+Plaza,+Shah+Sharaf+St,+Fatehpur" target="_blank" rel="noopener noreferrer" class="hover:text-brand-500 transition flex items-center gap-1"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-500"></i> Google Maps</a></li>
             <li><span>~10 mins nearby</span></li>
@@ -585,7 +620,7 @@
         </div>
 
         <div class="space-y-3">
-          <h4 class="font-bold text-xs uppercase tracking-wider text-yellow-400">Contact</h4>
+          <h3 class="font-bold text-xs uppercase tracking-wider text-yellow-400">Contact</h3>
           <ul class="space-y-2 text-xs text-neutral-400">
             <li><a href="tel:03045132070" class="hover:text-brand-500 transition">Call: 0304 5132070</a></li>
             <li><a href="https://wa.me/923045132070" target="_blank" rel="noopener noreferrer" class="hover:text-brand-500 transition">WhatsApp Order</a></li>
@@ -605,10 +640,15 @@
     </div>
   </footer>
 
-  <!-- Floating Cart Button -->
-  <button onclick="toggleCartDrawer()" style="position: fixed; bottom: 20px; right: 20px; z-index: 50;" class="bg-brand-500 hover:bg-brand-600 text-white p-4 rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 group">
-      <i data-lucide="shopping-cart" class="w-6 h-6"></i>
-      <span id="floating-cart-badge" class="absolute -top-1 -right-1 bg-yellow-400 text-black font-extrabold text-[11px] w-5 h-5 rounded-full flex items-center justify-center shadow-md">0</span>
+  <!-- Floating Cart Button (Issue 7 resolved: anchored fixed bottom-6 right-6) -->
+  <button 
+    type="button"
+    onclick="toggleCartDrawer()" 
+    class="fixed bottom-6 right-6 z-50 bg-brand-500 hover:bg-brand-600 text-white p-4 rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+    aria-label="Open Shopping Cart"
+  >
+    <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+    <span id="floating-cart-badge" class="absolute -top-1 -right-1 bg-yellow-400 text-black font-extrabold text-xs w-5 h-5 rounded-full flex items-center justify-center shadow-md pointer-events-none">0</span>
   </button>
 
   <!-- Slide-in Cart Drawer -->
@@ -618,7 +658,7 @@
               <h3 class="font-bold text-yellow-400 text-lg">Your Cart</h3>
               <div class="flex items-center gap-3">
                   <span id="cart-count" class="bg-brand-500 text-xs px-2.5 py-1 rounded-full font-bold">0 items</span>
-                  <button onclick="toggleCartDrawer()" class="text-neutral-400 hover:text-white p-1">✕</button>
+                  <button onclick="toggleCartDrawer()" class="text-neutral-400 hover:text-white p-1" aria-label="Close Cart">✕</button>
               </div>
           </div>
 
@@ -637,12 +677,12 @@
               
               <div class="relative">
                   <input type="text" id="customer-address" placeholder="Delivery Address" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" />
-                  <button onclick="fetchUserLocation()" type="button" title="Detect My Location" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-brand-500 hover:text-brand-400 transition">
+                  <button onclick="fetchUserLocation()" type="button" title="Detect My Location" aria-label="Detect My Location via GPS" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-brand-500 hover:text-brand-400 transition">
                       <i data-lucide="crosshair" class="w-4 h-4"></i>
                   </button>
               </div>
 
-              <button onclick="placeOrder()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-brand-500/20 text-sm">
+              <button onclick="placeOrder()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-xl transition shadow-lg text-sm active:scale-95">
                   Place Order Now
               </button>
           </div>
