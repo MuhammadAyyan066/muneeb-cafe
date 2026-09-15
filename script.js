@@ -1,7 +1,7 @@
 // ==========================================
 // 0. API CONFIGURATION
 // ==========================================
-const API_URL = 'https://muneeb-fast-food.vercel.app';
+const API_URL = "https://muneeb-cafe-backend.vercel.app";
 const API_BASE_URL = `${API_URL}/api/orders`;
 const MENU_API_URL = `${API_URL}/api/menu`;
 
@@ -350,6 +350,30 @@ const fallbackMenuItems = [
     ]
   },
 
+  // --- LIMOUSINE PIZZA ---
+  { 
+    name: "Limousine Pizza", 
+    category: "Limousine Pizza", 
+    price: 3500, 
+    time: "30 min", 
+    rating: "5.0 (85)", 
+    desc: "Giant 1-Meter Limousine Pizza with multiple flavors of your choice + 2 Ltr Drink", 
+    tag: "Special", 
+    image: "images/pizza pic.jpg" 
+  },
+
+  // --- BIRTHDAY DEALS ---
+  { 
+    name: "Birthday Deal", 
+    category: "Birthday Deals", 
+    price: 6500, 
+    time: "35 min", 
+    rating: "5.0 (120)", 
+    desc: "2 Family Pizza, 5 Grill Burger, 20 Grill Wings, 1 Pound Cake, 4 Regular Fries, 2 Drink 1.5 Ltr", 
+    tag: "Party", 
+    image: "images/deals.jpg" 
+  },
+
   // --- MUNEEB CAFÉ DEALS ---
   { name: "Deal.1", category: "Deals", price: 800, time: "15 min", rating: "4.8 (45)", desc: "1 Small Pizza, 5 Hot Wings, Half Liter Drink", tag: "Deal", image: "images/pizza pic.jpg" },
   { name: "Deal.2", category: "Deals", price: 850, time: "15 min", rating: "4.7 (50)", desc: "2 Zinger Burger, Small Fries, Half Liter Drink", tag: "Deal", image: "images/burgers.jpg" },
@@ -368,8 +392,6 @@ const fallbackMenuItems = [
   { name: "Deal.19", category: "Deals", price: 700, time: "12 min", rating: "4.8 (51)", desc: "2 Tikka Pratha, 2 Regular Fries, 2 Regular Drink", tag: "Deal", image: "images/deals.jpg" },
   { name: "Deal.20", category: "Deals", price: 750, time: "14 min", rating: "4.7 (44)", desc: "2 Special Peti Burger, 2 Regular Drink, 2 Regular Fries", tag: "Deal", image: "images/burgers.jpg" },
   { name: "Deal.21", category: "Deals", price: 1000, time: "15 min", rating: "4.9 (67)", desc: "20p Grill Wings, 1 Half Ltr Drink", tag: "Deal", image: "images/hot wings.jpg" },
-  { name: "Birthday Deal", category: "Deals", price: 6500, time: "35 min", rating: "5.0 (120)", desc: "2 Family Pizza, 5 Grill Burger, 20 Grill Wings, 1 Pound Cake, 4 Regular Fries, 2 Drink 1.5 Ltr", tag: "Party", image: "images/deals.jpg" },
-  { name: "Limousine Pizza", category: "Deals", price: 3500, time: "30 min", rating: "5.0 (85)", desc: "Giant Limousine Pizza + 2 Ltr Drink", tag: "Special", image: "images/pizza pic.jpg" },
   { name: "Muneeb Special Plater", category: "Deals", price: 3000, time: "25 min", rating: "4.9 (78)", desc: "10 Nuggets, 10 Hot wings, 10 Grill wings, 1 Large Pizza, 1 Drink 1.5 Ltr", tag: "Plater", image: "images/deals.jpg" },
 
   // --- BURGERS ---
@@ -848,7 +870,7 @@ async function initializeApp() {
   try {
     const res = await fetch(MENU_API_URL, {
       signal: controller.signal,
-      headers: {
+      headers: { 
         'Accept': 'application/json',
         'Bypass-Tunnel-Reminder': 'true'
       }
@@ -891,7 +913,6 @@ async function initializeApp() {
     }
   }
 
-  // Ensure all icons are created on DOM load
   if (window.lucide) {
     lucide.createIcons();
   }
@@ -909,7 +930,6 @@ window.addEventListener('DOMContentLoaded', initializeApp);
   const VALID_USER = "admin";
   const VALID_PASS = "muneeb123";
 
-  // Elements
   const shopAdminOpenBtn = document.getElementById('shopAdminOpenBtn');
   const confirmModal = document.getElementById('adminConfirmModal');
   const confirmCancelBtn = document.getElementById('confirmCancelBtn');
@@ -922,7 +942,6 @@ window.addEventListener('DOMContentLoaded', initializeApp);
   const userInput = document.getElementById('adminUsername');
   const passInput = document.getElementById('adminPassword');
 
-  // Step 1: Open Confirmation Modal
   if (shopAdminOpenBtn && confirmModal) {
     shopAdminOpenBtn.addEventListener('click', () => {
       confirmModal.classList.remove('hidden');
@@ -931,7 +950,6 @@ window.addEventListener('DOMContentLoaded', initializeApp);
     });
   }
 
-  // Cancel Confirmation
   if (confirmCancelBtn && confirmModal) {
     confirmCancelBtn.addEventListener('click', () => {
       confirmModal.classList.add('hidden');
@@ -939,7 +957,6 @@ window.addEventListener('DOMContentLoaded', initializeApp);
     });
   }
 
-  // Step 2: Confirmation Accepted -> Open Login Modal
   if (confirmProceedBtn && confirmModal && loginModal) {
     confirmProceedBtn.addEventListener('click', () => {
       confirmModal.classList.add('hidden');
@@ -952,7 +969,6 @@ window.addEventListener('DOMContentLoaded', initializeApp);
     });
   }
 
-  // Close Login Modal Manually
   if (loginCloseBtn && loginModal) {
     loginCloseBtn.addEventListener('click', () => {
       loginModal.classList.add('hidden');
@@ -961,7 +977,6 @@ window.addEventListener('DOMContentLoaded', initializeApp);
     });
   }
 
-  // Step 3: Handle Login & 3-Attempts Limit
   if (loginForm) {
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
