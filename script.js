@@ -972,7 +972,7 @@ window.addEventListener('DOMContentLoaded', initializeApp);
       if (enteredUser === VALID_USER && enteredPass === VALID_PASS) {
         failedAttempts = 0;
         sessionStorage.setItem('isAdminAuthenticated', 'true');
-        window.location.href = 'admin.html';
+        window.location.href = 'shop-admin.html';
       } else {
         failedAttempts += 1;
         const remaining = MAX_ATTEMPTS - failedAttempts;

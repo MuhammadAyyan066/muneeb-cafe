@@ -104,10 +104,22 @@ ${itemsList}
 
 async function loadOrders() {
   const statusIndicator = document.getElementById('connection-status');
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
 
   try {
-    const res = await fetch(API_BASE_URL);
-    if (!res.ok) throw new Error('API server returned error');
+    const res = await fetch(API_BASE_URL, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Bypass-Tunnel-Reminder': 'true'
+      },
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!res.ok) throw new Error(`Server returned status: ${res.status}`);
 
     cachedOrders = await res.json();
     if (statusIndicator) {
@@ -116,6 +128,9 @@ async function loadOrders() {
     updateCounts();
     renderOrders();
   } catch (err) {
+    clearTimeout(timeoutId);
+    console.error("Failed to load orders:", err);
+
     if (statusIndicator) {
       statusIndicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Offline`;
     }
@@ -124,7 +139,7 @@ async function loadOrders() {
       container.innerHTML = `
         <div class="bg-red-500/10 border border-red-500/30 p-6 rounded-2xl text-center space-y-2">
           <p class="text-sm font-semibold text-red-400">Unable to load orders from backend server.</p>
-          <p class="text-xs text-neutral-400">Make sure your Node.js Express server is running at ${API_BASE_URL}</p>
+          <p class="text-xs text-neutral-400">Target URL: ${API_BASE_URL}</p>
         </div>`;
     }
   }
