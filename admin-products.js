@@ -1,4 +1,4 @@
-const API_URL = 'https://muneeb-fast-food.vercel.app';
+const API_URL = 'https://muneeb-cafe-backend.vercel.app';
 
 // ==========================================
 // 1. DYNAMIC SIZE FIELDS TOGGLE

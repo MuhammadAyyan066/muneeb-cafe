@@ -1,4 +1,4 @@
-const API_URL = 'https://muneeb-fast-food.vercel.app';
+const API_URL = 'https://muneeb-cafe-backend.vercel.app';
 const API_BASE_URL = `${API_URL}/api/products`;
 
 // 1. Submit Function (Bilkul Theek Hai)
