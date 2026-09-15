@@ -175,9 +175,8 @@ ${itemsList}
             const statusIndicator = document.getElementById('connection-status');
 
             try {
-                const res = await fetch(API_BASE_URL, {
-                    headers: { 'Bypass-Tunnel-Reminder': 'true' }
-                });
+                // Simple standard GET request (Bina preflight/custom headers ke CORS error khatam)
+                const res = await fetch(API_BASE_URL);
                 if (!res.ok) throw new Error('API server returned error');
                 
                 cachedOrders = await res.json();
