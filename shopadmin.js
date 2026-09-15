@@ -1,5 +1,5 @@
 const API_URL = 'https://muneeb-fast-food.vercel.app';
-const API_BASE_URL = 'http://localhost:5000/api/orders';
+const API_BASE_URL = `${API_URL}/api/orders`;
 let cachedOrders = [];
 let currentFilter = 'All';
 

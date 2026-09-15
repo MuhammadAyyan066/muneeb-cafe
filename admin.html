@@ -240,6 +240,8 @@
     </div>
 
     <script>
+        // API Base configuration pointing to live Vercel backend
+        const API_URL = 'https://muneeb-fast-food.vercel.app';
         let cachedItems = [];
 
         function logout() {
@@ -294,7 +296,7 @@
             const datalist = document.getElementById('category-datalist');
 
             try {
-                const res = await fetch('http://localhost:5000/api/menu');
+                const res = await fetch(`${API_URL}/api/menu`);
                 if (!res.ok) throw new Error('Could not retrieve items from server.');
                 
                 cachedItems = await res.json();
@@ -334,7 +336,6 @@
                             ${items.map(item => {
                                 const encodedItem = encodeURIComponent(JSON.stringify(item));
                                 
-                                // Render multi-size badge or standard price
                                 let priceDisplay = '';
                                 if (item.sizes && item.sizes.length > 0) {
                                     priceDisplay = `<div class="flex flex-wrap gap-1 mt-1">` + 
@@ -404,7 +405,7 @@
             btn.innerText = "Renaming...";
 
             try {
-                const res = await fetch('http://localhost:5000/api/menu/admin/categories', {
+                const res = await fetch(`${API_URL}/api/menu/admin/categories`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ oldCategory, newCategory })
@@ -443,7 +444,6 @@
 
             checkPizzaCategory(item.category, 'edit');
 
-            // Populate Prices
             if (isPizzaCat(item.category) && item.sizes && item.sizes.length > 0) {
                 const sMap = {};
                 item.sizes.forEach(s => sMap[s.size] = s.price);
@@ -483,7 +483,7 @@
                 ];
                 formData.append('sizes', JSON.stringify(sizes));
                 formData.append('hasSizes', 'true');
-                formData.append('price', sizes[0].price); // Default fallback
+                formData.append('price', sizes[0].price);
             } else {
                 formData.append('price', document.getElementById('edit-price').value);
                 formData.append('hasSizes', 'false');
@@ -500,7 +500,7 @@
             btn.innerText = "Saving...";
 
             try {
-                const res = await fetch(`http://localhost:5000/api/menu/admin/items/${id}`, {
+                const res = await fetch(`${API_URL}/api/menu/admin/items/${id}`, {
                     method: 'PUT',
                     body: formData
                 });
@@ -524,7 +524,7 @@
         async function deleteItem(id) {
             if (!confirm("Are you sure you want to permanently delete this item?")) return;
             try {
-                const res = await fetch(`http://localhost:5000/api/menu/admin/items/${id}`, { 
+                const res = await fetch(`${API_URL}/api/menu/admin/items/${id}`, { 
                     method: 'DELETE' 
                 });
                 if (res.ok) {
@@ -582,7 +582,7 @@
             btn.innerText = "Saving to Database...";
 
             try {
-                const res = await fetch('http://localhost:5000/api/menu/admin/items', {
+                const res = await fetch(`${API_URL}/api/menu/admin/items`, {
                     method: 'POST',
                     body: formData
                 });
