@@ -411,11 +411,21 @@ const fallbackMenuItems = [
 ];
 
 let activeMenuItems = [];
-let cart = JSON.parse(localStorage.getItem('muneeb_cart') || '[]');
+
+// Clean fresh cart on every page reload / new visit
+localStorage.removeItem('muneeb_cart');
+let cart = [];
 let detectedCoords = { lat: null, lng: null };
 
-// Tracks whether the cart has already auto-opened once in this session
+// Tracks whether the cart has already auto-opened once on first item add
 let hasAutoOpenedCart = false;
+
+// Handle back/forward cache reload
+window.addEventListener('pageshow', function (event) {
+  if (event.persisted) {
+    window.location.reload();
+  }
+});
 
 // ==========================================
 // 2. ESCAPE UTILITY
@@ -597,9 +607,10 @@ function searchMenu() {
 }
 
 // ==========================================
-// 6. CART MANAGEMENT (LOCALSTORAGE)
+// 6. CART MANAGEMENT (FRESH SESSION + AUTO-OPEN LOGIC)
 // ==========================================
 function handleCartAutoOpen() {
+  // Urgent card open sirf pehli dafa jab item add ho
   if (!hasAutoOpenedCart) {
     openCartDrawer();
     hasAutoOpenedCart = true;
@@ -623,7 +634,7 @@ function addVariantToCart(productId, baseName, size, price) {
     });
   }
 
-  persistCart();
+  updateCartUI();
   showToast(`Added ${variantTitle}`);
   handleCartAutoOpen();
 }
@@ -644,7 +655,7 @@ function addStandardToCart(productId, name, price) {
     });
   }
 
-  persistCart();
+  updateCartUI();
   showToast(`Added ${name}`);
   handleCartAutoOpen();
 }
@@ -655,13 +666,12 @@ function addToCart(name, priceStr) {
 }
 
 function persistCart() {
-  localStorage.setItem('muneeb_cart', JSON.stringify(cart));
   updateCartUI();
 }
 
 function removeFromCart(index) {
   cart.splice(index, 1);
-  persistCart();
+  updateCartUI();
 }
 
 function updateCartUI() {
@@ -736,7 +746,7 @@ function closeCartDrawer() {
   if (drawer) {
     drawer.classList.add('translate-x-full');
   }
-  // User ne cart band kar ke wapas menu dekhna shuru kiya, agle items par auto-open na ho
+  // User ne cart close kiya, ab agle items par automatic drawer open nahi hoga
   hasAutoOpenedCart = true;
 }
 
@@ -887,9 +897,9 @@ async function placeOrder() {
     if (response.ok) {
       showCheckoutNotification("Order placed successfully! Sent to Kitchen.", "success");
       cart = [];
-      persistCart();
+      updateCartUI();
       detectedCoords = { lat: null, lng: null };
-      hasAutoOpenedCart = false; // Reset for next fresh order cycle
+      hasAutoOpenedCart = false;
 
       if (document.getElementById('customer-name')) document.getElementById('customer-name').value = '';
       if (document.getElementById('customer-phone')) document.getElementById('customer-phone').value = '';
