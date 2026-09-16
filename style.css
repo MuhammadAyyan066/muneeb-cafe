@@ -691,3 +691,47 @@ input[type=checkbox] {
   text-align: center;
   font-weight: 600;
 }
+/* Reusable button scale in style.css */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e14d2a;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.625rem 1.5rem;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+.btn-primary:hover { background-color: #c83818; }
+.btn-primary:active { transform: scale(0.95); }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(23, 23, 23, 0.8);
+  border: 1px solid rgba(250, 204, 21, 0.3);
+  color: #facc15;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.625rem 1.5rem;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+.btn-secondary:hover { border-color: #facc15; background-color: #262626; }
+
+.btn-icon-add {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  background-color: #e14d2a;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+.btn-icon-add:hover { background-color: #c83818; }
+.btn-icon-add:active { transform: scale(0.9); }
