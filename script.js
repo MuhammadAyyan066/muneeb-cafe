@@ -841,8 +841,7 @@ async function placeOrder() {
     const response = await fetch(API_BASE_URL, {
       method: 'POST',
       headers: { 
-        'Content-Type': 'application/json',
-        'Bypass-Tunnel-Reminder': 'true'
+        'Content-Type': 'application/json'
       },
       signal: controller.signal,
       body: JSON.stringify({
@@ -898,8 +897,7 @@ async function initializeApp() {
     const res = await fetch(MENU_API_URL, {
       signal: controller.signal,
       headers: { 
-        'Accept': 'application/json',
-        'Bypass-Tunnel-Reminder': 'true'
+        'Accept': 'application/json'
       }
     });
 
