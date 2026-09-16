@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Full Menu â€” Muneeb Fast Food Restaurant</title>
+  <title>Full Menu — Muneeb Cafe</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,11 +53,11 @@
       
       <a href="index.html" class="flex items-center gap-3 group">
         <div class="w-12 h-12 rounded-2xl overflow-hidden shadow-lg bg-neutral-900 border border-yellow-400/30 flex items-center justify-center p-0.5 group-hover:scale-105 transition-transform">
-          <img src="images/logo MFF.png" alt="Muneeb Fast Food Logo" class="w-full h-full object-contain rounded-xl">
+          <img src="images/logo MFF.png" alt="Muneeb Cafe Logo" class="w-full h-full object-contain rounded-xl">
         </div>
         <div class="flex flex-col">
           <span class="text-xl font-bold tracking-tight text-yellow-400 font-display leading-tight">Muneeb</span>
-          <span class="text-[9px] uppercase tracking-widest text-brand-500 font-bold -mt-0.5">Fast Food</span>
+          <span class="text-[9px] uppercase tracking-widest text-brand-500 font-bold -mt-0.5">Cafe</span>
         </div>
       </a>
 
@@ -90,7 +90,7 @@
     </div>
   </header>
 
-  <!-- Sticky Horizontal Scrollable Category Bar (Locks below the header at 80px) -->
+  <!-- Sticky Horizontal Scrollable Category Bar -->
   <nav class="sticky-category-nav" id="categoryNav">
     <div class="category-scroll-container">
       <button type="button" id="cat-ALL" class="cat-pill active" onclick="selectCategory(this, 'ALL')">All Items</button>
@@ -115,7 +115,7 @@
           <span class="text-yellow-400 font-semibold">Full Menu</span>
         </nav>
         <h1 class="font-serif-title text-4xl sm:text-5xl text-yellow-400 tracking-tight">Full Menu</h1>
-        <p class="text-sm text-neutral-400 mt-1">Muneeb Fast Food Authentic Menu & Special Deals</p>
+        <p class="text-sm text-neutral-400 mt-1">Muneeb Cafe Authentic Menu & Special Deals</p>
       </div>
 
       <div class="w-full md:w-auto">
@@ -151,14 +151,14 @@
         <div class="col-span-2 space-y-4">
           <div class="flex items-center gap-2">
             <div class="w-10 h-10 rounded-xl overflow-hidden shadow-md bg-neutral-900 border border-yellow-400/20 flex items-center justify-center">
-              <img src="images/logo MFF.png" alt="Muneeb Fast Food Logo" class="w-full h-full object-cover">
+              <img src="images/logo MFF.png" alt="Muneeb Cafe Logo" class="w-full h-full object-cover">
             </div>
-            <span class="text-xl font-bold tracking-tight font-display text-yellow-400">Muneeb <span class="text-xs uppercase text-brand-500 font-sans tracking-widest block font-bold">Fast Food Restaurant</span></span>
+            <span class="text-xl font-bold tracking-tight font-display text-yellow-400">Muneeb <span class="text-xs uppercase text-brand-500 font-sans tracking-widest block font-bold">Cafe</span></span>
           </div>
           <p class="text-xs text-neutral-400 max-w-xs leading-relaxed">
             Amir Bashir Plaza, Shah Sharaf St, Fatehpur.<br>
             Phone: <a href="tel:03045132070" class="text-brand-500 font-bold hover:underline">0304 5132070</a><br>
-            Service: <strong class="text-yellow-400">Cash Only</strong>
+            Service: <strong class="text-yellow-400">Cash & Online Transfer</strong>
           </p>
         </div>
 
@@ -192,7 +192,7 @@
       </div>
 
       <div class="pt-6 border-t border-yellow-400/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-400">
-        <p>Â© 2026 Muneeb Fast Food Restaurant. All rights reserved.</p>
+        <p>© 2026 Muneeb Cafe. All rights reserved.</p>
         <div class="flex items-center gap-4">
           <a href="https://wa.me/923045132070" target="_blank" class="hover:text-emerald-400 transition" title="WhatsApp"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
           <a href="https://maps.google.com/?q=Amir+Bashir+Plaza,+Shah+Sharaf+St,+Fatehpur" target="_blank" class="hover:text-brand-500 transition" title="Google Maps"><i data-lucide="map-pin" class="w-4 h-4"></i></a>
@@ -215,7 +215,7 @@
         <h3 class="font-bold text-yellow-400 text-lg">Your Cart</h3>
         <div class="flex items-center gap-3">
           <span id="cart-count" class="bg-brand-500 text-xs px-2.5 py-1 rounded-full font-bold">0 items</span>
-          <button onclick="toggleCartDrawer()" class="text-neutral-400 hover:text-white p-1">âœ•</button>
+          <button onclick="toggleCartDrawer()" class="text-neutral-400 hover:text-white p-1">✕</button>
         </div>
       </div>
 
@@ -234,8 +234,18 @@
         <input type="text" id="customer-phone" placeholder="Phone Number" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" />
         
         <div class="relative">
-          <input type="text" id="customer-address" placeholder="Delivery Address" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" />
-          <button onclick="fetchUserLocation()" type="button" title="Detect My Location" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-brand-500 hover:text-brand-400 transition">
+          <input 
+            type="text" 
+            id="customer-address" 
+            placeholder="Delivery Address" 
+            class="w-full bg-neutral-800 border border-neutral-700 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 transition" 
+          />
+          <button 
+            type="button" 
+            id="detect-location-btn" 
+            onclick="fetchUserLocation()" 
+            title="Detect My Location" 
+            class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-brand-500 hover:text-white hover:bg-brand-500 transition-all duration-200">
             <i data-lucide="crosshair" class="w-4 h-4"></i>
           </button>
         </div>
