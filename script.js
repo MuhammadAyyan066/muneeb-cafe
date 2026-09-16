@@ -1,13 +1,13 @@
 // ==========================================
-// 0. API CONFIGURATION
+// 0. API CONFIGURATION (Safe Global Definition)
 // ==========================================
-const API_URL = "https://muneeb-cafe-backend.vercel.app";
-const API_BASE_URL = `${API_URL}/api/orders`;
-const MENU_API_URL = `${API_URL}/api/menu`;
+window.API_URL = window.API_URL || "https://muneeb-cafe-backend.vercel.app";
+var API_URL = window.API_URL;
+var API_BASE_URL = `${API_URL}/api/orders`;
+var MENU_API_URL = `${API_URL}/api/menu`;
 
 // ==========================================
 // 1. FALLBACK / STATIC CATALOG ITEMS
-// (Rendered only when DB connection fails or returns empty)
 // ==========================================
 const fallbackMenuItems = [
   // --- PIZZA'S (Standard 4 Sizes) ---
@@ -451,7 +451,6 @@ function renderProductCard(item) {
   const categoryTag = item.tag || item.category || 'Special';
   const description = item.desc || item.description || '';
 
-  // Multi-Size Pizza Card
   if (isPizza && variants.length > 0) {
     const sizeRowsHtml = variants.map(v => `
       <div class="flex items-center justify-between py-1.5 px-3 rounded-xl bg-neutral-950/80 border border-neutral-800 text-xs">
@@ -491,7 +490,6 @@ function renderProductCard(item) {
     `;
   }
 
-  // Regular Single-Price Item
   const rawPrice = typeof item.price === 'number' 
     ? item.price 
     : parseInt(String(item.price || '0').replace(/[^0-9]/g, ''), 10) || 0;
@@ -718,7 +716,32 @@ function closeCartDrawer() {
 }
 
 // ==========================================
-// 7. GEOLOCATION & CHECKOUT DISPATCH
+// 7. PAYMENT UI TOGGLE
+// ==========================================
+function togglePaymentUI() {
+  const selectedRadio = document.querySelector('input[name="payment-method"]:checked');
+  const method = selectedRadio ? selectedRadio.value : 'Cash on Delivery';
+  const bankBox = document.getElementById('bank-transfer-box');
+  const receiptInput = document.getElementById('receipt-upload');
+
+  if (!bankBox) return;
+
+  if (method === 'Bank Transfer' || method === 'Online Bank Transfer') {
+    bankBox.classList.remove('hidden');
+    bankBox.style.display = 'block';
+    if (receiptInput) receiptInput.required = true;
+  } else {
+    bankBox.classList.add('hidden');
+    bankBox.style.display = 'none';
+    if (receiptInput) {
+      receiptInput.required = false;
+      receiptInput.value = '';
+    }
+  }
+}
+
+// ==========================================
+// 8. GEOLOCATION & CHECKOUT DISPATCH
 // ==========================================
 function fetchUserLocation() {
   const addressInput = document.getElementById('customer-address');
@@ -794,6 +817,9 @@ async function placeOrder() {
     return;
   }
 
+  const selectedRadio = document.querySelector('input[name="payment-method"]:checked');
+  const paymentMethod = selectedRadio ? selectedRadio.value : 'Cash on Delivery';
+
   const totalAmount = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
 
   const formattedItems = cart.map(item => ({
@@ -827,7 +853,8 @@ async function placeOrder() {
         address: address,
         locationCoords: detectedCoords,
         items: formattedItems,
-        totalAmount
+        totalAmount,
+        paymentMethod
       })
     });
 
@@ -861,7 +888,7 @@ async function placeOrder() {
 }
 
 // ==========================================
-// 8. DYNAMIC DATA FETCHING & INITIALIZATION
+// 9. DYNAMIC DATA FETCHING & INITIALIZATION
 // ==========================================
 async function initializeApp() {
   const controller = new AbortController();
@@ -885,7 +912,6 @@ async function initializeApp() {
     const dbItems = await res.json();
 
     if (Array.isArray(dbItems) && dbItems.length > 0) {
-      console.log(`[Data Flow] Live DB connected. Rendered ${dbItems.length} products.`);
       activeMenuItems = dbItems;
     } else {
       throw new Error("Empty product array received from database");
@@ -893,12 +919,18 @@ async function initializeApp() {
 
   } catch (err) {
     clearTimeout(timeoutId);
-    console.warn('[Data Flow] Backend unavailable. Using local catalog:', err.message);
     activeMenuItems = [...fallbackMenuItems];
   }
 
   renderMenu();
   updateCartUI();
+
+  // Payment listeners
+  const paymentRadios = document.querySelectorAll('input[name="payment-method"]');
+  paymentRadios.forEach(radio => {
+    radio.addEventListener('change', togglePaymentUI);
+    radio.addEventListener('click', togglePaymentUI);
+  });
 
   const urlParams = new URLSearchParams(window.location.search);
   const catParam = urlParams.get('cat');
@@ -921,7 +953,7 @@ async function initializeApp() {
 window.addEventListener('DOMContentLoaded', initializeApp);
 
 // ==========================================
-// 9. SHOP ADMIN AUTHENTICATION FLOW (2-STEP)
+// 10. SHOP ADMIN AUTHENTICATION FLOW
 // ==========================================
 (function initShopAdminFlow() {
   const MAX_ATTEMPTS = 3;
@@ -1009,34 +1041,4 @@ window.addEventListener('DOMContentLoaded', initializeApp);
       }
     });
   }
-})();// Toggle Payment Details Box
-function togglePaymentUI() {
-  const selectedRadio = document.querySelector('input[name="payment-method"]:checked');
-  const method = selectedRadio ? selectedRadio.value : 'Cash on Delivery';
-  const bankBox = document.getElementById('bank-transfer-box');
-  const receiptInput = document.getElementById('receipt-upload');
-
-  if (!bankBox) return;
-
-  if (method === 'Online Bank Transfer') {
-    bankBox.classList.remove('hidden');
-    bankBox.style.display = 'block';
-    if (receiptInput) receiptInput.required = true;
-  } else {
-    bankBox.classList.add('hidden');
-    bankBox.style.display = 'none';
-    if (receiptInput) {
-      receiptInput.required = false;
-      receiptInput.value = '';
-    }
-  }
-}
-
-// Global hook for event listeners
-document.addEventListener('DOMContentLoaded', () => {
-  const paymentRadios = document.querySelectorAll('input[name="payment-method"]');
-  paymentRadios.forEach(radio => {
-    radio.addEventListener('change', togglePaymentUI);
-    radio.addEventListener('click', togglePaymentUI);
-  });
-});
+})();
