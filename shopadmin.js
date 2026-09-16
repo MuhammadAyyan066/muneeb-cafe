@@ -410,3 +410,51 @@ async function deleteOrder(id) {
         alert("Network error: Could not reach backend server to delete order.");
     }
 }
+// --- Real-time Instant Push, Audio & Vibration Notification System ---
+const alertAudio = new Audio('notification.mp3');
+alertAudio.preload = 'auto';
+
+// Request Browser Notification Permission on First Admin Interaction
+function requestNotificationPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+document.addEventListener('click', requestNotificationPermission, { once: true });
+
+// Initialize Socket.io Connection
+const socket = io(typeof API_URL !== 'undefined' ? API_URL : 'https://muneeb-cafe-backend.vercel.app');
+
+socket.on('connect', () => {
+  socket.emit('joinAdmin');
+  socket.emit('joinAdminRoom');
+});
+
+socket.on('newOrderAlert', (newOrder) => {
+  // 1. Play Audio Ringtone
+  try {
+    alertAudio.currentTime = 0;
+    alertAudio.play().catch(() => {});
+  } catch (e) {}
+
+  // 2. Mobile Device Vibration Pattern
+  if ('vibrate' in navigator) {
+    navigator.vibrate([400, 200, 400, 200, 600]);
+  }
+
+  // 3. Native Browser Web Notification
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('🚨 New Order Received! - Muneeb Cafe', {
+      body: ${newOrder.customerName || 'Customer'} placed an order for Rs. /- (),
+      icon: 'images/logo MFF.png',
+      badge: 'images/logo MFF.png',
+      tag: newOrder._id || Date.now(),
+      renotify: true
+    });
+  }
+
+  // 4. Refresh Dashboard UI
+  if (typeof fetchOrders === 'function') {
+    fetchOrders();
+  }
+});
