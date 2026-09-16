@@ -414,6 +414,9 @@ let activeMenuItems = [];
 let cart = JSON.parse(localStorage.getItem('muneeb_cart') || '[]');
 let detectedCoords = { lat: null, lng: null };
 
+// Tracks whether the cart has already auto-opened once in this session
+let hasAutoOpenedCart = false;
+
 // ==========================================
 // 2. ESCAPE UTILITY
 // ==========================================
@@ -596,6 +599,13 @@ function searchMenu() {
 // ==========================================
 // 6. CART MANAGEMENT (LOCALSTORAGE)
 // ==========================================
+function handleCartAutoOpen() {
+  if (!hasAutoOpenedCart) {
+    openCartDrawer();
+    hasAutoOpenedCart = true;
+  }
+}
+
 function addVariantToCart(productId, baseName, size, price) {
   const variantTitle = `${baseName} (${size})`;
   const existingIndex = cart.findIndex(item => item.name === variantTitle && item.size === size);
@@ -615,6 +625,7 @@ function addVariantToCart(productId, baseName, size, price) {
 
   persistCart();
   showToast(`Added ${variantTitle}`);
+  handleCartAutoOpen();
 }
 
 function addStandardToCart(productId, name, price) {
@@ -635,6 +646,7 @@ function addStandardToCart(productId, name, price) {
 
   persistCart();
   showToast(`Added ${name}`);
+  handleCartAutoOpen();
 }
 
 function addToCart(name, priceStr) {
@@ -705,14 +717,27 @@ function showToast(message) {
   }, 1800);
 }
 
+function openCartDrawer() {
+  const drawer = document.getElementById('cart-drawer');
+  if (drawer) {
+    drawer.classList.remove('translate-x-full');
+  }
+}
+
 function toggleCartDrawer() {
   const drawer = document.getElementById('cart-drawer');
-  if (drawer) drawer.classList.toggle('translate-x-full');
+  if (drawer) {
+    drawer.classList.toggle('translate-x-full');
+  }
 }
 
 function closeCartDrawer() {
   const drawer = document.getElementById('cart-drawer');
-  if (drawer) drawer.classList.add('translate-x-full');
+  if (drawer) {
+    drawer.classList.add('translate-x-full');
+  }
+  // User ne cart band kar ke wapas menu dekhna shuru kiya, agle items par auto-open na ho
+  hasAutoOpenedCart = true;
 }
 
 // ==========================================
@@ -864,6 +889,7 @@ async function placeOrder() {
       cart = [];
       persistCart();
       detectedCoords = { lat: null, lng: null };
+      hasAutoOpenedCart = false; // Reset for next fresh order cycle
 
       if (document.getElementById('customer-name')) document.getElementById('customer-name').value = '';
       if (document.getElementById('customer-phone')) document.getElementById('customer-phone').value = '';
