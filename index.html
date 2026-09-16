@@ -467,8 +467,8 @@
           <img src="images/hot wings.jpg" alt="Cash Only Payment" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition duration-500">
           <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/80 to-black/60"></div>
           <div class="relative z-10 space-y-3">
-            <h3 class="font-bold text-yellow-400 text-base drop-shadow">Cash Only</h3>
-            <p class="text-xs text-neutral-300 leading-relaxed drop-shadow">Simple cash on delivery and counter payments.</p>
+            <h3 class="font-bold text-yellow-400 text-base drop-shadow">Cash / Online</h3>
+            <p class="text-xs text-neutral-300 leading-relaxed drop-shadow">Cash on delivery and instant bank transfer available.</p>
           </div>
         </div>
 
@@ -602,7 +602,7 @@
           <p class="text-xs text-neutral-400 max-w-xs leading-relaxed">
             Amir Bashir Plaza, Shah Sharaf St, Fatehpur.<br>
             Phone: <a href="tel:03045132070" class="text-brand-500 font-bold hover:underline">0304 5132070</a><br>
-            Service: <strong class="text-yellow-400">Cash Only</strong>
+            Service: <strong class="text-yellow-400">Cash & Online Transfer</strong>
           </p>
         </div>
 
@@ -657,8 +657,8 @@
     <span id="floating-cart-badge" class="absolute -top-1 -right-1 bg-yellow-400 text-black font-extrabold text-xs w-5 h-5 rounded-full flex items-center justify-center shadow-md pointer-events-none">0</span>
   </button>
 
-  <!-- Slide-in Cart Drawer -->
-  <div id="cart-drawer" class="fixed inset-y-0 right-0 z-50 bg-neutral-900 border-l border-yellow-400/20 p-6 shadow-2xl max-w-sm w-full text-white space-y-4 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between">
+  <!-- Slide-in Cart Drawer (Updated Dynamic Checkout Form) -->
+  <div id="cart-drawer" class="fixed inset-y-0 right-0 z-50 bg-neutral-900 border-l border-yellow-400/20 p-5 sm:p-6 shadow-2xl max-w-sm w-full text-white space-y-4 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between overflow-y-auto">
       <div class="space-y-4">
           <div class="flex justify-between items-center border-b border-neutral-800 pb-3">
               <h3 class="font-bold text-yellow-400 text-lg">Your Cart</h3>
@@ -668,7 +668,7 @@
               </div>
           </div>
 
-          <div id="cart-items" class="space-y-2 max-h-48 overflow-y-auto text-sm">
+          <div id="cart-items" class="space-y-2 max-h-40 overflow-y-auto text-sm pr-1">
               <p class="text-neutral-500 text-xs text-center py-2">Cart is empty</p>
           </div>
 
@@ -677,18 +677,52 @@
               <span id="cart-total" class="text-yellow-400">Rs. 0</span>
           </div>
 
+          <!-- Checkout Form Inputs -->
           <div class="space-y-3 pt-2">
-              <input type="text" id="customer-name" placeholder="Customer Name" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" />
-              <input type="text" id="customer-phone" placeholder="Phone Number" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" />
+              <input type="text" id="customer-name" placeholder="Customer Name" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" required />
+              <input type="text" id="customer-phone" placeholder="Phone Number" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" required />
               
               <div class="relative">
-                  <input type="text" id="customer-address" placeholder="Delivery Address" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" />
+                  <input type="text" id="customer-address" placeholder="Delivery Address" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" required />
                   <button onclick="fetchUserLocation()" type="button" title="Detect My Location" aria-label="Detect My Location via GPS" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-brand-500 hover:text-brand-400 transition">
                       <i data-lucide="crosshair" class="w-4 h-4"></i>
                   </button>
               </div>
 
-              <button onclick="placeOrder()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-brand-500/20 text-sm active:scale-95">
+              <!-- Payment Method Selector -->
+              <div class="space-y-1.5 text-left pt-1">
+                <label class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Payment Method</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <label class="flex items-center gap-2 p-2 bg-neutral-800 rounded-xl border border-neutral-700 cursor-pointer hover:border-yellow-400/50 transition">
+                    <input type="radio" name="payment-method" value="Cash on Delivery" checked onchange="togglePaymentUI()" class="accent-brand-500">
+                    <span class="text-xs font-semibold text-white">Cash on Delivery</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2 bg-neutral-800 rounded-xl border border-neutral-700 cursor-pointer hover:border-yellow-400/50 transition">
+                    <input type="radio" name="payment-method" value="Online Bank Transfer" onchange="togglePaymentUI()" class="accent-brand-500">
+                    <span class="text-xs font-semibold text-white">Bank Transfer</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Dynamic Bank Details & Receipt Screenshot Upload Box -->
+              <div id="bank-transfer-box" class="hidden space-y-2.5 p-3 bg-neutral-950 border border-yellow-400/20 rounded-xl text-left">
+                <div class="text-xs space-y-1 border-b border-neutral-800 pb-2">
+                  <p class="text-neutral-400 font-medium">Bank: <span class="text-white font-bold">Faysal Bank</span></p>
+                  <p class="text-neutral-400 font-medium">Title: <span class="text-white font-bold">Sufyan Ali</span></p>
+                  <div class="flex items-center justify-between">
+                    <p class="text-neutral-400 font-medium">A/C: <span class="text-yellow-400 font-mono font-bold" id="acc-number">379230100001306</span></p>
+                    <button type="button" onclick="navigator.clipboard.writeText('379230100001306'); alert('Account number copied to clipboard!');" class="text-[10px] bg-neutral-800 hover:bg-neutral-700 text-yellow-400 px-2 py-0.5 rounded border border-neutral-700">
+                      Copy
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-amber-400 block mb-1">Upload Payment Screenshot *</label>
+                  <input type="file" id="receipt-upload" accept="image/*" class="w-full text-xs text-neutral-300 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-500 file:text-white hover:file:bg-brand-600 cursor-pointer" />
+                </div>
+              </div>
+
+              <button onclick="placeOrder()" id="place-order-btn" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-brand-500/20 text-sm active:scale-95">
                   Place Order Now
               </button>
           </div>
