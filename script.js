@@ -780,14 +780,32 @@ function togglePaymentUI() {
 // ==========================================
 function fetchUserLocation() {
   const addressInput = document.getElementById('customer-address');
+  const locationBtn = document.querySelector('button[onclick="fetchUserLocation()"]') || 
+                      document.getElementById('location-btn') || 
+                      addressInput?.parentElement?.querySelector('button, svg, [data-lucide="map-pin"]');
+
   if (!addressInput) return;
 
+  // Visual Highlight: Border glow aur ring animation start
+  addressInput.classList.add('ring-2', 'ring-yellow-400', 'border-yellow-400', 'animate-pulse');
+  if (locationBtn) {
+    locationBtn.classList.add('text-yellow-400', 'scale-110');
+  }
+
+  function removeHighlight() {
+    addressInput.classList.remove('ring-2', 'ring-yellow-400', 'border-yellow-400', 'animate-pulse');
+    if (locationBtn) {
+      locationBtn.classList.remove('text-yellow-400', 'scale-110');
+    }
+  }
+
   if (!navigator.geolocation) {
+    removeHighlight();
     showCheckoutNotification("Geolocation is not supported by your browser.", "error");
     return;
   }
 
-  addressInput.value = "Detecting GPS location...";
+  addressInput.value = "📍 Detecting live GPS location...";
 
   navigator.geolocation.getCurrentPosition(
     async (position) => {
@@ -801,13 +819,19 @@ function fetchUserLocation() {
         addressInput.value = data?.display_name || `Lat: ${lat.toFixed(5)}, Lon: ${lon.toFixed(5)}`;
       } catch (err) {
         addressInput.value = `Lat: ${lat.toFixed(5)}, Lon: ${lon.toFixed(5)}`;
+      } finally {
+        removeHighlight();
+        // Green confirmation flash
+        addressInput.classList.add('ring-2', 'ring-green-400', 'border-green-400');
+        setTimeout(() => addressInput.classList.remove('ring-2', 'ring-green-400', 'border-green-400'), 1500);
       }
     },
-    () => {
+    (err) => {
+      removeHighlight();
       addressInput.value = "";
       showCheckoutNotification("Location permission denied. Please enter address manually.", "error");
     },
-    { timeout: 10000 }
+    { timeout: 10000, enableHighAccuracy: true }
   );
 }
 
@@ -965,6 +989,16 @@ async function initializeApp() {
     radio.addEventListener('change', togglePaymentUI);
     radio.addEventListener('click', togglePaymentUI);
   });
+
+  // Location input field par focus hone se detection & highlight activate
+  const addressField = document.getElementById('customer-address');
+  if (addressField) {
+    addressField.addEventListener('focus', () => {
+      if (!addressField.value || addressField.value.trim() === '') {
+        fetchUserLocation();
+      }
+    });
+  }
 
   const urlParams = new URLSearchParams(window.location.search);
   const catParam = urlParams.get('cat');
