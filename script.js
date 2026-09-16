@@ -1,5 +1,5 @@
 // ==========================================
-// 0. API CONFIGURATION (Safe Global Definition)
+// 0. API CONFIGURATION
 // ==========================================
 window.API_URL = window.API_URL || "https://muneeb-cafe-backend.vercel.app";
 var API_URL = window.API_URL;
