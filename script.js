@@ -1009,4 +1009,34 @@ window.addEventListener('DOMContentLoaded', initializeApp);
       }
     });
   }
-})();
+})();// Toggle Payment Details Box
+function togglePaymentUI() {
+  const selectedRadio = document.querySelector('input[name="payment-method"]:checked');
+  const method = selectedRadio ? selectedRadio.value : 'Cash on Delivery';
+  const bankBox = document.getElementById('bank-transfer-box');
+  const receiptInput = document.getElementById('receipt-upload');
+
+  if (!bankBox) return;
+
+  if (method === 'Online Bank Transfer') {
+    bankBox.classList.remove('hidden');
+    bankBox.style.display = 'block';
+    if (receiptInput) receiptInput.required = true;
+  } else {
+    bankBox.classList.add('hidden');
+    bankBox.style.display = 'none';
+    if (receiptInput) {
+      receiptInput.required = false;
+      receiptInput.value = '';
+    }
+  }
+}
+
+// Global hook for event listeners
+document.addEventListener('DOMContentLoaded', () => {
+  const paymentRadios = document.querySelectorAll('input[name="payment-method"]');
+  paymentRadios.forEach(radio => {
+    radio.addEventListener('change', togglePaymentUI);
+    radio.addEventListener('click', togglePaymentUI);
+  });
+});
