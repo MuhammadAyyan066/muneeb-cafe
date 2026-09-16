@@ -410,6 +410,7 @@ async function deleteOrder(id) {
         alert("Network error: Could not reach backend server to delete order.");
     }
 }
+
 // --- Real-time Instant Push, Audio & Vibration Notification System ---
 const alertAudio = new Audio('notification.mp3');
 alertAudio.preload = 'auto';
@@ -445,7 +446,7 @@ socket.on('newOrderAlert', (newOrder) => {
   // 3. Native Browser Web Notification
   if ('Notification' in window && Notification.permission === 'granted') {
     new Notification('🚨 New Order Received! - Muneeb Cafe', {
-      body: ${newOrder.customerName || 'Customer'} placed an order for Rs. /- (),
+      body: `${newOrder.customerName || 'Customer'} placed an order for Rs. ${newOrder.totalAmount || 0}/- (${newOrder.paymentMethod || 'COD'})`,
       icon: 'images/logo MFF.png',
       badge: 'images/logo MFF.png',
       tag: newOrder._id || Date.now(),
@@ -454,7 +455,5 @@ socket.on('newOrderAlert', (newOrder) => {
   }
 
   // 4. Refresh Dashboard UI
-  if (typeof fetchOrders === 'function') {
-    fetchOrders();
-  }
+  loadOrders();
 });
