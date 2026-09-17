@@ -1,4 +1,4 @@
-﻿const API_URL = 'https://muneeb-cafe-backend.vercel.app';
+﻿const API_URL = 'http://localhost:5000';
 const MENU_ENDPOINT = `${API_URL}/api/menu`;
 
 let allProducts = [];
@@ -17,6 +17,21 @@ function showBanner(msg, isSuccess = true) {
 
 function selectImage(path) {
   document.getElementById('product-image').value = path;
+  document.getElementById('image-preview').src = path;
+}
+
+function handleFileSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64Url = e.target.result;
+    document.getElementById('product-image').value = base64Url;
+    document.getElementById('image-preview').src = base64Url;
+    showBanner("Image loaded from device gallery!");
+  };
+  reader.readAsDataURL(file);
 }
 
 function openModal(item = null) {
@@ -29,13 +44,15 @@ function openModal(item = null) {
   document.getElementById('product-id').value = '';
 
   if (item) {
-    // EDIT MODE
     title.innerText = "Edit Menu Item";
     document.getElementById('product-id').value = item._id;
     document.getElementById('product-name').value = item.name || '';
     document.getElementById('product-category').value = item.category || 'Pizzas';
     document.getElementById('product-desc').value = item.desc || item.description || '';
-    document.getElementById('product-image').value = item.image || 'images/pizza pic.jpg';
+    
+    const imgSrc = item.image || 'images/pizza pic.jpg';
+    document.getElementById('product-image').value = imgSrc;
+    document.getElementById('image-preview').src = imgSrc;
 
     if (item.hasSizes && Array.isArray(item.sizes)) {
       item.sizes.forEach(s => {
@@ -48,9 +65,9 @@ function openModal(item = null) {
       document.getElementById('product-single-price').value = item.price || 0;
     }
   } else {
-    // ADD MODE
     title.innerText = "Add New Menu Item";
     document.getElementById('product-image').value = 'images/pizza pic.jpg';
+    document.getElementById('image-preview').src = 'images/pizza pic.jpg';
   }
 
   toggleCategoryPricing();
@@ -144,7 +161,7 @@ async function handleProductSubmit(e) {
   e.preventDefault();
   const saveBtn = document.getElementById('save-product-btn');
   saveBtn.disabled = true;
-  saveBtn.innerText = "Updating Database...";
+  saveBtn.innerText = "Saving to MongoDB...";
 
   const id = document.getElementById('product-id').value;
   const isEdit = Boolean(id);

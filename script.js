@@ -1,13 +1,18 @@
+﻿// ==========================================
+// 0. DYNAMIC API CONFIGURATION (AUTO-DETECT)
 // ==========================================
-// 0. API CONFIGURATION
-// ==========================================
-window.API_URL = window.API_URL || "https://muneeb-cafe-backend.vercel.app";
+// Local testing par localhost:5000 use hoga, live domain par Vercel backend
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+window.API_URL = window.API_URL || (isLocalhost ? "http://localhost:5000" : "https://muneeb-cafe-backend.vercel.app");
+
 var API_URL = window.API_URL;
 var API_BASE_URL = `${API_URL}/api/orders`;
-var MENU_API_URL = `${API_URL}/api/menu`;
+var MENU_API_URL = 'http://localhost:5000/api/menu';
+
+console.log("ðŸ”— Connecting Menu to:", MENU_API_URL);
 
 // ==========================================
-// 1. FALLBACK / STATIC CATALOG ITEMS
+// 1. STATIC FALLBACK ITEMS (Sirf server offline hone par)
 // ==========================================
 const fallbackMenuItems = [
   // --- PIZZA'S (Standard 4 Sizes) ---
@@ -374,7 +379,7 @@ const fallbackMenuItems = [
     image: "images/deals.jpg" 
   },
 
-  // --- MUNEEB CAFÉ DEALS ---
+  // --- MUNEEB CAFÃ‰ DEALS ---
   { name: "Deal.1", category: "Deals", price: 800, time: "15 min", rating: "4.8 (45)", desc: "1 Small Pizza, 5 Hot Wings, Half Liter Drink", tag: "Deal", image: "images/pizza pic.jpg" },
   { name: "Deal.2", category: "Deals", price: 850, time: "15 min", rating: "4.7 (50)", desc: "2 Zinger Burger, Small Fries, Half Liter Drink", tag: "Deal", image: "images/burgers.jpg" },
   { name: "Deal.3", category: "Deals", price: 450, time: "12 min", rating: "4.6 (38)", desc: "1 Zinger Burger, 1 Regular Fries, 1 Regular Drink", tag: "Deal", image: "images/burgers.jpg" },
@@ -460,7 +465,7 @@ function renderProductCard(item) {
 
   const itemId = item._id || item.id || '';
   const escapedName = escapeQuotes(item.name || 'Item');
-  const imageSrc = item.image || 'images/pizza pic.jpg';
+  const imageSrc = (item.image && item.image.trim() !== '') ? item.image : (item.img || 'images/pizza pic.jpg');
   const categoryTag = item.tag || item.category || 'Special';
   const description = item.desc || item.description || '';
 
@@ -698,11 +703,11 @@ function updateCartUI() {
           <div class="flex justify-between items-center bg-neutral-800/80 p-3 rounded-2xl border border-neutral-700/60 text-xs">
             <div>
               <p class="font-extrabold text-white">${item.name}</p>
-              <p class="text-neutral-400 mt-0.5">Rs. ${item.price} × ${item.quantity}</p>
+              <p class="text-neutral-400 mt-0.5">Rs. ${item.price} Ã— ${item.quantity}</p>
             </div>
             <div class="flex items-center gap-2">
               <span class="font-black text-yellow-400">Rs. ${item.price * item.quantity}</span>
-              <button onclick="removeFromCart(${index})" class="text-red-400 hover:text-red-300 font-bold p-1 transition cursor-pointer">✕</button>
+              <button onclick="removeFromCart(${index})" class="text-red-400 hover:text-red-300 font-bold p-1 transition cursor-pointer">âœ•</button>
             </div>
           </div>
         `;
@@ -805,7 +810,7 @@ function fetchUserLocation() {
     return;
   }
 
-  addressInput.value = "📍 Detecting live GPS location...";
+  addressInput.value = "ðŸ“ Detecting live GPS location...";
 
   navigator.geolocation.getCurrentPosition(
     async (position) => {
@@ -1109,4 +1114,16 @@ window.addEventListener('DOMContentLoaded', initializeApp);
       }
     });
   }
-})();
+})();// Example: Main site ka dynamic loader
+async function loadLiveMenu() {
+  try {
+    // Make sure endpoint wahi ho jahan admin save kar raha hai
+    const res = await fetch('http://localhost:5000/api/menu'); 
+    const items = await res.json();
+
+    // Render items dynamically with updated image
+    renderMenuItems(items);
+  } catch (err) {
+    console.error("Menu fetch failed:", err);
+  }
+}
