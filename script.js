@@ -465,7 +465,7 @@ function renderProductCard(item) {
 
   const itemId = item._id || item.id || '';
   const escapedName = escapeQuotes(item.name || 'Item');
-  const imageSrc = (item.image && item.image.trim() !== '') ? item.image : (item.img || 'images/pizza pic.jpg');
+  const imageSrc = (item.image && item.image.length > 5) ? item.image : (item.img || "images/pizza pic.jpg");
   const categoryTag = item.tag || item.category || 'Special';
   const description = item.desc || item.description || '';
 
@@ -495,7 +495,7 @@ function renderProductCard(item) {
             <span class="absolute top-2.5 right-2.5 z-10 bg-neutral-950/80 text-yellow-400 text-[10px] font-black px-2 py-0.5 rounded-full border border-yellow-400/20">
               ${variants.length} Sizes
             </span>
-            <img src="${imageSrc}" alt="${escapedName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='images/pizza pic.jpg'">
+            <img src="${imageSrc}" alt="${escapedName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="if(this.src!=='images/pizza pic.jpg')this.src='images/pizza pic.jpg';">
           </div>
           <h3 class="font-black text-white text-base">${item.name}</h3>
           <p class="text-xs text-neutral-400 mt-1 line-clamp-2">${description}</p>
@@ -1127,3 +1127,4 @@ async function loadLiveMenu() {
     console.error("Menu fetch failed:", err);
   }
 }
+
