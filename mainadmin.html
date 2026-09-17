@@ -49,7 +49,7 @@
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div>
         <h1 class="text-3xl font-extrabold text-yellow-400 font-display">Manage Menu & Inventory</h1>
-        <p class="text-sm text-neutral-400">Add, edit prices, update images directly in MongoDB Atlas.</p>
+        <p class="text-sm text-neutral-400">Add, edit prices, and upload gallery images directly to MongoDB.</p>
       </div>
       <button onclick="openModal()" class="bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold px-6 py-2.5 rounded-full transition flex items-center gap-2 cursor-pointer shadow-lg shadow-brand-500/20">
         <i data-lucide="plus-circle" class="w-4 h-4"></i> Add New Item
@@ -95,7 +95,7 @@
           </thead>
           <tbody id="admin-menu-table" class="divide-y divide-yellow-400/5 text-neutral-300">
             <tr>
-              <td colspan="4" class="py-8 text-center text-neutral-500 text-xs">Loading items from MongoDB...</td>
+              <td colspan="4" class="py-8 text-center text-neutral-500 text-xs">Loading items from database...</td>
             </tr>
           </tbody>
         </table>
@@ -154,16 +154,22 @@
           <textarea id="product-desc" rows="2" class="w-full bg-black border border-yellow-400/20 rounded-xl px-4 py-2 text-yellow-400 focus:border-brand-500 outline-none"></textarea>
         </div>
 
-        <!-- Quick Image Gallery Picker -->
-        <div>
-          <label class="block text-neutral-400 mb-1">Select Preset Image or Enter URL</label>
-          <div class="flex gap-2 mb-2 overflow-x-auto pb-1">
-            <img src="images/pizza pic.jpg" onclick="selectImage('images/pizza pic.jpg')" class="w-12 h-12 rounded-lg border-2 border-yellow-400/30 hover:border-brand-500 cursor-pointer object-cover">
-            <img src="images/burger.jpg" onclick="selectImage('images/burger.jpg')" class="w-12 h-12 rounded-lg border-2 border-yellow-400/30 hover:border-brand-500 cursor-pointer object-cover" onerror="this.style.display='none'">
-            <img src="images/deal.jpg" onclick="selectImage('images/deal.jpg')" class="w-12 h-12 rounded-lg border-2 border-yellow-400/30 hover:border-brand-500 cursor-pointer object-cover" onerror="this.style.display='none'">
-            <img src="images/fries.jpg" onclick="selectImage('images/fries.jpg')" class="w-12 h-12 rounded-lg border-2 border-yellow-400/30 hover:border-brand-500 cursor-pointer object-cover" onerror="this.style.display='none'">
+        <!-- Image Gallery / File Upload Only -->
+        <div class="space-y-3 bg-black/40 p-3 rounded-2xl border border-yellow-400/10">
+          <label class="block text-neutral-300 font-semibold text-xs">Item Image</label>
+          
+          <div class="flex items-center gap-4">
+            <img id="image-preview" src="images/pizza pic.jpg" class="w-16 h-16 rounded-xl object-cover border-2 border-yellow-400/30 flex-shrink-0" onerror="this.src='images/pizza pic.jpg'">
+            <div class="space-y-2 flex-1">
+              <label class="cursor-pointer bg-neutral-800 hover:bg-neutral-700 text-yellow-400 text-xs font-semibold px-4 py-2 rounded-xl inline-flex items-center gap-2 border border-yellow-400/20 transition">
+                <i data-lucide="image-plus" class="w-4 h-4"></i> Upload from Gallery
+                <input type="file" id="product-file-input" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+              </label>
+              <p class="text-[10px] text-neutral-500">Pick any image from your computer or phone</p>
+            </div>
           </div>
-          <input type="text" id="product-image" value="images/pizza pic.jpg" class="w-full bg-black border border-yellow-400/20 rounded-xl px-4 py-2 text-yellow-400 focus:border-brand-500 outline-none">
+
+          <input type="text" id="product-image" value="images/pizza pic.jpg" placeholder="Or enter image URL / asset path" class="w-full bg-black border border-yellow-400/20 rounded-xl px-3 py-1.5 text-neutral-400 text-[11px] focus:border-brand-500 outline-none" oninput="document.getElementById('image-preview').src = this.value">
         </div>
 
         <div class="flex justify-end gap-3 pt-3 border-t border-yellow-400/10">
