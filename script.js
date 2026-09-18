@@ -1,4 +1,7 @@
-﻿// ==========================================
+﻿const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+const BACKEND_BASE = isLocal ? "http://localhost:5000" : window.location.origin;
+const MENU_API_URL = `${BACKEND_BASE}/api/menu`;
+// ==========================================
 // 0. DYNAMIC API CONFIGURATION (AUTO-DETECT)
 // ==========================================
 // Local testing par localhost:5000 use hoga, live domain par Vercel backend
@@ -1671,3 +1674,4 @@ function renderNewArrivals() {
 document.addEventListener('DOMContentLoaded', () => {
   syncFreshMenuFromDatabase();
 });
+
