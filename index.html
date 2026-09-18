@@ -245,91 +245,9 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-        <!-- Card 1 -->
-        <div class="bg-[#121212] rounded-2xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
-          <div>
-            <div class="relative w-full h-28 sm:h-44 rounded-xl overflow-hidden bg-neutral-800 mb-3">
-              <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full uppercase">Deal.1</span>
-              <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&auto=format&fit=crop&q=80" alt="Deal.1" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-            </div>
-            <h3 class="font-bold text-white group-hover:text-brand-500 transition text-sm sm:text-base">Deal.1</h3>
-            <p class="text-xs text-neutral-400 mt-1 line-clamp-2">1 Small Pizza, 5 Hot Wings, Half Liter Drink</p>
-          </div>
-          <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
-            <div class="flex flex-col">
-              <span class="text-xs text-neutral-400">Price</span>
-              <span class="text-sm sm:text-lg font-bold text-yellow-400">800/-</span>
-            </div>
-            <button onclick="addToCart('Deal.1', '800/-')" aria-label="Add Deal 1 to cart" class="flex items-center gap-1 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add
-            </button>
-          </div>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="bg-[#121212] rounded-2xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
-          <div>
-            <div class="relative w-full h-28 sm:h-44 rounded-xl overflow-hidden bg-neutral-800 mb-3">
-              <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full uppercase">Deal.2</span>
-              <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop&q=80" alt="Deal.2" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-            </div>
-            <h3 class="font-bold text-white group-hover:text-brand-500 transition text-sm sm:text-base">Deal.2</h3>
-            <p class="text-xs text-neutral-400 mt-1 line-clamp-2">2 Zinger Burger, Small Fries, Half Liter Drink</p>
-          </div>
-          <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
-            <div class="flex flex-col">
-              <span class="text-xs text-neutral-400">Price</span>
-              <span class="text-sm sm:text-lg font-bold text-yellow-400">850/-</span>
-            </div>
-            <button onclick="addToCart('Deal.2', '850/-')" aria-label="Add Deal 2 to cart" class="flex items-center gap-1 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add
-            </button>
-          </div>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="bg-[#121212] rounded-2xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
-          <div>
-            <div class="relative w-full h-28 sm:h-44 rounded-xl overflow-hidden bg-neutral-800 mb-3">
-              <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full uppercase">Deal.3</span>
-              <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?w=500&auto=format&fit=crop&q=80" alt="Deal.3" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-            </div>
-            <h3 class="font-bold text-white group-hover:text-brand-500 transition text-sm sm:text-base">Deal.3</h3>
-            <p class="text-xs text-neutral-400 mt-1 line-clamp-2">1 Zinger Burger, 1 Regular Fries, 1 Regular Drink</p>
-          </div>
-          <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
-            <div class="flex flex-col">
-              <span class="text-xs text-neutral-400">Price</span>
-              <span class="text-sm sm:text-lg font-bold text-yellow-400">450/-</span>
-            </div>
-            <button onclick="addToCart('Deal.3', '450/-')" aria-label="Add Deal 3 to cart" class="flex items-center gap-1 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add
-            </button>
-          </div>
-        </div>
-
-        <!-- Card 4 -->
-        <div class="bg-[#121212] rounded-2xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
-          <div>
-            <div class="relative w-full h-28 sm:h-44 rounded-xl overflow-hidden bg-neutral-800 mb-3">
-              <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full uppercase">Deal.4</span>
-              <img src="https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=500&auto=format&fit=crop&q=80" alt="Deal.4" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-            </div>
-            <h3 class="font-bold text-white group-hover:text-brand-500 transition text-sm sm:text-base">Deal.4</h3>
-            <p class="text-xs text-neutral-400 mt-1 line-clamp-2">1 Small Pizza, 2 Peti Burger, 1 Small Fries, Half Liter Drink</p>
-          </div>
-          <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
-            <div class="flex flex-col">
-              <span class="text-xs text-neutral-400">Price</span>
-              <span class="text-sm sm:text-lg font-bold text-yellow-400">1200/-</span>
-            </div>
-            <button onclick="addToCart('Deal.4', '1200/-')" aria-label="Add Deal 4 to cart" class="flex items-center gap-1 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add
-            </button>
-          </div>
-        </div>
-      </div>
+      <div id="home-deals-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+  <div class="col-span-full py-8 text-center text-neutral-500 text-xs">Loading fresh deals...</div>
+</div>
     </section>
 
     <!-- Signature Mega Deals Section -->

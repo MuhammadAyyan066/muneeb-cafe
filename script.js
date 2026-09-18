@@ -1129,3 +1129,59 @@ async function loadLiveMenu() {
 }
 
 
+
+// ==========================================
+// RENDER DYNAMIC HOME DEALS DIRECT FROM DATABASE
+// ==========================================
+function renderHomeDeals() {
+  const dealsGrid = document.getElementById('home-deals-grid');
+  if (!dealsGrid) return;
+
+  const deals = activeMenuItems.filter(item => 
+    (item.category || '').toLowerCase().includes('deal')
+  ).slice(0, 4);
+
+  if (deals.length === 0) {
+    dealsGrid.innerHTML = '<p class="col-span-full text-center text-neutral-500 py-6 text-xs">No active deals found.</p>';
+    return;
+  }
+
+  dealsGrid.innerHTML = deals.map((deal, idx) => {
+    const imgSrc = (deal.image && deal.image.length > 5) ? deal.image : (deal.img || 'images/pizza pic.jpg');
+    const price = deal.price || (deal.sizes && deal.sizes[0] ? deal.sizes[0].price : 800);
+    const escapedName = escapeQuotes(deal.name || `Deal.${idx + 1}`);
+
+    return `
+      <div class="bg-[#121212] rounded-2xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
+        <div>
+          <div class="relative w-full h-28 sm:h-44 rounded-xl overflow-hidden bg-neutral-800 mb-3">
+            <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full uppercase">Deal</span>
+            <img src="${imgSrc}" alt="${escapedName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="if(!this.src.includes('pizza pic'))this.src='images/pizza pic.jpg';">
+          </div>
+          <h3 class="font-bold text-white group-hover:text-brand-500 transition text-sm sm:text-base">${deal.name}</h3>
+          <p class="text-xs text-neutral-400 mt-1 line-clamp-2">${deal.desc || deal.description || ''}</p>
+        </div>
+        <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
+          <div class="flex flex-col">
+            <span class="text-xs text-neutral-400">Price</span>
+            <span class="text-sm sm:text-lg font-bold text-yellow-400">Rs. ${price}/-</span>
+          </div>
+          <button onclick="addToCart('${escapedName}', '${price}/-')" aria-label="Add ${escapedName} to cart" class="flex items-center gap-1 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md cursor-pointer">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (window.lucide) lucide.createIcons();
+}
+
+// Call renderHomeDeals inside initial render cycle
+if (typeof renderMenu === 'function') {
+  const originalRenderMenu = renderMenu;
+  renderMenu = function(...args) {
+    originalRenderMenu.apply(this, args);
+    renderHomeDeals();
+  };
+}
