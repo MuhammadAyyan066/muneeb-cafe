@@ -1241,12 +1241,21 @@ function renderHomeDeals() {
   // Mega Deals / Chef's Selection Section
   const megaGrid = document.getElementById('home-mega-deals-grid');
   if (megaGrid) {
-    let megaDeals = activeMenuItems.filter(item => 
-      (item.name || '').toLowerCase().includes('mega') || 
-      (item.category || '').toLowerCase().includes('mega') ||
-      (item.name || '').toLowerCase().includes('chef') ||
-      (item.desc || '').toLowerCase().includes('family')
-    ).slice(0, 2);
+    // Prioritize Birthday Celebration Pizza Deal first
+    let birthdayDeals = activeMenuItems.filter(item =>
+      (item.name || '').toLowerCase().includes('birthday') ||
+      (item.name || '').toLowerCase().includes('celebration')
+    );
+
+    let otherMegaDeals = activeMenuItems.filter(item =>
+      !((item.name || '').toLowerCase().includes('birthday') || (item.name || '').toLowerCase().includes('celebration')) &&
+      ((item.name || '').toLowerCase().includes('mega') ||
+       (item.category || '').toLowerCase().includes('mega') ||
+       (item.name || '').toLowerCase().includes('chef') ||
+       (item.desc || '').toLowerCase().includes('family'))
+    );
+
+    let megaDeals = [...birthdayDeals, ...otherMegaDeals].slice(0, 2);
 
     if (megaDeals.length > 0) {
       megaGrid.innerHTML = megaDeals.map(item => {
@@ -1278,3 +1287,4 @@ function renderHomeDeals() {
 
   if (window.lucide) lucide.createIcons();
 }
+
