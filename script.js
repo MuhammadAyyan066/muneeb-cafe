@@ -1185,3 +1185,96 @@ if (typeof renderMenu === 'function') {
     renderHomeDeals();
   };
 }
+
+// ==========================================
+// RENDER DYNAMIC HOME DEALS & MEGA DEALS (SORTED 1, 2, 3, 4)
+// ==========================================
+function renderHomeDeals() {
+  const dealsGrid = document.getElementById('home-deals-grid');
+  if (dealsGrid) {
+    // Sirf Deal 1, 2, 3, 4 filter aur sort karein
+    let deals = activeMenuItems.filter(item => 
+      (item.category || '').toLowerCase().includes('deal') &&
+      !((item.name || '').toLowerCase().includes('mega') || (item.name || '').toLowerCase().includes('chef'))
+    );
+
+    // Sort specifically by deal number (Deal 1, Deal 2, Deal 3, Deal 4...)
+    deals.sort((a, b) => {
+      const numA = parseInt((a.name.match(/\d+/) || [999])[0], 10);
+      const numB = parseInt((b.name.match(/\d+/) || [999])[0], 10);
+      return numA - numB;
+    });
+
+    const displayDeals = deals.slice(0, 4);
+
+    if (displayDeals.length > 0) {
+      dealsGrid.innerHTML = displayDeals.map((deal, idx) => {
+        const imgSrc = (deal.image && deal.image.length > 5) ? deal.image : (deal.img || 'images/pizza pic.jpg');
+        const price = deal.price || (deal.sizes && deal.sizes[0] ? deal.sizes[0].price : 800);
+        const escapedName = escapeQuotes(deal.name || `Deal.${idx + 1}`);
+
+        return `
+          <div class="bg-[#121212] rounded-2xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
+            <div>
+              <div class="relative w-full h-28 sm:h-44 rounded-xl overflow-hidden bg-neutral-800 mb-3">
+                <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full uppercase">${deal.name.split(' ')[0] || 'Deal'}</span>
+                <img src="${imgSrc}" alt="${escapedName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="if(!this.src.includes('pizza pic'))this.src='images/pizza pic.jpg';">
+              </div>
+              <h3 class="font-bold text-white group-hover:text-brand-500 transition text-sm sm:text-base">${deal.name}</h3>
+              <p class="text-xs text-neutral-400 mt-1 line-clamp-2">${deal.desc || deal.description || ''}</p>
+            </div>
+            <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
+              <div class="flex flex-col">
+                <span class="text-xs text-neutral-400">Price</span>
+                <span class="text-sm sm:text-lg font-bold text-yellow-400">Rs. ${price}/-</span>
+              </div>
+              <button onclick="addToCart('${escapedName}', '${price}/-')" aria-label="Add ${escapedName} to cart" class="flex items-center gap-1 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md cursor-pointer">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  // Mega Deals / Chef's Selection Section
+  const megaGrid = document.getElementById('home-mega-deals-grid');
+  if (megaGrid) {
+    let megaDeals = activeMenuItems.filter(item => 
+      (item.name || '').toLowerCase().includes('mega') || 
+      (item.category || '').toLowerCase().includes('mega') ||
+      (item.name || '').toLowerCase().includes('chef') ||
+      (item.desc || '').toLowerCase().includes('family')
+    ).slice(0, 2);
+
+    if (megaDeals.length > 0) {
+      megaGrid.innerHTML = megaDeals.map(item => {
+        const imgSrc = (item.image && item.image.length > 5) ? item.image : (item.img || 'images/deals.jpg');
+        const price = item.price || (item.sizes && item.sizes[0] ? item.sizes[0].price : 2200);
+        const escapedName = escapeQuotes(item.name || 'Mega Feast');
+
+        return `
+          <div class="relative bg-neutral-900/90 rounded-3xl p-6 border border-yellow-400/20 overflow-hidden group hover:border-yellow-400/50 transition duration-500 flex flex-col justify-between">
+            <div class="space-y-4">
+              <div class="relative w-full h-48 rounded-2xl overflow-hidden">
+                <img src="${imgSrc}" alt="${escapedName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="if(!this.src.includes('deals'))this.src='images/deals.jpg';">
+                <span class="absolute top-3 left-3 bg-brand-500 text-white font-black text-xs px-3 py-1 rounded-full uppercase tracking-wider">Chef's Special</span>
+              </div>
+              <h3 class="text-xl font-black text-white group-hover:text-yellow-400 transition">${item.name}</h3>
+              <p class="text-xs text-neutral-400 leading-relaxed">${item.desc || item.description || ''}</p>
+            </div>
+            <div class="flex items-center justify-between pt-4 mt-4 border-t border-yellow-400/10">
+              <span class="text-xl font-black text-yellow-400">Rs. ${price}/-</span>
+              <button onclick="addToCart('${escapedName}', '${price}/-')" class="bg-yellow-400 hover:bg-yellow-500 text-neutral-950 font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition active:scale-95 shadow-lg">
+                <i data-lucide="shopping-bag" class="w-4 h-4"></i> Order Now
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  if (window.lucide) lucide.createIcons();
+}
