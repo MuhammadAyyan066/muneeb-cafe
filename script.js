@@ -1405,3 +1405,90 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof renderSignatureMegaDeals === 'function') renderSignatureMegaDeals();
   }, 400);
 });
+
+// ==========================================
+// RENDER SIGNATURE MEGA DEALS (LIMOSINE PIZZA & BIRTHDAY DEAL)
+// ==========================================
+function renderSignatureMegaDeals() {
+  const container = document.getElementById('home-mega-deals-grid');
+  if (!container) return;
+
+  // 1. Birthday Deal from DB/Menu
+  let birthdayItem = (typeof activeMenuItems !== 'undefined' ? activeMenuItems : []).find(item => {
+    const n = (item.name || '').toLowerCase();
+    return n.includes('birthday') || n.includes('celebration');
+  });
+
+  // 2. Limosine Pizza from DB/Menu
+  let limoItem = (typeof activeMenuItems !== 'undefined' ? activeMenuItems : []).find(item => {
+    const n = (item.name || '').toLowerCase();
+    return n.includes('limosine') || n.includes('limousine');
+  });
+
+  if (!limoItem) {
+    limoItem = {
+      name: "Limosine Pizza Deal",
+      price: 3500,
+      desc: "Massive 2-foot party pizza with multi-flavor crusts, garlic bread, wings, and 1.5L soft drink.",
+      image: "images/pizza pic.jpg",
+      category: "Deals"
+    };
+  }
+
+  if (!birthdayItem) {
+    birthdayItem = {
+      name: "Birthday Celebration Pizza Deal",
+      price: 2500,
+      desc: "Special celebration feast with customized toppings, drinks, and sides.",
+      image: "images/pizza pic.jpg",
+      category: "Deals"
+    };
+  }
+
+  const itemsToRender = [
+    { item: limoItem, tag: "👑 King Size Deal", badge: "MEGA FEAST" },
+    { item: birthdayItem, tag: "🎉 Special Birthday Deal", badge: "POPULAR" }
+  ];
+
+  container.innerHTML = itemsToRender.map(({ item, tag, badge }) => {
+    const imgSrc = (item.image && item.image.length > 5) ? item.image : (item.img || 'images/pizza pic.jpg');
+    const price = item.price || (item.sizes && item.sizes[0] ? item.sizes[0].price : 3500);
+    const escapedName = typeof escapeQuotes === 'function' ? escapeQuotes(item.name || 'Special Deal') : item.name;
+    const desc = item.desc || item.description || '';
+
+    return `
+      <div class="bg-[#121212] border border-yellow-400/15 rounded-3xl p-5 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-yellow-400/30 transition duration-300 shadow-soft overflow-hidden group">
+        <div class="w-full md:w-7/12 space-y-3.5 order-2 md:order-1">
+          <span class="inline-block bg-brand-500/15 border border-brand-500/30 text-brand-400 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+            ${tag}
+          </span>
+          <h3 class="text-xl sm:text-3xl font-extrabold text-white group-hover:text-yellow-400 transition">
+            ${item.name}
+          </h3>
+          <p class="text-xs sm:text-sm text-neutral-300 leading-relaxed">
+            ${desc}
+          </p>
+          <div class="flex items-center gap-4 pt-2">
+            <span class="text-xl sm:text-2xl font-black text-yellow-400">Rs. ${price}/-</span>
+            <button onclick="addToCart('${escapedName}', '${price}/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-xs sm:text-sm font-bold px-6 py-2.5 rounded-full transition active:scale-95 shadow-md cursor-pointer">
+              Order Now
+            </button>
+          </div>
+        </div>
+        <div class="w-full md:w-5/12 h-48 sm:h-60 rounded-2xl overflow-hidden bg-neutral-800 relative shadow-md order-1 md:order-2 shrink-0">
+          <img 
+            src="${imgSrc}" 
+            alt="${escapedName}" 
+            class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+            onerror="if(!this.src.includes('pizza pic'))this.src='images/pizza pic.jpg';"
+          />
+          <span class="absolute top-3 right-3 bg-brand-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase shadow">
+            ${badge}
+          </span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (window.lucide) lucide.createIcons();
+}
