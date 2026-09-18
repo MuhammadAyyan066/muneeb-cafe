@@ -1296,3 +1296,8 @@ function renderHomeDeals() {
 
 
 
+
+// Ensure homepage dynamic sections trigger immediately
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(renderHomeDeals, 300);
+});
