@@ -1675,3 +1675,55 @@ document.addEventListener('DOMContentLoaded', () => {
   syncFreshMenuFromDatabase();
 });
 
+// ==========================================
+// FAIL-SAFE LIVE + OFFLINE MENU & DEALS SYNC
+// ==========================================
+async function syncFreshMenuFromDatabase() {
+  // 1. Pehle turant existing data ya fallback se screen render karein taake page loading par na atke
+  if (!activeMenuItems || activeMenuItems.length === 0) {
+    const cached = localStorage.getItem('menuItems');
+    if (cached) {
+      try { activeMenuItems = JSON.parse(cached); } catch(e) {}
+    }
+    if (!activeMenuItems || activeMenuItems.length === 0) {
+      activeMenuItems = typeof fallbackMenuItems !== 'undefined' ? [...fallbackMenuItems] : [];
+    }
+  }
+
+  // Turant UI draw karein
+  if (typeof renderMenu === 'function') renderMenu(activeMenuItems);
+  if (typeof renderHomeDeals === 'function') renderHomeDeals();
+  if (typeof renderSignatureMegaDeals === 'function') renderSignatureMegaDeals();
+
+  // 2. Ab live database se fresh data fetch karein
+  const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  const apiUrl = isLocal 
+    ? "http://localhost:5000/api/menu" 
+    : `${window.location.origin}/api/menu`;
+
+  try {
+    const res = await fetch(`${apiUrl}?t=${Date.now()}`, {
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+    
+    if (res.ok) {
+      const freshData = await res.json();
+      if (Array.isArray(freshData) && freshData.length > 0) {
+        activeMenuItems = freshData;
+        localStorage.setItem('menuItems', JSON.stringify(freshData));
+        
+        // Fresh database data ke sath re-render karein
+        if (typeof renderMenu === 'function') renderMenu(activeMenuItems);
+        if (typeof renderHomeDeals === 'function') renderHomeDeals();
+        if (typeof renderSignatureMegaDeals === 'function') renderSignatureMegaDeals();
+      }
+    }
+  } catch (err) {
+    console.warn("Backend fetch failed, running on offline items:", err);
+  }
+}
+
+// Ensure DOM ready hote hi functions execute hon
+document.addEventListener('DOMContentLoaded', () => {
+  syncFreshMenuFromDatabase();
+});
