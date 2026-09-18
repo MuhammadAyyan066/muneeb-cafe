@@ -1599,3 +1599,75 @@ function renderSignatureMegaDeals() {
 
   if (window.lucide) lucide.createIcons();
 }
+// ==========================================================
+// 1. DYNAMIC DATABASE FETCH (NO LOCAL CACHE OVERWRITE)
+// ==========================================================
+async function syncFreshMenuFromDatabase() {
+  try {
+    const res = await fetch(`${MENU_API_URL}?t=${Date.now()}`, {
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+    });
+    if (!res.ok) throw new Error("Network response was not ok");
+    const freshData = await res.json();
+
+    if (Array.isArray(freshData) && freshData.length > 0) {
+      activeMenuItems = freshData;
+      // Stale cache ko bilkul fresh database data se overwrite karein
+      localStorage.setItem('menuItems', JSON.stringify(freshData));
+    }
+  } catch (err) {
+    console.warn("Using offline fallback items:", err);
+  }
+
+  // Refresh All Sections with Fresh DB Data
+  if (typeof renderMenu === 'function') renderMenu(activeMenuItems);
+  renderNewArrivals();
+  renderSignatureMegaDeals();
+  if (typeof renderHomeDeals === 'function') renderHomeDeals();
+}
+
+// ==========================================================
+// 2. RENDER NEW ARRIVALS (LATEST DB UPDATED / ADDED ITEMS)
+// ==========================================================
+function renderNewArrivals() {
+  const newArrivalsGrid = document.getElementById('new-arrivals-grid') || document.getElementById('home-new-arrivals');
+  if (!newArrivalsGrid) return;
+
+  const items = [...(activeMenuItems || [])];
+  // Jo item abhi edit ya add hua ho wo top par aye
+  const latestItems = items.reverse().slice(0, 4);
+
+  if (latestItems.length === 0) return;
+
+  newArrivalsGrid.innerHTML = latestItems.map(item => {
+    const imgSrc = (item.image && item.image.length > 5) ? item.image : (item.img || 'images/pizza pic.jpg');
+    const price = item.price || (item.sizes && item.sizes[0] ? item.sizes[0].price : 500);
+    const escapedName = typeof escapeQuotes === 'function' ? escapeQuotes(item.name || 'Item') : item.name;
+
+    return `
+      <div class="bg-[#121212] rounded-2xl p-3 sm:p-4 border border-yellow-400/10 flex flex-col justify-between hover:border-yellow-400/30 transition duration-300 group shadow-soft">
+        <div>
+          <div class="relative w-full h-32 sm:h-44 rounded-xl overflow-hidden bg-neutral-800 mb-3">
+            <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">New Arrival</span>
+            <img src="${imgSrc}" alt="${escapedName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="if(!this.src.includes('pizza pic'))this.src='images/pizza pic.jpg';">
+          </div>
+          <h3 class="font-bold text-white group-hover:text-brand-500 transition text-sm sm:text-base line-clamp-1">${item.name}</h3>
+          <p class="text-xs text-neutral-400 mt-1 line-clamp-2">${item.desc || item.description || ''}</p>
+        </div>
+        <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
+          <span class="text-sm sm:text-lg font-bold text-yellow-400">Rs. ${price}/-</span>
+          <button onclick="addToCart('${escapedName}', '${price}/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md">
+            Add
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (window.lucide) lucide.createIcons();
+}
+
+// Attach Live Sync on page ready
+document.addEventListener('DOMContentLoaded', () => {
+  syncFreshMenuFromDatabase();
+});
