@@ -1241,21 +1241,27 @@ function renderHomeDeals() {
   // Mega Deals / Chef's Selection Section
   const megaGrid = document.getElementById('home-mega-deals-grid');
   if (megaGrid) {
-    // Prioritize Birthday Celebration Pizza Deal first
-    let birthdayDeals = activeMenuItems.filter(item =>
-      (item.name || '').toLowerCase().includes('birthday') ||
-      (item.name || '').toLowerCase().includes('celebration')
-    );
+    // Target exact Birthday Deal from menu
+    let birthdayDeals = activeMenuItems.filter(item => {
+      const n = (item.name || '').toLowerCase();
+      return n.includes('birthday') || n.includes('celebration');
+    });
 
-    let otherMegaDeals = activeMenuItems.filter(item =>
-      !((item.name || '').toLowerCase().includes('birthday') || (item.name || '').toLowerCase().includes('celebration')) &&
-      ((item.name || '').toLowerCase().includes('mega') ||
-       (item.category || '').toLowerCase().includes('mega') ||
-       (item.name || '').toLowerCase().includes('chef') ||
-       (item.desc || '').toLowerCase().includes('family'))
-    );
+    let otherMegaDeals = activeMenuItems.filter(item => {
+      const n = (item.name || '').toLowerCase();
+      const c = (item.category || '').toLowerCase();
+      return !n.includes('birthday') && !n.includes('celebration') &&
+             (n.includes('mega') || c.includes('mega') || n.includes('chef') || (item.desc || '').toLowerCase().includes('family'));
+    });
 
-    let megaDeals = [...birthdayDeals, ...otherMegaDeals].slice(0, 2);
+    // Pehle number par Birthday Deal
+    let megaDeals = [];
+    if (birthdayDeals.length > 0) {
+      megaDeals.push(birthdayDeals[0]);
+    }
+    if (otherMegaDeals.length > 0) {
+      megaDeals.push(otherMegaDeals[0]);
+    }
 
     if (megaDeals.length > 0) {
       megaGrid.innerHTML = megaDeals.map(item => {
@@ -1287,5 +1293,6 @@ function renderHomeDeals() {
 
   if (window.lucide) lucide.createIcons();
 }
+
 
 
