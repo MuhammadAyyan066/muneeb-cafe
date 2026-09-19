@@ -1,6 +1,6 @@
-﻿const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-const BACKEND_BASE = isLocal ? "http://localhost:5000" : "https://muneeb-cafe-backend.vercel.app";
-var MENU_API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000/api/menu' : 'https://muneeb-cafe-backend.vercel.app/api/menu';
+﻿window.isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+window.BACKEND_BASE = isLocal ? "http://localhost:5000" : "https://muneeb-cafe-backend.vercel.app";
+window.MENU_API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000/api/menu' : 'https://muneeb-cafe-backend.vercel.app/api/menu';
 // ==========================================
 // 0. DYNAMIC API CONFIGURATION (AUTO-DETECT)
 // ==========================================
@@ -1132,7 +1132,7 @@ async function loadLiveMenu() {
 // ==============================================================
 // FAIL-SAFE UNIFIED RENDER ENGINE
 // ==============================================================
-var BACKEND_BASE = "https://muneeb-cafe-backend.vercel.app";
+window.BACKEND_BASE = "https://muneeb-cafe-backend.vercel.app";
 
 function getLoadedItems() {
   if (typeof activeMenuItems !== 'undefined' && Array.isArray(activeMenuItems) && activeMenuItems.length > 0) {
@@ -1402,3 +1402,156 @@ if (document.readyState === 'loading') {
 
 
 }
+// ==============================================================
+// MUNEEB CAFE DATABASE-FIRST RENDER ENGINE
+// ==============================================================
+window.isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+window.BACKEND_BASE = isLocal ? "http://localhost:5000" : "https://muneeb-cafe-backend.vercel.app";
+window.MENU_API_URL = `${BACKEND_BASE}/api/menu`;
+
+function extractPrice(item) {
+  if (item.price && item.price > 0) return item.price;
+  if (item.sizes && item.sizes.length > 0 && item.sizes[0].price) return item.sizes[0].price;
+  if (item.prices) {
+    return item.prices.small || item.prices.medium || item.prices.large || 550;
+  }
+  return 550;
+}
+
+function renderDatabaseMenu(items) {
+  if (!items || items.length === 0) return;
+
+  // 1. Render on menu.html (Full Menu Grid)
+  const menuGrid = document.getElementById('menu-grid');
+  if (menuGrid) {
+    menuGrid.innerHTML = items.map(item => {
+      const price = extractPrice(item);
+      const img = (item.image && item.image.length > 5) ? item.image : (item.img || 'images/pizza pic.jpg');
+      const name = item.name || 'Delicious Pizza';
+      const desc = item.description || item.desc || '';
+      const cat = item.category || 'Pizzas';
+
+      return `
+        <div class="bg-[#121212] rounded-2xl p-4 border border-yellow-400/10 flex flex-col justify-between hover:border-yellow-400/30 transition duration-300 group shadow-soft">
+          <div>
+            <div class="relative w-full h-40 rounded-xl overflow-hidden bg-neutral-800 mb-3">
+              <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">${cat}</span>
+              <img src="${img}" alt="${name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='images/pizza pic.jpg';">
+            </div>
+            <h3 class="font-bold text-white group-hover:text-brand-500 transition text-base line-clamp-1">${name}</h3>
+            <p class="text-xs text-neutral-400 mt-1 line-clamp-2">${desc}</p>
+          </div>
+          <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
+            <span class="text-base sm:text-lg font-bold text-yellow-400">Rs. ${price}/-</span>
+            <button onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md cursor-pointer">
+              Add
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 2. Render on index.html (New Arrivals / Deals Grid)
+  const dealsGrid = document.getElementById('home-deals-grid');
+  if (dealsGrid) {
+    // Agar deal category ho to wo lein, warna database ke pehle 4 items show karein
+    let displayList = items.filter(i => (i.category || '').toLowerCase().includes('deal'));
+    if (displayList.length === 0) {
+      displayList = items.slice(0, 4);
+    } else {
+      displayList = displayList.slice(0, 4);
+    }
+
+    dealsGrid.innerHTML = displayList.map((item, idx) => {
+      const price = extractPrice(item);
+      const img = (item.image && item.image.length > 5) ? item.image : (item.img || 'images/pizza pic.jpg');
+      const name = item.name || `Special Item ${idx + 1}`;
+      const desc = item.description || item.desc || '';
+
+      return `
+        <div class="bg-[#121212] rounded-2xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
+          <div>
+            <div class="relative w-full h-28 sm:h-44 rounded-xl overflow-hidden bg-neutral-800 mb-3">
+              <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full uppercase">${item.category || 'Special'}</span>
+              <img src="${img}" alt="${name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='images/pizza pic.jpg';">
+            </div>
+            <h3 class="font-bold text-white group-hover:text-brand-500 transition text-sm sm:text-base">${name}</h3>
+            <p class="text-xs text-neutral-400 mt-1 line-clamp-2">${desc}</p>
+          </div>
+          <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
+            <span class="text-sm sm:text-lg font-bold text-yellow-400">Rs. ${price}/-</span>
+            <button onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md cursor-pointer">
+              Add
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 3. Render Signature Mega Deals
+  const megaGrid = document.getElementById('home-mega-deals-grid');
+  if (megaGrid) {
+    const defaultMegas = [
+      { name: "Limosine Pizza Deal", price: 3500, tag: "👑 King Size Deal", badge: "MEGA FEAST", desc: "Massive 2-foot party pizza with multi-flavor crusts, garlic bread, wings, and 1.5L soft drink.", img: "images/pizza pic.jpg" },
+      { name: "Muneeb Special Plater", price: 3000, tag: "⭐ Most Popular Platter", badge: "HOT DEAL", desc: "10 Crispy Nuggets, 10 Hot Wings, 10 Grilled Wings, 1 Large Pizza, and 1.5 Ltr Soft Drink.", img: "images/deals.jpg" },
+      { name: "Birthday Celebration Pizza Deal", price: 2500, tag: "🎉 Special Birthday Deal", badge: "POPULAR", desc: "Special celebration feast with customized toppings, drinks, and sides.", img: "images/pizza pic.jpg" }
+    ];
+
+    megaGrid.innerHTML = defaultMegas.map(m => `
+      <div class="bg-[#121212] border border-yellow-400/15 rounded-3xl p-5 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-yellow-400/30 transition duration-300 shadow-soft overflow-hidden group">
+        <div class="w-full md:w-7/12 space-y-3.5 order-2 md:order-1">
+          <span class="inline-block bg-brand-500/15 border border-brand-500/30 text-brand-400 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">${m.tag}</span>
+          <h3 class="text-xl sm:text-3xl font-extrabold text-white group-hover:text-yellow-400 transition">${m.name}</h3>
+          <p class="text-xs sm:text-sm text-neutral-300 leading-relaxed">${m.desc}</p>
+          <div class="flex items-center gap-4 pt-2">
+            <span class="text-xl sm:text-2xl font-black text-yellow-400">Rs. ${m.price}/-</span>
+            <button onclick="addToCart('${m.name.replace(/'/g, "\\'")}', '${m.price}/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-xs sm:text-sm font-bold px-6 py-2.5 rounded-full transition active:scale-95 shadow-md cursor-pointer">
+              Order Now
+            </button>
+          </div>
+        </div>
+        <div class="w-full md:w-5/12 h-48 sm:h-60 rounded-2xl overflow-hidden bg-neutral-800 relative shadow-md order-1 md:order-2 shrink-0">
+          <img src="${m.img}" alt="${m.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='images/pizza pic.jpg';">
+          <span class="absolute top-3 right-3 bg-brand-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase shadow">${m.badge}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  if (window.lucide) lucide.createIcons();
+}
+
+async function loadMenuFromAPI() {
+  try {
+    const res = await fetch(`${MENU_API_URL}?t=${Date.now()}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        localStorage.setItem('menuItems', JSON.stringify(data));
+        renderDatabaseMenu(data);
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn("API offline or blocked, reading local cache:", err);
+  }
+
+  const cached = localStorage.getItem('menuItems');
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        renderDatabaseMenu(parsed);
+      }
+    } catch(e) {}
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadMenuFromAPI);
+} else {
+  loadMenuFromAPI();
+}
+
