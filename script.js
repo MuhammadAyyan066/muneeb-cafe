@@ -959,7 +959,9 @@ async function initializeApp() {
   const timeoutId = setTimeout(() => controller.abort(), 8000);
 
   try {
-    const sep = MENU_API_URL.includes("?") ? "&" : "?";`n    const res = await fetch(`${MENU_API_URL}${sep}t=${Date.now()}`, {`n      cache: "no-store",
+    const sep = MENU_API_URL.includes('?') ? '&' : '?';
+    const res = await fetch(MENU_API_URL + sep + 't=' + Date.now(), {
+      cache: 'no-store',
       signal: controller.signal,
       headers: { 
         'Accept': 'application/json'
