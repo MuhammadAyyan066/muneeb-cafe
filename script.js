@@ -7,7 +7,7 @@ window.API_URL = window.API_URL || (isLocalhost ? "http://localhost:5000" : "htt
 
 var API_URL = window.API_URL;
 var API_BASE_URL = `${API_URL}/api/orders`;
-var MENU_API_URL = 'http://localhost:5000/api/menu';
+var MENU_API_URL = ${API_URL}/api/menu;
 
 console.log("ðŸ”— Connecting Menu to:", MENU_API_URL);
 
@@ -959,7 +959,7 @@ async function initializeApp() {
   const timeoutId = setTimeout(() => controller.abort(), 8000);
 
   try {
-    const res = await fetch(MENU_API_URL, {
+    const sep = MENU_API_URL.includes("?") ? "&" : "?";`n    const res = await fetch(`${MENU_API_URL}${sep}t=${Date.now()}`, {`n      cache: "no-store",
       signal: controller.signal,
       headers: { 
         'Accept': 'application/json'
@@ -1651,6 +1651,7 @@ function renderHomeDealsCards(items) {
   if (!dealsGrid) return;
 
   let deals = items.filter(i => (i.category || '').toLowerCase().includes('deal'));
+  if (deals.length === 0) deals = items.slice(0, 4);
   deals.sort((a, b) => {
     const numA = parseInt((a.name.match(/\d+/) || [999])[0], 10);
     const numB = parseInt((b.name.match(/\d+/) || [999])[0], 10);
@@ -1743,3 +1744,4 @@ function renderMegaDealsCards(items) {
 
   if (window.lucide) lucide.createIcons();
 }
+
