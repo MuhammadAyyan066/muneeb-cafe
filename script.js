@@ -1,6 +1,6 @@
 ﻿const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-const BACKEND_BASE = isLocal ? "http://localhost:5000" : "https://pizza-backend-xxx.vercel.app";
-const MENU_API_URL = \/api/menu;
+const BACKEND_BASE = isLocal ? "http://localhost:5000" : "https://muneeb-cafe-backend.vercel.app";
+const MENU_API_URL = `${BACKEND_BASE}/api/menu`;
 // ==========================================
 // 0. DYNAMIC API CONFIGURATION (AUTO-DETECT)
 // ==========================================
@@ -1746,4 +1746,5 @@ function renderMegaDealsCards(items) {
 
   if (window.lucide) lucide.createIcons();
 }
+
 
