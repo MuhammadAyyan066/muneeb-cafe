@@ -1294,3 +1294,110 @@ if (document.readyState === 'loading') {
   renderAllUI();
   syncCloudBackend();
 }
+
+// ==========================================
+// DIRECT GUARANTEED RENDERER
+// ==========================================
+(function forceRenderCardsImmediately() {
+  function run() {
+    const dealsGrid = document.getElementById('home-deals-grid');
+    const megaGrid = document.getElementById('home-mega-deals-grid');
+
+    // Default Fallback items agar activeMenuItems load na hon
+    const defaultDeals = [
+      { name: "Deal 1", price: 650, desc: "1 Small Pizza + 345ml Cold Drink", img: "images/pizza pic.jpg" },
+      { name: "Deal 2", price: 1250, desc: "1 Regular Pizza + 500ml Cold Drink", img: "images/pizza pic.jpg" },
+      { name: "Deal 3", price: 1750, desc: "1 Large Pizza + 1 Ltr Cold Drink", img: "images/pizza pic.jpg" },
+      { name: "Deal 4", price: 2450, desc: "2 Large Pizzas + 1.5 Ltr Cold Drink", img: "images/pizza pic.jpg" }
+    ];
+
+    if (dealsGrid) {
+      let items = (typeof activeMenuItems !== 'undefined' && activeMenuItems.length > 0)
+        ? activeMenuItems.filter(i => (i.category || '').toLowerCase().includes('deal'))
+        : defaultDeals;
+
+      if (items.length === 0) items = defaultDeals;
+
+      dealsGrid.innerHTML = items.slice(0, 4).map((d, i) => {
+        const imgSrc = (d.image && d.image.length > 5) ? d.image : (d.img || 'images/pizza pic.jpg');
+        const price = d.price || 800;
+        const name = d.name || `Deal ${i+1}`;
+        return `
+          <div class="bg-[#121212] rounded-2xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
+            <div>
+              <div class="relative w-full h-28 sm:h-44 rounded-xl overflow-hidden bg-neutral-800 mb-3">
+                <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full uppercase">${name.split(' ')[0]}</span>
+                <img src="${imgSrc}" alt="${name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='images/pizza pic.jpg';">
+              </div>
+              <h3 class="font-bold text-white group-hover:text-brand-500 transition text-sm sm:text-base">${name}</h3>
+              <p class="text-xs text-neutral-400 mt-1 line-clamp-2">${d.desc || ''}</p>
+            </div>
+            <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
+              <span class="text-sm sm:text-lg font-bold text-yellow-400">Rs. ${price}/-</span>
+              <button onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md">
+                Add
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    if (megaGrid) {
+      const megaItems = [
+        {
+          name: "Limosine Pizza Deal",
+          price: 3500,
+          tag: "👑 King Size Deal",
+          badge: "MEGA FEAST",
+          desc: "Massive 2-foot party pizza with multi-flavor crusts, garlic bread, wings, and 1.5L soft drink.",
+          img: "images/pizza pic.jpg"
+        },
+        {
+          name: "Muneeb Special Plater",
+          price: 3000,
+          tag: "⭐ Most Popular Platter",
+          badge: "HOT DEAL",
+          desc: "10 Crispy Nuggets, 10 Hot Wings, 10 Grilled Wings, 1 Large Pizza, and 1.5 Ltr Soft Drink.",
+          img: "images/deals.jpg"
+        },
+        {
+          name: "Birthday Celebration Pizza Deal",
+          price: 2500,
+          tag: "🎉 Special Birthday Deal",
+          badge: "POPULAR",
+          desc: "Special celebration feast with customized toppings, drinks, and sides.",
+          img: "images/pizza pic.jpg"
+        }
+      ];
+
+      megaGrid.innerHTML = megaItems.map(m => `
+        <div class="bg-[#121212] border border-yellow-400/15 rounded-3xl p-5 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-yellow-400/30 transition duration-300 shadow-soft overflow-hidden group">
+          <div class="w-full md:w-7/12 space-y-3.5 order-2 md:order-1">
+            <span class="inline-block bg-brand-500/15 border border-brand-500/30 text-brand-400 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">${m.tag}</span>
+            <h3 class="text-xl sm:text-3xl font-extrabold text-white group-hover:text-yellow-400 transition">${m.name}</h3>
+            <p class="text-xs sm:text-sm text-neutral-300 leading-relaxed">${m.desc}</p>
+            <div class="flex items-center gap-4 pt-2">
+              <span class="text-xl sm:text-2xl font-black text-yellow-400">Rs. ${m.price}/-</span>
+              <button onclick="addToCart('${m.name.replace(/'/g, "\\'")}', '${m.price}/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-xs sm:text-sm font-bold px-6 py-2.5 rounded-full transition active:scale-95 shadow-md">
+                Order Now
+              </button>
+            </div>
+          </div>
+          <div class="w-full md:w-5/12 h-48 sm:h-60 rounded-2xl overflow-hidden bg-neutral-800 relative shadow-md order-1 md:order-2 shrink-0">
+            <img src="${m.img}" alt="${m.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='images/pizza pic.jpg';">
+            <span class="absolute top-3 right-3 bg-brand-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase shadow">${m.badge}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+})();
