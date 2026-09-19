@@ -1,4 +1,4 @@
-// ==========================================
+﻿// ==========================================
 // 0. DYNAMIC API CONFIGURATION (AUTO-DETECT)
 // ==========================================
 // Local testing par localhost:5000 use hoga, live domain par Vercel backend
@@ -7,9 +7,9 @@ window.API_URL = window.API_URL || (isLocalhost ? "http://localhost:5000" : "htt
 
 var API_URL = window.API_URL;
 var API_BASE_URL = `${API_URL}/api/orders`;
-var MENU_API_URL = `${API_URL}/api/menu`;
+var MENU_API_URL = API_URL + "/api/menu";
 
-console.log("ðŸ”— Connecting Menu to:", MENU_API_URL);
+console.log("Ã°Å¸â€â€” Connecting Menu to:", MENU_API_URL);
 
 // ==========================================
 // 1. STATIC FALLBACK ITEMS (Sirf server offline hone par)
@@ -379,7 +379,7 @@ const fallbackMenuItems = [
     image: "images/deals.jpg" 
   },
 
-  // --- MUNEEB CAFÃ‰ DEALS ---
+  // --- MUNEEB CAFÃƒâ€° DEALS ---
   { name: "Deal.1", category: "Deals", price: 800, time: "15 min", rating: "4.8 (45)", desc: "1 Small Pizza, 5 Hot Wings, Half Liter Drink", tag: "Deal", image: "images/pizza pic.jpg" },
   { name: "Deal.2", category: "Deals", price: 850, time: "15 min", rating: "4.7 (50)", desc: "2 Zinger Burger, Small Fries, Half Liter Drink", tag: "Deal", image: "images/burgers.jpg" },
   { name: "Deal.3", category: "Deals", price: 450, time: "12 min", rating: "4.6 (38)", desc: "1 Zinger Burger, 1 Regular Fries, 1 Regular Drink", tag: "Deal", image: "images/burgers.jpg" },
@@ -703,11 +703,11 @@ function updateCartUI() {
           <div class="flex justify-between items-center bg-neutral-800/80 p-3 rounded-2xl border border-neutral-700/60 text-xs">
             <div>
               <p class="font-extrabold text-white">${item.name}</p>
-              <p class="text-neutral-400 mt-0.5">Rs. ${item.price} Ã— ${item.quantity}</p>
+              <p class="text-neutral-400 mt-0.5">Rs. ${item.price} Ãƒâ€” ${item.quantity}</p>
             </div>
             <div class="flex items-center gap-2">
               <span class="font-black text-yellow-400">Rs. ${item.price * item.quantity}</span>
-              <button onclick="removeFromCart(${index})" class="text-red-400 hover:text-red-300 font-bold p-1 transition cursor-pointer">âœ•</button>
+              <button onclick="removeFromCart(${index})" class="text-red-400 hover:text-red-300 font-bold p-1 transition cursor-pointer">Ã¢Å“â€¢</button>
             </div>
           </div>
         `;
@@ -810,7 +810,7 @@ function fetchUserLocation() {
     return;
   }
 
-  addressInput.value = "ðŸ“ Detecting live GPS location...";
+  addressInput.value = "Ã°Å¸â€œÂ Detecting live GPS location...";
 
   navigator.geolocation.getCurrentPosition(
     async (position) => {
@@ -1343,8 +1343,8 @@ function renderSignatureMegaDeals() {
   }
 
   const itemsToRender = [
-    { item: platterItem, tag: "⭐ Most Popular Platter", badge: "HOT DEAL" },
-    { item: birthdayItem, tag: "🎉 Special Birthday Deal", badge: "POPULAR" }
+    { item: platterItem, tag: "â­ Most Popular Platter", badge: "HOT DEAL" },
+    { item: birthdayItem, tag: "ðŸŽ‰ Special Birthday Deal", badge: "POPULAR" }
   ];
 
   container.innerHTML = itemsToRender.map(({ item, tag, badge }) => {
@@ -1446,8 +1446,8 @@ function renderSignatureMegaDeals() {
   }
 
   const itemsToRender = [
-    { item: limoItem, tag: "👑 King Size Deal", badge: "MEGA FEAST" },
-    { item: birthdayItem, tag: "🎉 Special Birthday Deal", badge: "POPULAR" }
+    { item: limoItem, tag: "ðŸ‘‘ King Size Deal", badge: "MEGA FEAST" },
+    { item: birthdayItem, tag: "ðŸŽ‰ Special Birthday Deal", badge: "POPULAR" }
   ];
 
   container.innerHTML = itemsToRender.map(({ item, tag, badge }) => {
@@ -1552,9 +1552,9 @@ function renderSignatureMegaDeals() {
   }
 
   const itemsToRender = [
-    { item: limoItem, tag: "👑 King Size Deal", badge: "MEGA FEAST" },
-    { item: platterItem, tag: "⭐ Most Popular Platter", badge: "HOT DEAL" },
-    { item: birthdayItem, tag: "🎉 Special Birthday Deal", badge: "POPULAR" }
+    { item: limoItem, tag: "ðŸ‘‘ King Size Deal", badge: "MEGA FEAST" },
+    { item: platterItem, tag: "â­ Most Popular Platter", badge: "HOT DEAL" },
+    { item: birthdayItem, tag: "ðŸŽ‰ Special Birthday Deal", badge: "POPULAR" }
   ];
 
   container.innerHTML = itemsToRender.map(({ item, tag, badge }) => {
@@ -1712,9 +1712,9 @@ function renderMegaDealsCards(items) {
   };
 
   const cards = [
-    { item: limo, tag: "👑 King Size Deal", badge: "MEGA FEAST" },
-    { item: platter, tag: "⭐ Most Popular Platter", badge: "HOT DEAL" },
-    { item: birthday, tag: "🎉 Special Birthday Deal", badge: "POPULAR" }
+    { item: limo, tag: "ðŸ‘‘ King Size Deal", badge: "MEGA FEAST" },
+    { item: platter, tag: "â­ Most Popular Platter", badge: "HOT DEAL" },
+    { item: birthday, tag: "ðŸŽ‰ Special Birthday Deal", badge: "POPULAR" }
   ];
 
   container.innerHTML = cards.map(({ item, tag, badge }) => {
