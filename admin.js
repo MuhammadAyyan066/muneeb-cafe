@@ -1,4 +1,4 @@
-﻿const API_URL = 'http://localhost:5000';
+const API_URL = 'https://muneeb-cafe-backend.vercel.app';
 const MENU_ENDPOINT = `${API_URL}/api/menu`;
 
 let allProducts = [];
