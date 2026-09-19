@@ -1,4 +1,4 @@
-﻿// ==========================================
+// ==========================================
 // 0. DYNAMIC API CONFIGURATION (AUTO-DETECT)
 // ==========================================
 // Local testing par localhost:5000 use hoga, live domain par Vercel backend
@@ -7,7 +7,7 @@ window.API_URL = window.API_URL || (isLocalhost ? "http://localhost:5000" : "htt
 
 var API_URL = window.API_URL;
 var API_BASE_URL = `${API_URL}/api/orders`;
-var MENU_API_URL = ${API_URL}/api/menu;
+var MENU_API_URL = `${API_URL}/api/menu`;
 
 console.log("ðŸ”— Connecting Menu to:", MENU_API_URL);
 
