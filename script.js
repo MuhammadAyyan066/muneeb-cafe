@@ -1,6 +1,6 @@
 ﻿const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 const BACKEND_BASE = isLocal ? "http://localhost:5000" : "https://muneeb-cafe-backend.vercel.app";
-const MENU_API_URL = `${BACKEND_BASE}/api/menu`;
+var MENU_API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000/api/menu' : 'https://muneeb-cafe-backend.vercel.app/api/menu';
 // ==========================================
 // 0. DYNAMIC API CONFIGURATION (AUTO-DETECT)
 // ==========================================
@@ -10,7 +10,6 @@ window.API_URL = window.API_URL || (isLocalhost ? "http://localhost:5000" : "htt
 
 var API_URL = window.API_URL;
 var API_BASE_URL = `${API_URL}/api/orders`;
-var MENU_API_URL = 'http://localhost:5000/api/menu';
 
 console.log("ðŸ”— Connecting Menu to:", MENU_API_URL);
 
@@ -1134,7 +1133,6 @@ async function loadLiveMenu() {
 // FAIL-SAFE UNIFIED RENDER ENGINE
 // ==============================================================
 var BACKEND_BASE = "https://muneeb-cafe-backend.vercel.app";
-var MENU_API_URL = `${BACKEND_BASE}/api/menu`;
 
 function getLoadedItems() {
   if (typeof activeMenuItems !== 'undefined' && Array.isArray(activeMenuItems) && activeMenuItems.length > 0) {
