@@ -1296,3 +1296,69 @@ if (document.readyState === 'loading') {
 } else {
   refreshAllSections();
 }
+
+// ==========================================
+// EMERGENCY FIX: INSTANT MENU & CARDS DISPLAY
+// ==========================================
+function renderMenuDirect() {
+  const container = document.getElementById('menu-grid');
+  if (!container) return;
+
+  // Agar activeMenuItems empty ho to fallback le lo
+  let items = (typeof activeMenuItems !== 'undefined' && activeMenuItems.length > 0) 
+    ? activeMenuItems 
+    : (typeof fallbackMenuItems !== 'undefined' ? fallbackMenuItems : []);
+
+  if (items.length === 0) {
+    const cached = localStorage.getItem('menuItems');
+    if (cached) {
+      try { items = JSON.parse(cached); } catch(e){}
+    }
+  }
+
+  if (items.length === 0) return;
+
+  activeMenuItems = items;
+
+  container.innerHTML = items.map((item, idx) => {
+    const imgSrc = (item.image && item.image.length > 5) ? item.image : (item.img || 'images/pizza pic.jpg');
+    const price = item.price || (item.sizes && item.sizes[0] ? item.sizes[0].price : 500);
+    const escapedName = typeof escapeQuotes === 'function' ? escapeQuotes(item.name) : item.name;
+
+    return `
+      <div class="bg-[#121212] rounded-2xl p-4 border border-yellow-400/10 flex flex-col justify-between hover:border-yellow-400/30 transition duration-300 group shadow-soft">
+        <div>
+          <div class="relative w-full h-40 rounded-xl overflow-hidden bg-neutral-800 mb-3">
+            <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">${item.category || 'Special'}</span>
+            <img src="${imgSrc}" alt="${escapedName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="if(!this.src.includes('pizza pic'))this.src='images/pizza pic.jpg';">
+          </div>
+          <h3 class="font-bold text-white group-hover:text-brand-500 transition text-base">${item.name}</h3>
+          <p class="text-xs text-neutral-400 mt-1 line-clamp-2">${item.desc || item.description || ''}</p>
+        </div>
+        <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
+          <span class="text-base sm:text-lg font-bold text-yellow-400">Rs. ${price}/-</span>
+          <button onclick="addToCart('${escapedName}', '${price}/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md cursor-pointer">
+            Add
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (window.lucide) lucide.createIcons();
+}
+
+// Force immediate load on startup
+if (typeof renderMenu === 'undefined' || !renderMenu) {
+  renderMenu = renderMenuDirect;
+}
+
+renderMenuDirect();
+if (typeof renderHomeDeals === 'function') renderHomeDeals();
+if (typeof renderSignatureMegaDeals === 'function') renderSignatureMegaDeals();
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderMenuDirect();
+  if (typeof renderHomeDeals === 'function') renderHomeDeals();
+  if (typeof renderSignatureMegaDeals === 'function') renderSignatureMegaDeals();
+});
