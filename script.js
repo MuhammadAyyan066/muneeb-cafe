@@ -415,7 +415,7 @@ const fallbackMenuItems = [
   { name: "Loaded Fries", category: "Fries", price: 360, time: "10 min", rating: "4.9 (290)", desc: "Fries topped with creamy cheese sauce and chicken bits", tag: "Fries", image: "images/burgers.jpg" }
 ];
 
-// ZERO-DELAY CACHE: Local storage se foran activeMenuItems fill honge
+// ZERO-DELAY CACHE: Instant load from localStorage taake page khulte hi 0-second mein display ho
 let cachedInitialItems = null;
 try {
   const localCache = localStorage.getItem('muneeb_menu_cache');
@@ -577,7 +577,7 @@ function renderMenu(itemsToRender = activeMenuItems) {
 }
 
 // ==========================================
-// 5. STICKY TOP CATEGORY SCROLL & FILTER
+// 5. STICKY TOP CATEGORY SCROLL & ZERO-SECOND FAST FILTER
 // ==========================================
 function selectCategory(buttonElement, category) {
   document.querySelectorAll('.cat-pill').forEach(btn => {
@@ -603,7 +603,8 @@ function filterByCategory(category) {
     const target = category.toLowerCase().replace(/['s]/g, '').trim();
     const filtered = activeMenuItems.filter(item => {
       const itemCat = (item.category || '').toLowerCase().replace(/['s]/g, '').trim();
-      return itemCat.includes(target) || target.includes(itemCat);
+      const itemName = (item.name || '').toLowerCase();
+      return itemCat.includes(target) || target.includes(itemCat) || itemName.includes(target);
     });
     renderMenu(filtered);
   }
@@ -968,29 +969,51 @@ async function placeOrder() {
 // 9. DYNAMIC DATA FETCHING & INITIALIZATION
 // ==========================================
 async function initializeApp() {
-  // Step 1: 0-second instant screen populate
+  // ZERO-DELAY: Pehle localStorage se instant 0-second render ho
   renderAllComponents();
   updateCartUI();
 
-  // "See All" button listener: Deals category filter and auto scroll
-  const seeAllButtons = document.querySelectorAll('a, button');
-  seeAllButtons.forEach(btn => {
-    if (btn.textContent.trim().toLowerCase() === 'see all' || btn.id === 'see-all-deals-btn') {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const dealsPill = Array.from(document.querySelectorAll('.cat-pill')).find(
-          p => p.textContent.toLowerCase().includes('deal')
-        );
-        if (dealsPill) {
-          selectCategory(dealsPill, 'Deals');
-        } else {
-          filterByCategory('Deals');
-        }
-      });
-    }
-  });
+  // FEATURED CATEGORIES & SEE ALL DEALS CLICK HANDLERS (ZERO-SECOND FAST FILTER)
+  function attachCategoryClickHandlers() {
+    document.querySelectorAll('[data-category], a, button').forEach(el => {
+      const catAttr = el.getAttribute('data-category');
+      const text = el.textContent.trim().toLowerCase();
 
-  // Step 2: Background network fetch
+      // See All Deals Handler
+      if (text === 'see all' || el.id === 'see-all-deals-btn' || el.classList.contains('see-all-deals')) {
+        el.onclick = function(e) {
+          e.preventDefault();
+          const targetPill = Array.from(document.querySelectorAll('.cat-pill')).find(
+            btn => btn.textContent.toLowerCase().includes('deal')
+          );
+          if (targetPill) {
+            selectCategory(targetPill, 'Deals');
+          } else {
+            filterByCategory('Deals');
+          }
+        };
+      }
+
+      // Featured Categories Click Handler (0-Second switch)
+      if (catAttr) {
+        el.onclick = function(e) {
+          e.preventDefault();
+          const targetPill = Array.from(document.querySelectorAll('.cat-pill')).find(
+            btn => btn.textContent.toLowerCase().includes(catAttr.toLowerCase())
+          );
+          if (targetPill) {
+            selectCategory(targetPill, catAttr);
+          } else {
+            filterByCategory(catAttr);
+          }
+        };
+      }
+    });
+  }
+
+  attachCategoryClickHandlers();
+
+  // Background network fetch silently without blocking screen
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 8000);
 
@@ -1012,6 +1035,7 @@ async function initializeApp() {
         activeMenuItems = dbItems;
         localStorage.setItem('muneeb_menu_cache', JSON.stringify(dbItems));
         renderAllComponents();
+        attachCategoryClickHandlers();
       }
     }
   } catch (err) {
@@ -1267,7 +1291,7 @@ function renderSignatureMegaDeals() {
   container.innerHTML = fixedDeals.map(({ item, tag, badge }) => {
     const imgSrc = (item.image && item.image.length > 5) ? item.image : (item.img || 'images/deals.jpg');
     const price = item.price || (item.sizes && item.sizes[0] ? item.sizes[0].price : 3000);
-    const escapedName = typeof escapeQuotes === 'function' ? escapeQuotes(item.name || 'Special Deal') : item.name;
+    const escapedName = typeof escapeQuotes === 'function' ? escapeQuotes(item.name) : item.name;
     const desc = item.desc || item.description || '';
 
     return `
@@ -1294,11 +1318,9 @@ function renderSignatureMegaDeals() {
             src="${imgSrc}" 
             alt="${escapedName}" 
             class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-            onerror="if(!this.src.includes('pizza pic'))this.src='images/pizza pic.jpg';"
+            onerror="this.src='images/pizza pic.jpg';"
           />
-          <span class="absolute top-3 right-3 bg-brand-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase shadow">
-            ${badge}
-          </span>
+          <span class="absolute top-3 right-3 bg-brand-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase shadow">${badge}</span>
         </div>
       </div>
     `;
@@ -1398,10 +1420,7 @@ function renderMegaDealsCards(items) {
   if (!container) return;
 
   // 1. Limousine Pizza
-  let limo = items.find(i => {
-    const n = (i.name || '').toLowerCase();
-    return n.includes('limousine') || n.includes('limosine');
-  }) || {
+  let limo = items.find(i => (i.name || '').toLowerCase().includes('limousine') || (i.name || '').toLowerCase().includes('limosine')) || {
     name: "Limousine Pizza",
     price: 3500,
     desc: "Giant 1-Meter Limousine Pizza with multiple crust flavors + 2 Ltr Soft Drink.",
@@ -1409,10 +1428,7 @@ function renderMegaDealsCards(items) {
   };
 
   // 2. Muneeb Special Platter (No Shawarma)
-  let platter = items.find(i => {
-    const n = (i.name || '').toLowerCase();
-    return n.includes('platter') || n.includes('plater') || (n.includes('muneeb') && n.includes('special'));
-  }) || {
+  let platter = items.find(i => (i.name || '').toLowerCase().includes('platter') || (i.name || '').toLowerCase().includes('plater') || (i.name || '').toLowerCase().includes('special')) || {
     name: "Muneeb Special Platter",
     price: 3000,
     desc: "10 Crispy Nuggets, 10 Hot Wings, 10 Grilled Wings, 1 Large Pizza, and 1.5 Ltr Soft Drink.",
@@ -1420,10 +1436,7 @@ function renderMegaDealsCards(items) {
   };
 
   // 3. Birthday Deal
-  let birthday = items.find(i => {
-    const n = (i.name || '').toLowerCase();
-    return n.includes('birthday') || n.includes('celebration');
-  }) || {
+  let birthday = items.find(i => (i.name || '').toLowerCase().includes('birthday') || (i.name || '').toLowerCase().includes('celebration')) || {
     name: "Birthday Deal",
     price: 6500,
     desc: "2 Family Pizza, 5 Grill Burger, 20 Grill Wings, 1 Pound Cake, 4 Regular Fries, 2 Drink 1.5 Ltr.",
