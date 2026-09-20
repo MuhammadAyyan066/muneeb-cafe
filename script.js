@@ -415,7 +415,7 @@ const fallbackMenuItems = [
   { name: "Loaded Fries", category: "Fries", price: 360, time: "10 min", rating: "4.9 (290)", desc: "Fries topped with creamy cheese sauce and chicken bits", tag: "Fries", image: "images/burgers.jpg" }
 ];
 
-// ZERO-DELAY CACHE: Instant load from localStorage taake page khulte hi 0-second mein display ho
+// ZERO-DELAY CACHE: Local storage se foran activeMenuItems load honge
 let cachedInitialItems = null;
 try {
   const localCache = localStorage.getItem('muneeb_menu_cache');
@@ -597,21 +597,24 @@ function selectCategory(buttonElement, category) {
 }
 
 function filterByCategory(category) {
-  if (category === 'ALL') {
-    renderMenu(activeMenuItems);
-  } else {
-    const target = category.toLowerCase().replace(/['s]/g, '').trim();
-    const filtered = activeMenuItems.filter(item => {
+  const target = String(category || 'ALL').toLowerCase().replace(/['s]/g, '').trim();
+
+  let filtered = activeMenuItems;
+  if (target !== 'all') {
+    filtered = activeMenuItems.filter(item => {
       const itemCat = (item.category || '').toLowerCase().replace(/['s]/g, '').trim();
       const itemName = (item.name || '').toLowerCase();
       return itemCat.includes(target) || target.includes(itemCat) || itemName.includes(target);
     });
-    renderMenu(filtered);
   }
 
-  const gridHeading = document.getElementById('item-count-heading');
-  if (gridHeading) {
-    gridHeading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // 0-second fast render
+  renderMenu(filtered);
+
+  // Smooth / Instant scroll to Menu
+  const menuTarget = document.getElementById('menu') || document.getElementById('menu-grid') || document.getElementById('item-count-heading');
+  if (menuTarget) {
+    menuTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }
 
@@ -966,20 +969,32 @@ async function placeOrder() {
 }
 
 // ==========================================
-// 9. DYNAMIC DATA FETCHING & INITIALIZATION
+// 9. DYNAMIC DATA FETCHING & INITIALIZATION (0-SECOND LOAD)
 // ==========================================
 async function initializeApp() {
-  // ZERO-DELAY: Pehle localStorage se instant 0-second render ho
-  renderAllComponents();
+  // 1. Agar URL parameter mein pehle se koi category di ho toh direct wahi khule bina poora menu render kiye
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialCat = urlParams.get('cat');
+
+  if (initialCat) {
+    filterByCategory(initialCat);
+    const targetPill = Array.from(document.querySelectorAll('.cat-pill')).find(
+      btn => btn.textContent.toLowerCase().includes(initialCat.toLowerCase())
+    );
+    if (targetPill) targetPill.classList.add('active');
+  } else {
+    renderAllComponents();
+  }
+
   updateCartUI();
 
-  // FEATURED CATEGORIES & SEE ALL DEALS CLICK HANDLERS (ZERO-SECOND FAST FILTER)
+  // 2. FEATURED CATEGORIES & SEE ALL DEALS CLICK HANDLERS (0-SECOND INSTANT RESPONSE)
   function attachCategoryClickHandlers() {
-    document.querySelectorAll('[data-category], a, button').forEach(el => {
+    document.querySelectorAll('[data-category], a, button, .feature-cat-card, .cat-card').forEach(el => {
       const catAttr = el.getAttribute('data-category');
       const text = el.textContent.trim().toLowerCase();
 
-      // See All Deals Handler
+      // See All Deals Click Handler
       if (text === 'see all' || el.id === 'see-all-deals-btn' || el.classList.contains('see-all-deals')) {
         el.onclick = function(e) {
           e.preventDefault();
@@ -994,7 +1009,7 @@ async function initializeApp() {
         };
       }
 
-      // Featured Categories Click Handler (0-Second switch)
+      // Featured Categories Click Handler
       if (catAttr) {
         el.onclick = function(e) {
           e.preventDefault();
@@ -1013,7 +1028,7 @@ async function initializeApp() {
 
   attachCategoryClickHandlers();
 
-  // Background network fetch silently without blocking screen
+  // 3. Background fetch (Silent update without delay)
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 8000);
 
@@ -1034,7 +1049,12 @@ async function initializeApp() {
       if (Array.isArray(dbItems) && dbItems.length > 0) {
         activeMenuItems = dbItems;
         localStorage.setItem('muneeb_menu_cache', JSON.stringify(dbItems));
-        renderAllComponents();
+        
+        if (initialCat) {
+          filterByCategory(initialCat);
+        } else {
+          renderAllComponents();
+        }
         attachCategoryClickHandlers();
       }
     }
@@ -1058,19 +1078,6 @@ async function initializeApp() {
         fetchUserLocation();
       }
     });
-  }
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const catParam = urlParams.get('cat');
-  if (catParam) {
-    const targetPill = Array.from(document.querySelectorAll('.cat-pill')).find(
-      btn => btn.textContent.toLowerCase().includes(catParam.toLowerCase())
-    );
-    if (targetPill) {
-      selectCategory(targetPill, catParam);
-    } else {
-      filterByCategory(catParam);
-    }
   }
 
   if (window.lucide) {
