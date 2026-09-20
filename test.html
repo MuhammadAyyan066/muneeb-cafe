@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Register Shop Admin</title>
+</head>
+<body style="background: #111; color: white; font-family: sans-serif; padding: 50px;">
+    <h2>Test Register Shop Admin API</h2>
+    <button onclick="registerShopAdmin()" style="padding: 10px 20px; background: orange; border: none; font-weight: bold; cursor: pointer;">
+        Click to Create Shop Admin
+    </button>
+    <p id="result" style="margin-top: 20px;"></p>
+
+    <script>
+        async function registerShopAdmin() {
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: "shopadmin",
+                        password: "123",
+                        role: "shop_admin"
+                    })
+                });
+                const data = await response.json();
+                document.getElementById('result').innerText = JSON.stringify(data);
+            } catch (err) {
+                document.getElementById('result').innerText = "Error: " + err.message;
+            }
+        }
+    </script>
+</body>
+</html>

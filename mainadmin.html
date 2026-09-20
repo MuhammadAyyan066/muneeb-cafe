@@ -1,0 +1,189 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — Muneeb Fast Food</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { brand: { 500: '#e14d2a', 600: '#c83818' } },
+          fontFamily: { display: ['"Outfit"', 'sans-serif'], body: ['"Plus Jakarta Sans"', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-black text-yellow-400 min-h-screen flex flex-col justify-between font-body antialiased">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-black/90 backdrop-blur border-b border-yellow-400/10">
+    <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-brand-500 text-white p-2 rounded-xl"><i data-lucide="utensils" class="w-5 h-5"></i></div>
+        <div>
+          <span class="text-xl font-bold tracking-tight text-yellow-400 font-display block leading-tight">Admin Portal</span>
+          <span class="text-[9px] uppercase tracking-widest text-brand-500 font-bold">Muneeb Fast Food</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="shop-admin.html" class="text-xs font-semibold px-4 py-2 rounded-full border border-yellow-400/30 hover:bg-neutral-900 transition">Orders Panel</a>
+        <a href="index.html" class="text-xs font-semibold px-4 py-2 rounded-full bg-yellow-400 text-black hover:bg-yellow-500 transition font-bold">Back to Website</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Banner -->
+  <div id="admin-alert" class="max-w-7xl mx-auto px-4 w-full mt-4 hidden">
+    <div id="admin-alert-text" class="text-xs font-bold p-3 rounded-xl text-center"></div>
+  </div>
+
+  <!-- Main Management -->
+  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8 w-full flex-1">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-extrabold text-yellow-400 font-display">Manage Menu & Inventory</h1>
+        <p class="text-sm text-neutral-400">Add, edit prices, and upload gallery images directly to MongoDB.</p>
+      </div>
+      <button onclick="openModal()" class="bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold px-6 py-2.5 rounded-full transition flex items-center gap-2 cursor-pointer shadow-lg shadow-brand-500/20">
+        <i data-lucide="plus-circle" class="w-4 h-4"></i> Add New Item
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div class="bg-neutral-900 p-5 rounded-2xl border border-yellow-400/10">
+        <p class="text-xs text-neutral-400 uppercase font-semibold">Total Active Items</p>
+        <h3 id="total-items-count" class="text-2xl font-extrabold text-yellow-400 mt-1">0</h3>
+      </div>
+      <div class="bg-neutral-900 p-5 rounded-2xl border border-yellow-400/10">
+        <p class="text-xs text-neutral-400 uppercase font-semibold">Active Categories</p>
+        <h3 id="total-categories-count" class="text-2xl font-extrabold text-yellow-400 mt-1">0 Categories</h3>
+      </div>
+      <div class="bg-neutral-900 p-5 rounded-2xl border border-yellow-400/10">
+        <p class="text-xs text-neutral-400 uppercase font-semibold">Database Status</p>
+        <h3 id="server-status" class="text-2xl font-extrabold text-emerald-400 mt-1 flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span> Connected
+        </h3>
+      </div>
+    </div>
+
+    <!-- Inventory Table -->
+    <div class="bg-neutral-900 rounded-3xl border border-yellow-400/10 overflow-hidden p-6 space-y-4 shadow-xl">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-yellow-400">Current Database Items</h2>
+        <button onclick="loadAdminProducts()" class="text-neutral-400 hover:text-yellow-400 p-2 rounded-lg hover:bg-neutral-800 transition" title="Refresh">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="border-b border-yellow-400/10 text-neutral-400 text-xs uppercase tracking-wider">
+              <th class="py-3 px-4">Item</th>
+              <th class="py-3 px-4">Category</th>
+              <th class="py-3 px-4">Pricing</th>
+              <th class="py-3 px-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admin-menu-table" class="divide-y divide-yellow-400/5 text-neutral-300">
+            <tr>
+              <td colspan="4" class="py-8 text-center text-neutral-500 text-xs">Loading items from database...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Add / Edit Modal -->
+  <div id="product-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-neutral-900 border border-yellow-400/20 rounded-3xl p-6 max-w-lg w-full space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-yellow-400/10 pb-3">
+        <h3 id="modal-title" class="text-xl font-bold text-yellow-400">Add New Menu Item</h3>
+        <button onclick="closeModal()" class="text-neutral-400 hover:text-yellow-400 text-lg">✕</button>
+      </div>
+
+      <form id="product-form" onsubmit="handleProductSubmit(event)" class="space-y-4 text-xs sm:text-sm">
+        <input type="hidden" id="product-id" value="">
+
+        <div>
+          <label class="block text-neutral-400 mb-1">Item Name *</label>
+          <input type="text" id="product-name" required class="w-full bg-black border border-yellow-400/20 rounded-xl px-4 py-2 text-yellow-400 focus:border-brand-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block text-neutral-400 mb-1">Category *</label>
+          <select id="product-category" onchange="toggleCategoryPricing()" class="w-full bg-black border border-yellow-400/20 rounded-xl px-4 py-2 text-yellow-400 focus:border-brand-500 outline-none">
+            <option value="Pizzas">Pizzas</option>
+            <option value="Muneeb Special Pizzas">Muneeb Special Pizzas</option>
+            <option value="Deals">Deals</option>
+            <option value="Burgers">Burgers</option>
+            <option value="Shawarma">Shawarma</option>
+            <option value="Wings">Wings</option>
+            <option value="Fries">Fries</option>
+          </select>
+        </div>
+
+        <!-- Single Price Container -->
+        <div id="single-price-box" class="hidden">
+          <label class="block text-neutral-400 mb-1">Standard Price (Rs.) *</label>
+          <input type="number" id="product-single-price" placeholder="450" class="w-full bg-black border border-yellow-400/20 rounded-xl px-4 py-2 text-yellow-400 focus:border-brand-500 outline-none">
+        </div>
+
+        <!-- Multi-size Pizza Price Container -->
+        <div id="pizza-sizes-box" class="p-3 bg-black/60 border border-yellow-400/10 rounded-xl space-y-2">
+          <label class="block text-xs font-bold text-yellow-400">Sizes Pricing (Rs.):</label>
+          <div class="grid grid-cols-2 gap-2">
+            <div><span class="text-[10px] text-neutral-400">Small</span><input type="number" id="price-small" placeholder="550" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
+            <div><span class="text-[10px] text-neutral-400">Medium</span><input type="number" id="price-medium" placeholder="1150" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
+            <div><span class="text-[10px] text-neutral-400">Large</span><input type="number" id="price-large" placeholder="1600" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
+            <div><span class="text-[10px] text-neutral-400">Family</span><input type="number" id="price-family" placeholder="1900" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-neutral-400 mb-1">Description</label>
+          <textarea id="product-desc" rows="2" class="w-full bg-black border border-yellow-400/20 rounded-xl px-4 py-2 text-yellow-400 focus:border-brand-500 outline-none"></textarea>
+        </div>
+
+        <!-- Image Gallery / File Upload Only -->
+        <div class="space-y-3 bg-black/40 p-3 rounded-2xl border border-yellow-400/10">
+          <label class="block text-neutral-300 font-semibold text-xs">Item Image</label>
+          
+          <div class="flex items-center gap-4">
+            <img id="image-preview" src="images/pizza pic.jpg" class="w-16 h-16 rounded-xl object-cover border-2 border-yellow-400/30 flex-shrink-0" onerror="this.src='images/pizza pic.jpg'">
+            <div class="space-y-2 flex-1">
+              <label class="cursor-pointer bg-neutral-800 hover:bg-neutral-700 text-yellow-400 text-xs font-semibold px-4 py-2 rounded-xl inline-flex items-center gap-2 border border-yellow-400/20 transition">
+                <i data-lucide="image-plus" class="w-4 h-4"></i> Upload from Gallery
+                <input type="file" id="product-file-input" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+              </label>
+              <p class="text-[10px] text-neutral-500">Pick any image from your computer or phone</p>
+            </div>
+          </div>
+
+          <input type="text" id="product-image" value="images/pizza pic.jpg" placeholder="Or enter image URL / asset path" class="w-full bg-black border border-yellow-400/20 rounded-xl px-3 py-1.5 text-neutral-400 text-[11px] focus:border-brand-500 outline-none" oninput="document.getElementById('image-preview').src = this.value">
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-yellow-400/10">
+          <button type="button" onclick="closeModal()" class="px-5 py-2 rounded-full border border-yellow-400/20 text-neutral-400 hover:text-yellow-400">Cancel</button>
+          <button type="submit" id="save-product-btn" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-6 py-2 rounded-full transition">Save Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="bg-neutral-900 border-t border-yellow-400/10 py-6 text-center text-xs text-neutral-500">
+    © 2026 Muneeb Fast Food Restaurant. Admin Backend Control Panel.
+  </footer>
+
+  <script src="admin.js"></script>
+</body>
+</html>

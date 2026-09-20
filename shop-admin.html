@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Admin - Orders Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body class="bg-neutral-950 text-white min-h-screen p-4 sm:p-8 font-sans antialiased">
+    <div class="max-w-5xl mx-auto space-y-6">
+        
+        <!-- Header Bar -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-neutral-900 p-6 rounded-3xl border border-yellow-400/10 shadow-xl">
+            <div>
+                <div class="flex items-center gap-2.5">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <h2 class="text-2xl font-black text-yellow-400 tracking-tight">Shop Admin Dashboard</h2>
+                </div>
+                <p class="text-xs sm:text-sm text-neutral-400 mt-1">Live customer orders, payment verification, and direct rider dispatch</p>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <button onclick="loadOrders()" class="flex-1 sm:flex-none bg-neutral-800 hover:bg-neutral-700 text-yellow-400 px-4 py-2 rounded-xl text-xs font-bold border border-yellow-400/20 transition flex items-center justify-center gap-1.5">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
+                </button>
+                <button onclick="logout()" class="flex-1 sm:flex-none bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition">
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Orders Section -->
+        <div class="bg-neutral-900 p-6 rounded-3xl border border-yellow-400/10 shadow-xl space-y-5">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-800 pb-4">
+                <div class="flex items-center gap-2">
+                    <h3 class="text-lg font-bold text-white">Incoming Orders</h3>
+                    <span id="order-count-badge" class="bg-yellow-400 text-neutral-950 text-xs font-black px-2.5 py-0.5 rounded-full">0</span>
+                </div>
+                <div id="connection-status" class="text-xs text-neutral-400 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Live Online
+                </div>
+            </div>
+
+            <!-- Filter Tabs & Active Badges -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none text-xs">
+                <button onclick="setFilter('All')" id="tab-All" class="filter-tab px-3.5 py-2 rounded-xl font-bold transition flex items-center gap-1.5 bg-yellow-400 text-neutral-950 shadow-sm">
+                    All <span id="badge-all" class="bg-neutral-900/20 px-1.5 py-0.5 rounded-full text-[10px] font-black">0</span>
+                </button>
+                <button onclick="setFilter('Pending')" id="tab-Pending" class="filter-tab px-3.5 py-2 rounded-xl font-bold transition flex items-center gap-1.5 bg-neutral-800/80 hover:bg-neutral-800 text-neutral-300 border border-neutral-700/50">
+                    Pending <span id="badge-pending" class="bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full text-[10px] font-black">0</span>
+                </button>
+                <button onclick="setFilter('Processing')" id="tab-Processing" class="filter-tab px-3.5 py-2 rounded-xl font-bold transition flex items-center gap-1.5 bg-neutral-800/80 hover:bg-neutral-800 text-neutral-300 border border-neutral-700/50">
+                    Processing <span id="badge-processing" class="bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded-full text-[10px] font-black">0</span>
+                </button>
+                <button onclick="setFilter('In Delivery')" id="tab-In Delivery" class="filter-tab px-3.5 py-2 rounded-xl font-bold transition flex items-center gap-1.5 bg-neutral-800/80 hover:bg-neutral-800 text-neutral-300 border border-neutral-700/50">
+                    Out for Delivery <span id="badge-delivery" class="bg-sky-500/20 text-sky-400 px-1.5 py-0.5 rounded-full text-[10px] font-black">0</span>
+                </button>
+                <button onclick="setFilter('Done')" id="tab-Done" class="filter-tab px-3.5 py-2 rounded-xl font-bold transition flex items-center gap-1.5 bg-neutral-800/80 hover:bg-neutral-800 text-neutral-300 border border-neutral-700/50">
+                    Done <span id="badge-done" class="bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full text-[10px] font-black">0</span>
+                </button>
+            </div>
+
+            <!-- Orders Container -->
+            <div id="orders-list" class="space-y-4 pt-2">
+                <p class="text-neutral-400 text-sm text-center py-8">Loading orders...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Receipt Image Lightbox Modal -->
+    <div id="receipt-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="relative bg-neutral-900 border border-yellow-400/20 rounded-2xl p-4 max-w-xl w-full max-h-[90vh] flex flex-col items-center gap-3 shadow-2xl">
+            <div class="flex justify-between items-center w-full pb-2 border-b border-neutral-800">
+                <span class="text-sm font-bold text-yellow-400 flex items-center gap-1.5">
+                    <i data-lucide="receipt" class="w-4 h-4 text-brand-500"></i> Payment Transfer Receipt
+                </span>
+                <button onclick="closeReceiptModal()" class="text-neutral-400 hover:text-white text-lg p-1">âœ•</button>
+            </div>
+            <div class="w-full flex-1 overflow-auto rounded-xl bg-black/50 flex items-center justify-center p-2 border border-neutral-800">
+                <img id="receipt-modal-img" src="" alt="Payment Receipt" class="max-h-[65vh] max-w-full rounded-lg object-contain" />
+            </div>
+            <div class="flex items-center justify-between w-full pt-1">
+                <a id="receipt-download-link" href="" target="_blank" rel="noopener noreferrer" class="text-xs text-sky-400 hover:underline flex items-center gap-1">
+                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Open original image in new tab
+                </a>
+                <button onclick="closeReceiptModal()" class="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 px-4 py-1.5 rounded-lg text-xs font-semibold transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- External JavaScript File -->
+    <script src="shopadmin.js"></script>
+</body>
+</html>
