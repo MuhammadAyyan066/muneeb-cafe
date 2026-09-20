@@ -6,7 +6,7 @@
     <title>Shop Admin - Orders Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 </head>
 <body class="bg-neutral-950 text-white min-h-screen p-4 sm:p-8 font-sans antialiased">
     <div class="max-w-5xl mx-auto space-y-6">
@@ -21,7 +21,12 @@
                 <p class="text-xs sm:text-sm text-neutral-400 mt-1">Live customer orders, payment verification, and direct rider dispatch</p>
             </div>
             
-            <div class="flex items-center gap-3 w-full sm:w-auto">
+            <div class="flex items-center gap-3 w-full sm:w-auto flex-wrap">
+                <!-- Main Admin Portal Button -->
+                <a href="mainadmin.html" class="flex-1 sm:flex-none bg-yellow-400 hover:bg-yellow-500 text-neutral-950 px-4 py-2 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 shadow-md">
+                    <i data-lucide="shield" class="w-3.5 h-3.5"></i> Main Admin
+                </a>
+
                 <button onclick="loadOrders()" class="flex-1 sm:flex-none bg-neutral-800 hover:bg-neutral-700 text-yellow-400 px-4 py-2 rounded-xl text-xs font-bold border border-yellow-400/20 transition flex items-center justify-center gap-1.5">
                     <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
                 </button>
@@ -77,7 +82,7 @@
                 <span class="text-sm font-bold text-yellow-400 flex items-center gap-1.5">
                     <i data-lucide="receipt" class="w-4 h-4 text-brand-500"></i> Payment Transfer Receipt
                 </span>
-                <button onclick="closeReceiptModal()" class="text-neutral-400 hover:text-white text-lg p-1">âœ•</button>
+                <button onclick="closeReceiptModal()" class="text-neutral-400 hover:text-white text-lg p-1">✕</button>
             </div>
             <div class="w-full flex-1 overflow-auto rounded-xl bg-black/50 flex items-center justify-center p-2 border border-neutral-800">
                 <img id="receipt-modal-img" src="" alt="Payment Receipt" class="max-h-[65vh] max-w-full rounded-lg object-contain" />
@@ -95,5 +100,10 @@
 
     <!-- External JavaScript File -->
     <script src="shopadmin.js"></script>
+    <script>
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    </script>
 </body>
 </html>
