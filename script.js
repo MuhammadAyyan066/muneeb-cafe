@@ -1,7 +1,6 @@
 ﻿// ==========================================
 // 0. DYNAMIC API CONFIGURATION (AUTO-DETECT)
 // ==========================================
-// Local testing par localhost:5000 use hoga, live domain par Vercel backend
 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 window.API_URL = window.API_URL || (isLocalhost ? "http://localhost:5000" : "https://muneeb-cafe-backend.vercel.app");
 
@@ -12,10 +11,10 @@ var MENU_API_URL = API_URL + "/api/menu";
 console.log("x” Connecting Menu to:", MENU_API_URL);
 
 // ==========================================
-// 1. STATIC FALLBACK ITEMS (Sirf server offline hone par)
+// 1. STATIC FALLBACK ITEMS
 // ==========================================
 const fallbackMenuItems = [
-  // --- PIZZA'S (Standard 4 Sizes) ---
+  // --- PIZZAS ---
   {
     name: "Chicken Tikah Pizza",
     category: "Pizzas",
@@ -177,7 +176,7 @@ const fallbackMenuItems = [
     ]
   },
 
-  // --- MUNEEB SPECIAL PIZZA'S ---
+  // --- MUNEEB SPECIAL PIZZAS ---
   {
     name: "Muneeb Special Pizza",
     category: "Muneeb Special Pizzas",
@@ -379,7 +378,7 @@ const fallbackMenuItems = [
     image: "images/deals.jpg" 
   },
 
-  // --- MUNEEB CAFÉ DEALS ---
+  // --- MUNEEB CAFE DEALS ---
   { name: "Deal.1", category: "Deals", price: 800, time: "15 min", rating: "4.8 (45)", desc: "1 Small Pizza, 5 Hot Wings, Half Liter Drink", tag: "Deal", image: "images/pizza pic.jpg" },
   { name: "Deal.2", category: "Deals", price: 850, time: "15 min", rating: "4.7 (50)", desc: "2 Zinger Burger, Small Fries, Half Liter Drink", tag: "Deal", image: "images/burgers.jpg" },
   { name: "Deal.3", category: "Deals", price: 450, time: "12 min", rating: "4.6 (38)", desc: "1 Zinger Burger, 1 Regular Fries, 1 Regular Drink", tag: "Deal", image: "images/burgers.jpg" },
@@ -412,10 +411,13 @@ const fallbackMenuItems = [
   // --- HOT WINGS & SIDES ---
   { name: "Hot Wings (10 pcs)", category: "Wings", price: 450, time: "10 min", rating: "4.8 (210)", desc: "Spicy crispy fried chicken hot wings", tag: "Wings", image: "images/hot wings.jpg" },
   { name: "Plain Fries", category: "Fries", price: 200, time: "8 min", rating: "4.6 (300)", desc: "Crispy golden salted french fries", tag: "Fries", image: "images/burgers.jpg" },
-  { name: "Loaded Fries", category: "Fries", price: 360, time: "10 min", rating: "4.9 (290)", desc: "Fries topped with creamy cheese sauce and chicken bits", tag: "Fries", image: "images/burgers.jpg" }
+  { name: "Loaded Fries", category: "Fries", price: 360, time: "10 min", rating: "4.9 (290)", desc: "Fries topped with creamy cheese sauce and chicken bits", tag: "Fries", image: "images/burgers.jpg" },
+
+  // --- PASTA ---
+  { name: "Creamy Alfredo Pasta", category: "Pasta", price: 550, time: "15 min", rating: "4.9 (110)", desc: "Fettuccine pasta tossed in rich parmesan alfredo sauce and chicken chunks", tag: "Pasta", image: "images/pasta.jpg" }
 ];
 
-// ZERO-DELAY CACHE: Local storage se foran activeMenuItems load honge
+// ZERO-DELAY CACHE INITIALIZATION
 let cachedInitialItems = null;
 try {
   const localCache = localStorage.getItem('muneeb_menu_cache');
@@ -430,15 +432,12 @@ let activeMenuItems = Array.isArray(cachedInitialItems) && cachedInitialItems.le
   ? cachedInitialItems 
   : [...fallbackMenuItems];
 
-// Clean fresh cart on every page reload / new visit
+// Clean cart on new refresh
 localStorage.removeItem('muneeb_cart');
 let cart = [];
 let detectedCoords = { lat: null, lng: null };
-
-// Tracks whether the cart has already auto-opened once on first item add
 let hasAutoOpenedCart = false;
 
-// Handle back/forward cache reload
 window.addEventListener('pageshow', function (event) {
   if (event.persisted) {
     window.location.reload();
@@ -608,13 +607,13 @@ function filterByCategory(category) {
     });
   }
 
-  // 0-second fast render
+  // Instant 0-second render
   renderMenu(filtered);
 
-  // Smooth / Instant scroll to Menu
+  // Instant scroll
   const menuTarget = document.getElementById('menu') || document.getElementById('menu-grid') || document.getElementById('item-count-heading');
   if (menuTarget) {
-    menuTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    menuTarget.scrollIntoView({ behavior: 'auto', block: 'start' });
   }
 }
 
@@ -632,7 +631,6 @@ function searchMenu() {
 // 6. CART MANAGEMENT (FRESH SESSION + AUTO-OPEN LOGIC)
 // ==========================================
 function handleCartAutoOpen() {
-  // Urgent card open sirf pehli dafa jab item add ho
   if (!hasAutoOpenedCart) {
     openCartDrawer();
     hasAutoOpenedCart = true;
@@ -768,7 +766,6 @@ function closeCartDrawer() {
   if (drawer) {
     drawer.classList.add('translate-x-full');
   }
-  // User ne cart close kiya, ab agle items par automatic drawer open nahi hoga
   hasAutoOpenedCart = true;
 }
 
@@ -808,7 +805,6 @@ function fetchUserLocation() {
 
   if (!addressInput) return;
 
-  // Visual Highlight: Border glow aur ring animation start
   addressInput.classList.add('ring-2', 'ring-yellow-400', 'border-yellow-400', 'animate-pulse');
   if (locationBtn) {
     locationBtn.classList.add('text-yellow-400', 'scale-110');
@@ -843,7 +839,6 @@ function fetchUserLocation() {
         addressInput.value = `Lat: ${lat.toFixed(5)}, Lon: ${lon.toFixed(5)}`;
       } finally {
         removeHighlight();
-        // Green confirmation flash
         addressInput.classList.add('ring-2', 'ring-green-400', 'border-green-400');
         setTimeout(() => addressInput.classList.remove('ring-2', 'ring-green-400', 'border-green-400'), 1500);
       }
@@ -969,66 +964,39 @@ async function placeOrder() {
 }
 
 // ==========================================
-// 9. DYNAMIC DATA FETCHING & INITIALIZATION (0-SECOND LOAD)
+// 9. DYNAMIC DATA FETCHING & INITIALIZATION (0-SECOND CASE 2 LOGIC)
 // ==========================================
 async function initializeApp() {
-  // 1. Agar URL parameter mein pehle se koi category di ho toh direct wahi khule bina poora menu render kiye
   const urlParams = new URLSearchParams(window.location.search);
-  const initialCat = urlParams.get('cat');
+  const directCategory = urlParams.get('cat');
 
-  if (initialCat) {
-    filterByCategory(initialCat);
+  // CRITICAL ZERO-SECOND FIX: Agar URL mein direct category hai, toh bina poora menu dikhaye foran filter karo
+  if (directCategory) {
+    const target = directCategory.toLowerCase().replace(/['s]/g, '').trim();
+    const directFiltered = activeMenuItems.filter(item => {
+      const itemCat = (item.category || '').toLowerCase().replace(/['s]/g, '').trim();
+      const itemName = (item.name || '').toLowerCase();
+      return itemCat.includes(target) || target.includes(itemCat) || itemName.includes(target);
+    });
+
+    renderMenu(directFiltered);
+
+    // Matching category pill ko activate karo
     const targetPill = Array.from(document.querySelectorAll('.cat-pill')).find(
-      btn => btn.textContent.toLowerCase().includes(initialCat.toLowerCase())
+      btn => btn.textContent.toLowerCase().includes(directCategory.toLowerCase())
     );
-    if (targetPill) targetPill.classList.add('active');
+    if (targetPill) {
+      document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+      targetPill.classList.add('active');
+    }
   } else {
+    // Agar direct menu/home par ho toh standard load
     renderAllComponents();
   }
 
   updateCartUI();
 
-  // 2. FEATURED CATEGORIES & SEE ALL DEALS CLICK HANDLERS (0-SECOND INSTANT RESPONSE)
-  function attachCategoryClickHandlers() {
-    document.querySelectorAll('[data-category], a, button, .feature-cat-card, .cat-card').forEach(el => {
-      const catAttr = el.getAttribute('data-category');
-      const text = el.textContent.trim().toLowerCase();
-
-      // See All Deals Click Handler
-      if (text === 'see all' || el.id === 'see-all-deals-btn' || el.classList.contains('see-all-deals')) {
-        el.onclick = function(e) {
-          e.preventDefault();
-          const targetPill = Array.from(document.querySelectorAll('.cat-pill')).find(
-            btn => btn.textContent.toLowerCase().includes('deal')
-          );
-          if (targetPill) {
-            selectCategory(targetPill, 'Deals');
-          } else {
-            filterByCategory('Deals');
-          }
-        };
-      }
-
-      // Featured Categories Click Handler
-      if (catAttr) {
-        el.onclick = function(e) {
-          e.preventDefault();
-          const targetPill = Array.from(document.querySelectorAll('.cat-pill')).find(
-            btn => btn.textContent.toLowerCase().includes(catAttr.toLowerCase())
-          );
-          if (targetPill) {
-            selectCategory(targetPill, catAttr);
-          } else {
-            filterByCategory(catAttr);
-          }
-        };
-      }
-    });
-  }
-
-  attachCategoryClickHandlers();
-
-  // 3. Background fetch (Silent update without delay)
+  // Background Live Database Sync without flicker
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 8000);
 
@@ -1037,9 +1005,7 @@ async function initializeApp() {
     const res = await fetch(MENU_API_URL + sep + 't=' + Date.now(), {
       cache: 'no-store',
       signal: controller.signal,
-      headers: { 
-        'Accept': 'application/json'
-      }
+      headers: { 'Accept': 'application/json' }
     });
 
     clearTimeout(timeoutId);
@@ -1049,18 +1015,17 @@ async function initializeApp() {
       if (Array.isArray(dbItems) && dbItems.length > 0) {
         activeMenuItems = dbItems;
         localStorage.setItem('muneeb_menu_cache', JSON.stringify(dbItems));
-        
-        if (initialCat) {
-          filterByCategory(initialCat);
+
+        if (directCategory) {
+          filterByCategory(directCategory);
         } else {
           renderAllComponents();
         }
-        attachCategoryClickHandlers();
       }
     }
   } catch (err) {
     clearTimeout(timeoutId);
-    console.warn("Background fetch failed:", err);
+    console.warn("Background fetch sync:", err);
   }
 
   // Payment listeners
@@ -1267,7 +1232,7 @@ function renderSignatureMegaDeals() {
     image: "images/pizza pic.jpg"
   };
 
-  // 2. Muneeb Special Platter (No Shawarma)
+  // 2. Muneeb Special Platter
   let platterItem = items.find(item => {
     const n = (item.name || '').toLowerCase();
     return n.includes('platter') || n.includes('plater') || (n.includes('muneeb') && n.includes('special'));
@@ -1304,15 +1269,9 @@ function renderSignatureMegaDeals() {
     return `
       <div class="bg-[#121212] border border-yellow-400/15 rounded-3xl p-5 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-yellow-400/30 transition duration-300 shadow-soft overflow-hidden group">
         <div class="w-full md:w-7/12 space-y-3.5 order-2 md:order-1">
-          <span class="inline-block bg-brand-500/15 border border-brand-500/30 text-brand-400 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-            ${tag}
-          </span>
-          <h3 class="text-xl sm:text-3xl font-extrabold text-white group-hover:text-yellow-400 transition">
-            ${item.name}
-          </h3>
-          <p class="text-xs sm:text-sm text-neutral-300 leading-relaxed">
-            ${desc}
-          </p>
+          <span class="inline-block bg-brand-500/15 border border-brand-500/30 text-brand-400 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">${tag}</span>
+          <h3 class="text-xl sm:text-3xl font-extrabold text-white group-hover:text-yellow-400 transition">${item.name}</h3>
+          <p class="text-xs sm:text-sm text-neutral-300 leading-relaxed">${desc}</p>
           <div class="flex items-center gap-4 pt-2">
             <span class="text-xl sm:text-2xl font-black text-yellow-400">Rs. ${price}/-</span>
             <button onclick="addToCart('${escapedName}', '${price}/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-xs sm:text-sm font-bold px-6 py-2.5 rounded-full transition active:scale-95 shadow-md cursor-pointer">
@@ -1321,12 +1280,7 @@ function renderSignatureMegaDeals() {
           </div>
         </div>
         <div class="w-full md:w-5/12 h-48 sm:h-60 rounded-2xl overflow-hidden bg-neutral-800 relative shadow-md order-1 md:order-2 shrink-0">
-          <img 
-            src="${imgSrc}" 
-            alt="${escapedName}" 
-            class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-            onerror="this.src='images/pizza pic.jpg';"
-          />
+          <img src="${imgSrc}" alt="${escapedName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='images/pizza pic.jpg';">
           <span class="absolute top-3 right-3 bg-brand-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase shadow">${badge}</span>
         </div>
       </div>
@@ -1337,10 +1291,13 @@ function renderSignatureMegaDeals() {
 }
 
 // ==============================================================
-// COMPLETE SELF-CONTAINED FIX FOR MENU & DEALS RENDERING
-// ==============================================================
+// SELF-CONTAINED MENU & DEALS RENDERING
+// ==========================================
 window.addEventListener('DOMContentLoaded', () => {
-  renderAllComponents();
+  const urlParams = new URLSearchParams(window.location.search);
+  if (!urlParams.get('cat')) {
+    renderAllComponents();
+  }
 });
 
 function renderAllComponents() {
@@ -1426,7 +1383,6 @@ function renderMegaDealsCards(items) {
   const container = document.getElementById('home-mega-deals-grid');
   if (!container) return;
 
-  // 1. Limousine Pizza
   let limo = items.find(i => (i.name || '').toLowerCase().includes('limousine') || (i.name || '').toLowerCase().includes('limosine')) || {
     name: "Limousine Pizza",
     price: 3500,
@@ -1434,7 +1390,6 @@ function renderMegaDealsCards(items) {
     image: "images/pizza pic.jpg"
   };
 
-  // 2. Muneeb Special Platter (No Shawarma)
   let platter = items.find(i => (i.name || '').toLowerCase().includes('platter') || (i.name || '').toLowerCase().includes('plater') || (i.name || '').toLowerCase().includes('special')) || {
     name: "Muneeb Special Platter",
     price: 3000,
@@ -1442,7 +1397,6 @@ function renderMegaDealsCards(items) {
     image: "images/deals.jpg"
   };
 
-  // 3. Birthday Deal
   let birthday = items.find(i => (i.name || '').toLowerCase().includes('birthday') || (i.name || '').toLowerCase().includes('celebration')) || {
     name: "Birthday Deal",
     price: 6500,
