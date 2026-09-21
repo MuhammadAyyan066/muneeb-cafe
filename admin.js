@@ -227,3 +227,50 @@ window.addEventListener('DOMContentLoaded', () => {
   loadAdminProducts();
   if (window.lucide) lucide.createIcons();
 });
+// ==============================================================
+// INSTANT ZERO-SECOND TABLE SEARCH (DIRECT DOM FILTERING)
+// ==============================================================
+function searchAdminProducts() {
+  const query = (document.getElementById('admin-search-input')?.value || '').toLowerCase().trim();
+  const tableBody = document.getElementById('admin-menu-table');
+  if (!tableBody) return;
+
+  const rows = tableBody.querySelectorAll('tr');
+  let matchCount = 0;
+
+  // Har row ko direct inspect karke 0 second mein hide/show karein
+  rows.forEach(row => {
+    // Agar row data row nahi hai (jaise "loading" ya "no items") toh skip karein
+    if (row.children.length < 4) return;
+
+    const itemName = (row.children[0]?.textContent || '').toLowerCase();
+    const itemCategory = (row.children[1]?.textContent || '').toLowerCase();
+    const itemPrice = (row.children[2]?.textContent || '').toLowerCase();
+
+    // Word matching check
+    const isMatch = !query || itemName.includes(query) || itemCategory.includes(query) || itemPrice.includes(query);
+
+    if (isMatch) {
+      row.style.display = '';
+      matchCount++;
+    } else {
+      row.style.display = 'none';
+    }
+  });
+
+  // Agar koi matching item na mile toh feedback row dikhayein
+  let emptyNotice = document.getElementById('search-empty-notice');
+  if (matchCount === 0 && query !== '') {
+    if (!emptyNotice) {
+      emptyNotice = document.createElement('tr');
+      emptyNotice.id = 'search-empty-notice';
+      emptyNotice.innerHTML = `<td colspan="4" class="py-6 text-center text-neutral-400 text-xs font-semibold">No matching items found for "${query}"</td>`;
+      tableBody.appendChild(emptyNotice);
+    } else {
+      emptyNotice.style.display = '';
+      emptyNotice.innerHTML = `<td colspan="4" class="py-6 text-center text-neutral-400 text-xs font-semibold">No matching items found for "${query}"</td>`;
+    }
+  } else if (emptyNotice) {
+    emptyNotice.style.display = 'none';
+  }
+}
