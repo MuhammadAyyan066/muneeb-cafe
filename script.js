@@ -8,7 +8,7 @@ var API_URL = window.API_URL;
 var API_BASE_URL = `${API_URL}/api/orders`;
 var MENU_API_URL = API_URL + "/api/menu";
 
-console.log("x” Connecting Menu to:", MENU_API_URL);
+console.log("Connecting Menu to:", MENU_API_URL);
 
 // ==========================================
 // 1. STATIC FALLBACK ITEMS
@@ -432,7 +432,7 @@ let activeMenuItems = Array.isArray(cachedInitialItems) && cachedInitialItems.le
   ? cachedInitialItems 
   : [...fallbackMenuItems];
 
-// Clean cart on new refresh
+// Fresh cart on every page reload
 localStorage.removeItem('muneeb_cart');
 let cart = [];
 let detectedCoords = { lat: null, lng: null };
@@ -607,10 +607,8 @@ function filterByCategory(category) {
     });
   }
 
-  // Instant 0-second render
   renderMenu(filtered);
 
-  // Instant scroll
   const menuTarget = document.getElementById('menu') || document.getElementById('menu-grid') || document.getElementById('item-count-heading');
   if (menuTarget) {
     menuTarget.scrollIntoView({ behavior: 'auto', block: 'start' });
@@ -628,7 +626,7 @@ function searchMenu() {
 }
 
 // ==========================================
-// 6. CART MANAGEMENT (FRESH SESSION + AUTO-OPEN LOGIC)
+// 6. CART MANAGEMENT (FRESH SESSION + AUTO-OPEN)
 // ==========================================
 function handleCartAutoOpen() {
   if (!hasAutoOpenedCart) {
@@ -964,13 +962,12 @@ async function placeOrder() {
 }
 
 // ==========================================
-// 9. DYNAMIC DATA FETCHING & INITIALIZATION (0-SECOND CASE 2 LOGIC)
+// 9. DYNAMIC DATA FETCHING & INITIALIZATION (0-SECOND LOAD)
 // ==========================================
 async function initializeApp() {
   const urlParams = new URLSearchParams(window.location.search);
   const directCategory = urlParams.get('cat');
 
-  // CRITICAL ZERO-SECOND FIX: Agar URL mein direct category hai, toh bina poora menu dikhaye foran filter karo
   if (directCategory) {
     const target = directCategory.toLowerCase().replace(/['s]/g, '').trim();
     const directFiltered = activeMenuItems.filter(item => {
@@ -981,7 +978,6 @@ async function initializeApp() {
 
     renderMenu(directFiltered);
 
-    // Matching category pill ko activate karo
     const targetPill = Array.from(document.querySelectorAll('.cat-pill')).find(
       btn => btn.textContent.toLowerCase().includes(directCategory.toLowerCase())
     );
@@ -990,13 +986,11 @@ async function initializeApp() {
       targetPill.classList.add('active');
     }
   } else {
-    // Agar direct menu/home par ho toh standard load
     renderAllComponents();
   }
 
   updateCartUI();
 
-  // Background Live Database Sync without flicker
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 8000);
 
@@ -1028,14 +1022,12 @@ async function initializeApp() {
     console.warn("Background fetch sync:", err);
   }
 
-  // Payment listeners
   const paymentRadios = document.querySelectorAll('input[name="payment-method"]');
   paymentRadios.forEach(radio => {
     radio.addEventListener('change', togglePaymentUI);
     radio.addEventListener('click', togglePaymentUI);
   });
 
-  // Location input field par focus hone se detection & highlight activate
   const addressField = document.getElementById('customer-address');
   if (addressField) {
     addressField.addEventListener('focus', () => {
@@ -1143,76 +1135,69 @@ window.addEventListener('DOMContentLoaded', initializeApp);
   }
 })();
 
-async function loadLiveMenu() {
-  try {
-    const res = await fetch('http://localhost:5000/api/menu'); 
-    const items = await res.json();
-    renderMenuCards(items);
-  } catch (err) {
-    console.error("Menu fetch failed:", err);
-  }
+// ==========================================
+// 11. HOME DEALS & SIGNATURE DEALS
+// ==========================================
+function renderAllComponents() {
+  const items = (typeof activeMenuItems !== 'undefined' && activeMenuItems.length > 0)
+    ? activeMenuItems
+    : (typeof fallbackMenuItems !== 'undefined' ? fallbackMenuItems : []);
+
+  renderMenu(items);
+  renderHomeDeals();
+  renderSignatureMegaDeals();
 }
 
-// ==========================================
-// RENDER DYNAMIC HOME DEALS & MEGA DEALS (SORTED 1, 2, 3, 4)
-// ==========================================
 function renderHomeDeals() {
   const dealsGrid = document.getElementById('home-deals-grid');
-  if (dealsGrid) {
-    let deals = activeMenuItems.filter(item => 
-      (item.category || '').toLowerCase().includes('deal') &&
-      !((item.name || '').toLowerCase().includes('mega') || (item.name || '').toLowerCase().includes('chef') || (item.name || '').toLowerCase().includes('platter'))
-    );
+  if (!dealsGrid) return;
 
-    deals.sort((a, b) => {
-      const numA = parseInt((a.name.match(/\d+/) || [999])[0], 10);
-      const numB = parseInt((b.name.match(/\d+/) || [999])[0], 10);
-      return numA - numB;
-    });
+  let deals = activeMenuItems.filter(item => 
+    (item.category || '').toLowerCase().includes('deal') &&
+    !((item.name || '').toLowerCase().includes('mega') || (item.name || '').toLowerCase().includes('chef') || (item.name || '').toLowerCase().includes('platter'))
+  );
 
-    const displayDeals = deals.slice(0, 4);
+  deals.sort((a, b) => {
+    const numA = parseInt((a.name.match(/\d+/) || [999])[0], 10);
+    const numB = parseInt((b.name.match(/\d+/) || [999])[0], 10);
+    return numA - numB;
+  });
 
-    if (displayDeals.length > 0) {
-      dealsGrid.innerHTML = displayDeals.map((deal, idx) => {
-        const imgSrc = (deal.image && deal.image.length > 5) ? deal.image : (deal.img || 'images/pizza pic.jpg');
-        const price = deal.price || (deal.sizes && deal.sizes[0] ? deal.sizes[0].price : 800);
-        const escapedName = escapeQuotes(deal.name || `Deal.${idx + 1}`);
+  const displayDeals = deals.slice(0, 4);
 
-        return `
-          <div class="bg-[#121212] rounded-2xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
-            <div>
-              <div class="relative w-full h-28 sm:h-44 rounded-xl overflow-hidden bg-neutral-800 mb-3">
-                <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full uppercase">${deal.name.split(' ')[0] || 'Deal'}</span>
-                <img src="${imgSrc}" alt="${escapedName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="if(!this.src.includes('pizza pic'))this.src='images/pizza pic.jpg';">
-              </div>
-              <h3 class="font-bold text-white group-hover:text-brand-500 transition text-sm sm:text-base">${deal.name}</h3>
-              <p class="text-xs text-neutral-400 mt-1 line-clamp-2">${deal.desc || deal.description || ''}</p>
+  if (displayDeals.length > 0) {
+    dealsGrid.innerHTML = displayDeals.map((deal, idx) => {
+      const imgSrc = (deal.image && deal.image.length > 5) ? deal.image : (deal.img || 'images/pizza pic.jpg');
+      const price = deal.price || (deal.sizes && deal.sizes[0] ? deal.sizes[0].price : 800);
+      const escapedName = escapeQuotes(deal.name || `Deal.${idx + 1}`);
+
+      return `
+        <div class="bg-[#121212] rounded-2xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
+          <div>
+            <div class="relative w-full h-28 sm:h-44 rounded-xl overflow-hidden bg-neutral-800 mb-3">
+              <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full uppercase">${deal.name.split(' ')[0] || 'Deal'}</span>
+              <img src="${imgSrc}" alt="${escapedName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="if(!this.src.includes('pizza pic'))this.src='images/pizza pic.jpg';">
             </div>
-            <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
-              <div class="flex flex-col">
-                <span class="text-xs text-neutral-400">Price</span>
-                <span class="text-sm sm:text-lg font-bold text-yellow-400">Rs. ${price}/-</span>
-              </div>
-              <button onclick="addToCart('${escapedName}', '${price}/-')" aria-label="Add ${escapedName} to cart" class="flex items-center gap-1 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md cursor-pointer">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add
-              </button>
-            </div>
+            <h3 class="font-bold text-white group-hover:text-brand-500 transition text-sm sm:text-base">${deal.name}</h3>
+            <p class="text-xs text-neutral-400 mt-1 line-clamp-2">${deal.desc || deal.description || ''}</p>
           </div>
-        `;
-      }).join('');
-    }
+          <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
+            <div class="flex flex-col">
+              <span class="text-xs text-neutral-400">Price</span>
+              <span class="text-sm sm:text-lg font-bold text-yellow-400">Rs. ${price}/-</span>
+            </div>
+            <button onclick="addToCart('${escapedName}', '${price}/-')" aria-label="Add ${escapedName} to cart" class="flex items-center gap-1 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md cursor-pointer">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   if (window.lucide) lucide.createIcons();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(renderHomeDeals, 300);
-});
-
-// ==========================================
-// RENDER SIGNATURE MEGA DEALS (3 BOXES: LIMOUSINE, PLATTER & BIRTHDAY DEAL)
-// ==========================================
 function renderSignatureMegaDeals() {
   const container = document.getElementById('home-mega-deals-grid');
   if (!container) return;
@@ -1221,7 +1206,6 @@ function renderSignatureMegaDeals() {
     ? activeMenuItems
     : (typeof fallbackMenuItems !== 'undefined' ? fallbackMenuItems : []);
 
-  // 1. Limousine Pizza
   let limoItem = items.find(item => {
     const n = (item.name || '').toLowerCase();
     return n.includes('limousine') || n.includes('limosine');
@@ -1232,7 +1216,6 @@ function renderSignatureMegaDeals() {
     image: "images/pizza pic.jpg"
   };
 
-  // 2. Muneeb Special Platter
   let platterItem = items.find(item => {
     const n = (item.name || '').toLowerCase();
     return n.includes('platter') || n.includes('plater') || (n.includes('muneeb') && n.includes('special'));
@@ -1243,7 +1226,6 @@ function renderSignatureMegaDeals() {
     image: "images/deals.jpg"
   };
 
-  // 3. Birthday Deal
   let birthdayItem = items.find(item => {
     const n = (item.name || '').toLowerCase();
     return n.includes('birthday') || n.includes('celebration');
@@ -1288,222 +1270,4 @@ function renderSignatureMegaDeals() {
   }).join('');
 
   if (window.lucide) lucide.createIcons();
-}
-
-// ==============================================================
-// SELF-CONTAINED MENU & DEALS RENDERING
-// ==========================================
-window.addEventListener('DOMContentLoaded', () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  if (!urlParams.get('cat')) {
-    renderAllComponents();
-  }
-});
-
-function renderAllComponents() {
-  const items = (typeof activeMenuItems !== 'undefined' && activeMenuItems.length > 0)
-    ? activeMenuItems
-    : (typeof fallbackMenuItems !== 'undefined' ? fallbackMenuItems : []);
-
-  renderMenuCards(items);
-  renderHomeDealsCards(items);
-  renderMegaDealsCards(items);
-}
-
-function renderMenuCards(items) {
-  const grid = document.getElementById('menu-grid');
-  if (!grid || !items || items.length === 0) return;
-
-  grid.innerHTML = items.map(item => {
-    const img = (item.image && item.image.length > 5) ? item.image : (item.img || 'images/pizza pic.jpg');
-    const price = item.price || (item.sizes && item.sizes[0] ? item.sizes[0].price : 500);
-    const name = item.name || 'Special Item';
-    return `
-      <div class="bg-[#121212] rounded-2xl p-4 border border-yellow-400/10 flex flex-col justify-between hover:border-yellow-400/30 transition duration-300 group shadow-soft">
-        <div>
-          <div class="relative w-full h-40 rounded-xl overflow-hidden bg-neutral-800 mb-3">
-            <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">${item.category || 'Item'}</span>
-            <img src="${img}" alt="${name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='images/pizza pic.jpg';">
-          </div>
-          <h3 class="font-bold text-white group-hover:text-brand-500 transition text-base line-clamp-1">${name}</h3>
-          <p class="text-xs text-neutral-400 mt-1 line-clamp-2">${item.desc || item.description || ''}</p>
-        </div>
-        <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
-          <span class="text-base sm:text-lg font-bold text-yellow-400">Rs. ${price}/-</span>
-          <button onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md">
-            Add
-          </button>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function renderHomeDealsCards(items) {
-  const dealsGrid = document.getElementById('home-deals-grid');
-  if (!dealsGrid) return;
-
-  let deals = items.filter(i => (i.category || '').toLowerCase().includes('deal'));
-  if (deals.length === 0) deals = items.slice(0, 4);
-  deals.sort((a, b) => {
-    const numA = parseInt((a.name.match(/\d+/) || [999])[0], 10);
-    const numB = parseInt((b.name.match(/\d+/) || [999])[0], 10);
-    return numA - numB;
-  });
-
-  const displayDeals = deals.slice(0, 4);
-  if (displayDeals.length === 0) return;
-
-  dealsGrid.innerHTML = displayDeals.map((deal, idx) => {
-    const img = (deal.image && deal.image.length > 5) ? deal.image : (deal.img || 'images/pizza pic.jpg');
-    const price = deal.price || (deal.sizes && deal.sizes[0] ? deal.sizes[0].price : 800);
-    const name = deal.name || `Deal.${idx + 1}`;
-    return `
-      <div class="bg-[#121212] rounded-2xl p-3 sm:p-4 shadow-soft hover:shadow-hover transition duration-300 flex flex-col justify-between group border border-yellow-400/10">
-        <div>
-          <div class="relative w-full h-28 sm:h-44 rounded-xl overflow-hidden bg-neutral-800 mb-3">
-            <span class="absolute top-2 left-2 z-10 bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full uppercase">${name.split(' ')[0] || 'Deal'}</span>
-            <img src="${img}" alt="${name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='images/pizza pic.jpg';">
-          </div>
-          <h3 class="font-bold text-white group-hover:text-brand-500 transition text-sm sm:text-base">${name}</h3>
-          <p class="text-xs text-neutral-400 mt-1 line-clamp-2">${deal.desc || deal.description || ''}</p>
-        </div>
-        <div class="flex items-center justify-between mt-4 pt-2.5 border-t border-yellow-400/10">
-          <span class="text-sm sm:text-lg font-bold text-yellow-400">Rs. ${price}/-</span>
-          <button onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition active:scale-95 shadow-md">
-            Add
-          </button>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function renderMegaDealsCards(items) {
-  const container = document.getElementById('home-mega-deals-grid');
-  if (!container) return;
-
-  let limo = items.find(i => (i.name || '').toLowerCase().includes('limousine') || (i.name || '').toLowerCase().includes('limosine')) || {
-    name: "Limousine Pizza",
-    price: 3500,
-    desc: "Giant 1-Meter Limousine Pizza with multiple crust flavors + 2 Ltr Soft Drink.",
-    image: "images/pizza pic.jpg"
-  };
-
-  let platter = items.find(i => (i.name || '').toLowerCase().includes('platter') || (i.name || '').toLowerCase().includes('plater') || (i.name || '').toLowerCase().includes('special')) || {
-    name: "Muneeb Special Platter",
-    price: 3000,
-    desc: "10 Crispy Nuggets, 10 Hot Wings, 10 Grilled Wings, 1 Large Pizza, and 1.5 Ltr Soft Drink.",
-    image: "images/deals.jpg"
-  };
-
-  let birthday = items.find(i => (i.name || '').toLowerCase().includes('birthday') || (i.name || '').toLowerCase().includes('celebration')) || {
-    name: "Birthday Deal",
-    price: 6500,
-    desc: "2 Family Pizza, 5 Grill Burger, 20 Grill Wings, 1 Pound Cake, 4 Regular Fries, 2 Drink 1.5 Ltr.",
-    image: "images/deals.jpg"
-  };
-
-  const cards = [
-    { item: limo, tag: "👑 King Size Deal", badge: "MEGA FEAST" },
-    { item: platter, tag: "⭐ Muneeb Special Platter", badge: "HOT DEAL" },
-    { item: birthday, tag: "🎉 Special Birthday Deal", badge: "POPULAR" }
-  ];
-
-  container.innerHTML = cards.map(({ item, tag, badge }) => {
-    const img = (item.image && item.image.length > 5) ? item.image : (item.img || 'images/pizza pic.jpg');
-    const price = item.price || 3000;
-    const name = item.name || 'Mega Deal';
-    return `
-      <div class="bg-[#121212] border border-yellow-400/15 rounded-3xl p-5 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-yellow-400/30 transition duration-300 shadow-soft overflow-hidden group">
-        <div class="w-full md:w-7/12 space-y-3.5 order-2 md:order-1">
-          <span class="inline-block bg-brand-500/15 border border-brand-500/30 text-brand-400 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">${tag}</span>
-          <h3 class="text-xl sm:text-3xl font-extrabold text-white group-hover:text-yellow-400 transition">${name}</h3>
-          <p class="text-xs sm:text-sm text-neutral-300 leading-relaxed">${item.desc || item.description || ''}</p>
-          <div class="flex items-center gap-4 pt-2">
-            <span class="text-xl sm:text-2xl font-black text-yellow-400">Rs. ${price}/-</span>
-            <button onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-xs sm:text-sm font-bold px-6 py-2.5 rounded-full transition active:scale-95 shadow-md">
-              Order Now
-            </button>
-          </div>
-        </div>
-        <div class="w-full md:w-5/12 h-48 sm:h-60 rounded-2xl overflow-hidden bg-neutral-800 relative shadow-md order-1 md:order-2 shrink-0">
-          <img src="${img}" alt="${name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='images/pizza pic.jpg';">
-          <span class="absolute top-3 right-3 bg-brand-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase shadow">${badge}</span>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  if (window.lucide) lucide.createIcons();
-}
-// Global variable items ko store karne ke liye
-let allAdminProducts = [];
-
-// Jab loadAdminProducts call ho, data ko save karein
-const originalLoadAdminProducts = window.loadAdminProducts;
-
-function searchAdminProducts() {
-  const query = document.getElementById('admin-search-input')?.value.toLowerCase().trim() || '';
-  
-  if (!query) {
-    renderAdminTable(allAdminProducts);
-    return;
-  }
-
-  const filtered = allAdminProducts.filter(item => {
-    const name = (item.name || '').toLowerCase();
-    const cat = (item.category || '').toLowerCase();
-    const desc = (item.desc || item.description || '').toLowerCase();
-    return name.includes(query) || cat.includes(query) || desc.includes(query);
-  });
-
-  renderAdminTable(filtered);
-}
-// ==============================================================
-// INSTANT ZERO-SECOND TABLE SEARCH (DIRECT DOM FILTERING)
-// ==============================================================
-function searchAdminProducts() {
-  const query = (document.getElementById('admin-search-input')?.value || '').toLowerCase().trim();
-  const tableBody = document.getElementById('admin-menu-table');
-  if (!tableBody) return;
-
-  const rows = tableBody.querySelectorAll('tr');
-  let matchCount = 0;
-
-  // Har row ko direct inspect karke 0 second mein hide/show karein
-  rows.forEach(row => {
-    // Agar row data row nahi hai (jaise "loading" ya "no items") toh skip karein
-    if (row.children.length < 4) return;
-
-    const itemName = (row.children[0]?.textContent || '').toLowerCase();
-    const itemCategory = (row.children[1]?.textContent || '').toLowerCase();
-    const itemPrice = (row.children[2]?.textContent || '').toLowerCase();
-
-    // Word matching check
-    const isMatch = !query || itemName.includes(query) || itemCategory.includes(query) || itemPrice.includes(query);
-
-    if (isMatch) {
-      row.style.display = '';
-      matchCount++;
-    } else {
-      row.style.display = 'none';
-    }
-  });
-
-  // Agar koi matching item na mile toh feedback row dikhayein
-  let emptyNotice = document.getElementById('search-empty-notice');
-  if (matchCount === 0 && query !== '') {
-    if (!emptyNotice) {
-      emptyNotice = document.createElement('tr');
-      emptyNotice.id = 'search-empty-notice';
-      emptyNotice.innerHTML = `<td colspan="4" class="py-6 text-center text-neutral-400 text-xs font-semibold">No matching items found for "${query}"</td>`;
-      tableBody.appendChild(emptyNotice);
-    } else {
-      emptyNotice.style.display = '';
-      emptyNotice.innerHTML = `<td colspan="4" class="py-6 text-center text-neutral-400 text-xs font-semibold">No matching items found for "${query}"</td>`;
-    }
-  } else if (emptyNotice) {
-    emptyNotice.style.display = 'none';
-  }
 }
