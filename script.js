@@ -593,7 +593,7 @@ function renderMenu(itemsToRender = activeMenuItems) {
 }
 
 // ==========================================
-// 5. STICKY TOP CATEGORY SCROLL & ZERO-SECOND FAST FILTER
+// 5. STICKY TOP CATEGORY SCROLL & ACCURATE FILTER
 // ==========================================
 function selectCategory(buttonElement, category) {
   document.querySelectorAll('.cat-pill').forEach(btn => {
@@ -613,22 +613,47 @@ function selectCategory(buttonElement, category) {
 }
 
 function filterByCategory(category) {
-  const target = String(category || 'ALL').toLowerCase().replace(/['s]/g, '').trim();
+  const target = String(category || 'ALL').trim().toLowerCase();
 
   let filtered = activeMenuItems;
+
   if (target !== 'all') {
     filtered = activeMenuItems.filter(item => {
-      const itemCat = (item.category || '').toLowerCase().replace(/['s]/g, '').trim();
-      const itemName = (item.name || '').toLowerCase();
-      return itemCat.includes(target) || target.includes(itemCat) || itemName.includes(target);
+      const itemCat = String(item.category || '').trim().toLowerCase();
+
+      // 1. Muneeb Special Pizzas filter
+      if (target.includes('muneeb') || target.includes('special pizza')) {
+        return itemCat.includes('special pizza') || itemCat.includes('muneeb special');
+      }
+
+      // 2. Standard Pizzas filter (Special alag rahe)
+      if (target === 'pizza' || target === 'pizzas') {
+        return (itemCat === 'pizzas' || itemCat === 'pizza') && !itemCat.includes('special');
+      }
+
+      // 3. Deals filter
+      if (target.includes('deal')) {
+        return itemCat.includes('deal');
+      }
+
+      // 4. Baki categories (Burgers, Shawarma, Wings, Fries, Pasta, Pratha Roll)
+      const cleanTarget = target.replace(/s$/, '');
+      const cleanItemCat = itemCat.replace(/s$/, '');
+
+      return cleanItemCat === cleanTarget || itemCat === target || itemCat.startsWith(cleanTarget);
     });
   }
 
   renderMenu(filtered);
 
+  const heading = document.getElementById('item-count-heading');
+  if (heading) {
+    heading.innerText = target === 'all' ? `Showing all items (${filtered.length})` : `Showing ${category} (${filtered.length})`;
+  }
+
   const menuTarget = document.getElementById('menu') || document.getElementById('menu-grid') || document.getElementById('item-count-heading');
   if (menuTarget) {
-    menuTarget.scrollIntoView({ behavior: 'auto', block: 'start' });
+    menuTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }
 
@@ -986,14 +1011,7 @@ async function initializeApp() {
   const directCategory = urlParams.get('cat');
 
   if (directCategory) {
-    const target = directCategory.toLowerCase().replace(/['s]/g, '').trim();
-    const directFiltered = activeMenuItems.filter(item => {
-      const itemCat = (item.category || '').toLowerCase().replace(/['s]/g, '').trim();
-      const itemName = (item.name || '').toLowerCase();
-      return itemCat.includes(target) || target.includes(itemCat) || itemName.includes(target);
-    });
-
-    renderMenu(directFiltered);
+    filterByCategory(directCategory);
 
     const targetPill = Array.from(document.querySelectorAll('.cat-pill')).find(
       btn => btn.textContent.toLowerCase().includes(directCategory.toLowerCase())
