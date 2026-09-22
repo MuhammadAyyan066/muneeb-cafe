@@ -10,6 +10,23 @@ var MENU_API_URL = `${API_URL}/api/menu`;
 
 console.log("Connecting Menu to:", MENU_API_URL);
 
+// Safe Cache Storage Function (Fixes QuotaExceededError from Base64 images)
+function safeCacheMenu(data) {
+  try {
+    if (!Array.isArray(data)) return;
+    const lightweightData = data.map(item => ({
+      ...item,
+      image: (item.image && item.image.length > 500) ? 'images/pizza pic.jpg' : (item.image || 'images/pizza pic.jpg')
+    }));
+    localStorage.setItem('muneeb_menu_cache', JSON.stringify(lightweightData));
+  } catch (err) {
+    console.warn("Storage quota full, resetting cache safely.");
+    try {
+      localStorage.removeItem('muneeb_menu_cache');
+    } catch (e) {}
+  }
+}
+
 // ==========================================
 // 1. STATIC FALLBACK ITEMS
 // ==========================================
@@ -962,7 +979,7 @@ async function placeOrder() {
 }
 
 // ==========================================
-// 9. DYNAMIC DATA FETCHING & INITIALIZATION (0-SECOND LOAD)
+// 9. DYNAMIC DATA FETCHING & INITIALIZATION
 // ==========================================
 async function initializeApp() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -1008,7 +1025,7 @@ async function initializeApp() {
       const dbItems = await res.json();
       if (Array.isArray(dbItems) && dbItems.length > 0) {
         activeMenuItems = dbItems;
-        localStorage.setItem('muneeb_menu_cache', JSON.stringify(dbItems));
+        safeCacheMenu(dbItems);
 
         if (directCategory) {
           filterByCategory(directCategory);
@@ -1199,7 +1216,7 @@ function renderHomeDeals() {
 }
 
 // ==========================================
-// RENDER SIGNATURE MEGA DEALS (3 BOXES: LIMOUSINE, MUNEEB SPECIAL PLATTER, BIRTHDAY DEAL)
+// RENDER SIGNATURE MEGA DEALS (3 BOXES)
 // ==========================================
 function renderSignatureMegaDeals() {
   const container = document.getElementById('home-mega-deals-grid');
@@ -1290,32 +1307,6 @@ function renderSignatureMegaDeals() {
 }
 
 // ==============================================================
-// 12. REAL-TIME ZERO-SECOND LIVE MENU SYNC (SOCKET.IO)
-// ==============================================================
-(function initLiveMenuSync() {
-  try {
-    if (typeof io !== 'undefined') {
-      const socket = io(window.API_URL || 'https://muneeb-cafe-backend.vercel.app');
-
-      socket.on('connect', () => {
-        console.log("⚡ Live Real-time Menu Sync Connected");
-      });
-
-      socket.on('menuUpdated', (updatedItems) => {
-        if (Array.isArray(updatedItems) && updatedItems.length > 0) {
-          console.log("⚡ 0-Sec Live Update Received from Admin!");
-          activeMenuItems = updatedItems;
-          localStorage.setItem('muneeb_menu_cache', JSON.stringify(updatedItems));
-
-          renderAllComponents();
-        }
-      });
-    }
-  } catch (err) {
-    console.warn("Socket sync error:", err);
-  }
-})();
-// ==============================================================
 // 12. INSTANT LIVE SYNC VIA FAST BACKGROUND POLLING (VERCEL FRIENDLY)
 // ==============================================================
 (function initLiveMenuSync() {
@@ -1333,13 +1324,11 @@ function renderSignatureMegaDeals() {
         const dbItems = await res.json();
         const currentHash = JSON.stringify(dbItems);
 
-        // Agar database me koi bhi edit/change hui ho
         if (currentHash !== lastDataHash && Array.isArray(dbItems) && dbItems.length > 0) {
           lastDataHash = currentHash;
           activeMenuItems = dbItems;
-          localStorage.setItem('muneeb_menu_cache', currentHash);
+          safeCacheMenu(dbItems);
 
-          // Turant live screen update
           renderAllComponents();
 
           const urlParams = new URLSearchParams(window.location.search);
@@ -1352,6 +1341,6 @@ function renderSignatureMegaDeals() {
     }
   }
 
-  // Har 4 second baad automatic background check (Zero socket error)
-  setInterval(checkMenuUpdates, 4000);
+  // Fast background sync check
+  setInterval(checkMenuUpdates, 3000);
 })();
