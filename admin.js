@@ -1,19 +1,6 @@
 const API_URL = window.API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : 'https://muneeb-cafe-backend.vercel.app');
 const MENU_ENDPOINT = `${API_URL}/api/menu`;
 
-// Socket.io Realtime Client
-let socket = null;
-try {
-  if (typeof io !== 'undefined') {
-    socket = io(API_URL);
-    socket.on('connect', () => {
-      console.log("⚡ Main Admin connected to socket server");
-    });
-  }
-} catch (e) {
-  console.warn("Socket init error in admin:", e);
-}
-
 let allProducts = [];
 
 function showBanner(msg, isSuccess = true) {
@@ -118,7 +105,7 @@ async function loadAdminProducts() {
 
     allProducts = await res.json();
 
-    // Browser local cache foran fresh update karein
+    // Local Storage cache foran update
     localStorage.setItem('muneeb_menu_cache', JSON.stringify(allProducts));
 
     if (totalCount) totalCount.innerText = allProducts.length;
@@ -238,11 +225,6 @@ async function handleProductSubmit(e) {
     
     // Fresh MongoDB data reload
     await loadAdminProducts();
-
-    // Real-time broadcast to all client devices
-    if (socket) {
-      socket.emit('menuUpdated', allProducts);
-    }
   } catch (err) {
     showBanner(`Operation Failed: ${err.message}`, false);
   } finally {
@@ -259,10 +241,6 @@ async function deleteProduct(id) {
     showBanner("Item deleted successfully!");
     
     await loadAdminProducts();
-
-    if (socket) {
-      socket.emit('menuUpdated', allProducts);
-    }
   } catch (err) {
     showBanner(`Delete Error: ${err.message}`, false);
   }
