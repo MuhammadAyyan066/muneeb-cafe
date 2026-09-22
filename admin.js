@@ -1,5 +1,18 @@
-const API_URL = 'https://muneeb-cafe-backend.vercel.app';
+const API_URL = window.API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : 'https://muneeb-cafe-backend.vercel.app');
 const MENU_ENDPOINT = `${API_URL}/api/menu`;
+
+// Socket.io Realtime Client
+let socket = null;
+try {
+  if (typeof io !== 'undefined') {
+    socket = io(API_URL);
+    socket.on('connect', () => {
+      console.log("⚡ Main Admin connected to socket server");
+    });
+  }
+} catch (e) {
+  console.warn("Socket init error in admin:", e);
+}
 
 let allProducts = [];
 
@@ -24,6 +37,11 @@ function handleFileSelect(event) {
   const file = event.target.files[0];
   if (!file) return;
 
+  if (file.size > 2 * 1024 * 1024) {
+    alert("Image size bohat badi hai (Max 2MB allow hai). Please compress ya choti image upload karein.");
+    return;
+  }
+
   const reader = new FileReader();
   reader.onload = function(e) {
     const base64Url = e.target.result;
@@ -45,12 +63,12 @@ function openModal(item = null) {
 
   if (item) {
     title.innerText = "Edit Menu Item";
-    document.getElementById('product-id').value = item._id;
+    document.getElementById('product-id').value = item._id || item.id || '';
     document.getElementById('product-name').value = item.name || '';
     document.getElementById('product-category').value = item.category || 'Pizzas';
     document.getElementById('product-desc').value = item.desc || item.description || '';
     
-    const imgSrc = item.image || 'images/pizza pic.jpg';
+    const imgSrc = item.image || item.img || 'images/pizza pic.jpg';
     document.getElementById('product-image').value = imgSrc;
     document.getElementById('image-preview').src = imgSrc;
 
@@ -94,10 +112,14 @@ async function loadAdminProducts() {
   const statusEl = document.getElementById('server-status');
 
   try {
-    const res = await fetch(MENU_ENDPOINT);
+    const sep = MENU_ENDPOINT.includes('?') ? '&' : '?';
+    const res = await fetch(`${MENU_ENDPOINT}${sep}t=${Date.now()}`, { cache: 'no-store' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     allProducts = await res.json();
+
+    // Browser local cache foran fresh update karein
+    localStorage.setItem('muneeb_menu_cache', JSON.stringify(allProducts));
 
     if (totalCount) totalCount.innerText = allProducts.length;
     if (catCount) {
@@ -113,42 +135,53 @@ async function loadAdminProducts() {
       return;
     }
 
-    tbody.innerHTML = allProducts.map((item, idx) => {
-      let pricing = '';
-      if (item.hasSizes && Array.isArray(item.sizes) && item.sizes.length > 0) {
-        pricing = item.sizes.map(s => `${s.size[0]}: Rs.${s.price}`).join(' | ');
-      } else {
-        pricing = `Rs. ${item.price || 0}/-`;
-      }
-
-      return `
-        <tr class="hover:bg-neutral-800/40 transition border-b border-yellow-400/5">
-          <td class="py-3 px-4 flex items-center gap-3">
-            <img src="${item.image || 'images/pizza pic.jpg'}" class="w-10 h-10 rounded-lg object-cover border border-yellow-400/10" onerror="this.src='images/pizza pic.jpg'">
-            <div>
-              <p class="font-bold text-yellow-400 leading-tight">${item.name}</p>
-              <p class="text-[11px] text-neutral-500 line-clamp-1">${item.desc || item.description || ''}</p>
-            </div>
-          </td>
-          <td class="py-3 px-4 text-neutral-300 text-xs font-semibold">${item.category || 'Item'}</td>
-          <td class="py-3 px-4 text-brand-500 font-bold text-xs">${pricing}</td>
-          <td class="py-3 px-4 text-right space-x-2">
-            <button onclick="editProductByIndex(${idx})" class="text-yellow-400 hover:text-yellow-300 p-1.5 rounded-lg hover:bg-yellow-400/10 transition" title="Edit Item">
-              <i data-lucide="edit-3" class="w-4 h-4"></i>
-            </button>
-            <button onclick="deleteProduct('${item._id}')" class="text-red-400 hover:text-red-300 p-1.5 rounded-lg hover:bg-red-950/30 transition" title="Delete">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
-          </td>
-        </tr>
-      `;
-    }).join('');
+    renderAdminTableRows(allProducts);
 
     if (window.lucide) lucide.createIcons();
   } catch (err) {
     if (statusEl) statusEl.innerHTML = `<span class="w-3 h-3 rounded-full bg-red-500"></span> Disconnected`;
     if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-red-400 text-xs">Failed to load database: ${err.message}</td></tr>`;
   }
+}
+
+function renderAdminTableRows(items) {
+  const tbody = document.getElementById('admin-menu-table');
+  if (!tbody) return;
+
+  tbody.innerHTML = items.map((item, idx) => {
+    let pricing = '';
+    if (item.hasSizes && Array.isArray(item.sizes) && item.sizes.length > 0) {
+      pricing = item.sizes.map(s => `${s.size[0]}: Rs.${s.price}`).join(' | ');
+    } else {
+      pricing = `Rs. ${item.price || 0}/-`;
+    }
+
+    const itemId = item._id || item.id;
+
+    return `
+      <tr class="hover:bg-neutral-800/40 transition border-b border-yellow-400/5">
+        <td class="py-3 px-4 flex items-center gap-3">
+          <img src="${item.image || 'images/pizza pic.jpg'}" class="w-10 h-10 rounded-lg object-cover border border-yellow-400/10" onerror="this.src='images/pizza pic.jpg'">
+          <div>
+            <p class="font-bold text-yellow-400 leading-tight">${item.name}</p>
+            <p class="text-[11px] text-neutral-500 line-clamp-1">${item.desc || item.description || ''}</p>
+          </div>
+        </td>
+        <td class="py-3 px-4 text-neutral-300 text-xs font-semibold">${item.category || 'Item'}</td>
+        <td class="py-3 px-4 text-brand-500 font-bold text-xs">${pricing}</td>
+        <td class="py-3 px-4 text-right space-x-2">
+          <button onclick="editProductByIndex(${idx})" class="text-yellow-400 hover:text-yellow-300 p-1.5 rounded-lg hover:bg-yellow-400/10 transition cursor-pointer" title="Edit Item">
+            <i data-lucide="edit-3" class="w-4 h-4"></i>
+          </button>
+          <button onclick="deleteProduct('${itemId}')" class="text-red-400 hover:text-red-300 p-1.5 rounded-lg hover:bg-red-950/30 transition cursor-pointer" title="Delete">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  if (window.lucide) lucide.createIcons();
 }
 
 function editProductByIndex(index) {
@@ -202,7 +235,14 @@ async function handleProductSubmit(e) {
 
     showBanner(isEdit ? 'Item updated in MongoDB!' : 'New item saved to MongoDB!');
     closeModal();
-    loadAdminProducts();
+    
+    // Fresh MongoDB data reload
+    await loadAdminProducts();
+
+    // Real-time broadcast to all client devices
+    if (socket) {
+      socket.emit('menuUpdated', allProducts);
+    }
   } catch (err) {
     showBanner(`Operation Failed: ${err.message}`, false);
   } finally {
@@ -217,7 +257,12 @@ async function deleteProduct(id) {
     const res = await fetch(`${MENU_ENDPOINT}/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error("Could not delete from backend");
     showBanner("Item deleted successfully!");
-    loadAdminProducts();
+    
+    await loadAdminProducts();
+
+    if (socket) {
+      socket.emit('menuUpdated', allProducts);
+    }
   } catch (err) {
     showBanner(`Delete Error: ${err.message}`, false);
   }
@@ -227,6 +272,7 @@ window.addEventListener('DOMContentLoaded', () => {
   loadAdminProducts();
   if (window.lucide) lucide.createIcons();
 });
+
 // ==============================================================
 // INSTANT ZERO-SECOND TABLE SEARCH (DIRECT DOM FILTERING)
 // ==============================================================
@@ -238,16 +284,13 @@ function searchAdminProducts() {
   const rows = tableBody.querySelectorAll('tr');
   let matchCount = 0;
 
-  // Har row ko direct inspect karke 0 second mein hide/show karein
   rows.forEach(row => {
-    // Agar row data row nahi hai (jaise "loading" ya "no items") toh skip karein
     if (row.children.length < 4) return;
 
     const itemName = (row.children[0]?.textContent || '').toLowerCase();
     const itemCategory = (row.children[1]?.textContent || '').toLowerCase();
     const itemPrice = (row.children[2]?.textContent || '').toLowerCase();
 
-    // Word matching check
     const isMatch = !query || itemName.includes(query) || itemCategory.includes(query) || itemPrice.includes(query);
 
     if (isMatch) {
@@ -258,7 +301,6 @@ function searchAdminProducts() {
     }
   });
 
-  // Agar koi matching item na mile toh feedback row dikhayein
   let emptyNotice = document.getElementById('search-empty-notice');
   if (matchCount === 0 && query !== '') {
     if (!emptyNotice) {
