@@ -3,6 +3,23 @@ const MENU_ENDPOINT = `${API_URL}/api/menu`;
 
 let allProducts = [];
 
+// Safe cache handler to completely prevent QuotaExceededError
+function safeCacheMenu(data) {
+  try {
+    if (!Array.isArray(data)) return;
+    const lightweightData = data.map(item => ({
+      ...item,
+      image: (item.image && item.image.length > 500) ? 'images/pizza pic.jpg' : (item.image || 'images/pizza pic.jpg')
+    }));
+    localStorage.setItem('muneeb_menu_cache', JSON.stringify(lightweightData));
+  } catch (err) {
+    console.warn("Storage quota full, resetting cache safely.");
+    try {
+      localStorage.removeItem('muneeb_menu_cache');
+    } catch (e) {}
+  }
+}
+
 function showBanner(msg, isSuccess = true) {
   const banner = document.getElementById('admin-alert');
   const text = document.getElementById('admin-alert-text');
@@ -105,8 +122,8 @@ async function loadAdminProducts() {
 
     allProducts = await res.json();
 
-    // Local Storage cache foran update
-    localStorage.setItem('muneeb_menu_cache', JSON.stringify(allProducts));
+    // Safe cache storage (No QuotaExceededError)
+    safeCacheMenu(allProducts);
 
     if (totalCount) totalCount.innerText = allProducts.length;
     if (catCount) {
