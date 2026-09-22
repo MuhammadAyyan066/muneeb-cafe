@@ -1008,8 +1008,9 @@ async function initializeApp() {
 
   updateCartUI();
 
+  // 35 Seconds Timeout for Vercel Cold-Starts (Prevents AbortError)
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  const timeoutId = setTimeout(() => controller.abort(), 35000);
 
   try {
     const sep = MENU_API_URL.includes('?') ? '&' : '?';
@@ -1027,16 +1028,18 @@ async function initializeApp() {
         activeMenuItems = dbItems;
         safeCacheMenu(dbItems);
 
+        renderAllComponents();
+
         if (directCategory) {
           filterByCategory(directCategory);
-        } else {
-          renderAllComponents();
         }
       }
     }
   } catch (err) {
     clearTimeout(timeoutId);
-    console.warn("Background fetch sync:", err);
+    if (err.name !== 'AbortError') {
+      console.warn("Background fetch sync:", err);
+    }
   }
 
   const paymentRadios = document.querySelectorAll('input[name="payment-method"]');
