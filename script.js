@@ -1315,3 +1315,43 @@ function renderSignatureMegaDeals() {
     console.warn("Socket sync error:", err);
   }
 })();
+// ==============================================================
+// 12. INSTANT LIVE SYNC VIA FAST BACKGROUND POLLING (VERCEL FRIENDLY)
+// ==============================================================
+(function initLiveMenuSync() {
+  let lastDataHash = "";
+
+  async function checkMenuUpdates() {
+    try {
+      const sep = MENU_API_URL.includes('?') ? '&' : '?';
+      const res = await fetch(`${MENU_API_URL}${sep}t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (res.ok) {
+        const dbItems = await res.json();
+        const currentHash = JSON.stringify(dbItems);
+
+        // Agar database me koi bhi edit/change hui ho
+        if (currentHash !== lastDataHash && Array.isArray(dbItems) && dbItems.length > 0) {
+          lastDataHash = currentHash;
+          activeMenuItems = dbItems;
+          localStorage.setItem('muneeb_menu_cache', currentHash);
+
+          // Turant live screen update
+          renderAllComponents();
+
+          const urlParams = new URLSearchParams(window.location.search);
+          const directCat = urlParams.get('cat');
+          if (directCat) filterByCategory(directCat);
+        }
+      }
+    } catch (err) {
+      // background error ignore
+    }
+  }
+
+  // Har 4 second baad automatic background check (Zero socket error)
+  setInterval(checkMenuUpdates, 4000);
+})();
