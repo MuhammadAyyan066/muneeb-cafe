@@ -6,7 +6,7 @@ window.API_URL = window.API_URL || (isLocalhost ? "http://localhost:5000" : "htt
 
 var API_URL = window.API_URL;
 var API_BASE_URL = `${API_URL}/api/orders`;
-var MENU_API_URL = API_URL + "/api/menu";
+var MENU_API_URL = `${API_URL}/api/menu`;
 
 console.log("Connecting Menu to:", MENU_API_URL);
 
@@ -507,7 +507,7 @@ function renderProductCard(item) {
             <span class="absolute top-2.5 right-2.5 z-10 bg-neutral-950/80 text-yellow-400 text-[10px] font-black px-2 py-0.5 rounded-full border border-yellow-400/20">
               ${variants.length} Sizes
             </span>
-            <img src="${item.image || item.img || 'images/pizza pic.jpg'}" alt="${escapedName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="if(this.src!=='images/pizza pic.jpg')this.src='images/pizza pic.jpg';">
+            <img src="${imageSrc}" alt="${escapedName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="if(this.src!=='images/pizza pic.jpg')this.src='images/pizza pic.jpg';">
           </div>
           <h3 class="font-black text-white text-base">${item.name}</h3>
           <p class="text-xs text-neutral-400 mt-1 line-clamp-2">${description}</p>
@@ -531,7 +531,7 @@ function renderProductCard(item) {
           <span class="absolute top-2.5 left-2.5 z-10 bg-brand-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
             ${categoryTag}
           </span>
-          <img src="${item.image || item.img || 'images/pizza pic.jpg'}" alt="${escapedName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='images/burgers.jpg'">
+          <img src="${imageSrc}" alt="${escapedName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='images/burgers.jpg'">
         </div>
         <h3 class="font-black text-white text-base">${item.name}</h3>
         <p class="text-xs text-neutral-400 mt-1 line-clamp-2">${description}</p>
@@ -1220,7 +1220,7 @@ function renderSignatureMegaDeals() {
     image: "images/pizza pic.jpg"
   };
 
-  // 2. Muneeb Special Platter (Menu Item Match - No Shawarma)
+  // 2. Muneeb Special Platter
   let platterItem = items.find(item => {
     const n = (item.name || '').toLowerCase();
     return n.includes('muneeb special platter') || (n.includes('platter') && !n.includes('shawarma'));
