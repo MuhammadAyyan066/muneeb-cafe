@@ -1271,3 +1271,159 @@ function renderSignatureMegaDeals() {
 
   if (window.lucide) lucide.createIcons();
 }
+// ==========================================
+// RENDER SIGNATURE MEGA DEALS (3 BOXES: LIMOUSINE, MUNEEB SPECIAL PLATTER, BIRTHDAY DEAL)
+// ==========================================
+function renderSignatureMegaDeals() {
+  const container = document.getElementById('home-mega-deals-grid');
+  if (!container) return;
+
+  const items = (typeof activeMenuItems !== 'undefined' && activeMenuItems.length > 0)
+    ? activeMenuItems
+    : (typeof fallbackMenuItems !== 'undefined' ? fallbackMenuItems : []);
+
+  // 1. Limousine Pizza
+  let limoItem = items.find(item => {
+    const n = (item.name || '').toLowerCase();
+    return n.includes('limousine') || n.includes('limosine');
+  }) || {
+    name: "Limousine Pizza",
+    price: 3500,
+    desc: "Giant 1-Meter Limousine Pizza with multiple crust flavors + 2 Ltr Soft Drink.",
+    image: "images/pizza pic.jpg"
+  };
+
+  // 2. Muneeb Special Platter (Menu Item Match - No Shawarma)
+  let platterItem = items.find(item => {
+    const n = (item.name || '').toLowerCase();
+    return n.includes('muneeb special platter') || (n.includes('platter') && !n.includes('shawarma'));
+  }) || {
+    name: "Muneeb Special Platter",
+    price: 3000,
+    desc: "10 Nuggets, 10 Hot wings, 10 Grill wings, 1 Large Pizza, 1 Drink 1.5 Ltr",
+    image: "images/deals.jpg"
+  };
+
+  // 3. Birthday Deal
+  let birthdayItem = items.find(item => {
+    const n = (item.name || '').toLowerCase();
+    return n.includes('birthday') || n.includes('celebration');
+  }) || {
+    name: "Birthday Deal",
+    price: 6500,
+    desc: "2 Family Pizza, 5 Grill Burger, 20 Grill Wings, 1 Pound Cake, 4 Regular Fries, 2 Drink 1.5 Ltr.",
+    image: "images/deals.jpg"
+  };
+
+  const fixedDeals = [
+    { item: limoItem, tag: "👑 King Size Deal", badge: "MEGA FEAST" },
+    { item: platterItem, tag: "⭐ Muneeb Special Platter", badge: "HOT DEAL" },
+    { item: birthdayItem, tag: "🎉 Special Birthday Deal", badge: "POPULAR" }
+  ];
+
+  container.innerHTML = fixedDeals.map(({ item, tag, badge }) => {
+    const imgSrc = (item.image && item.image.length > 5) ? item.image : (item.img || 'images/deals.jpg');
+    const price = item.price || (item.sizes && item.sizes[0] ? item.sizes[0].price : 3000);
+    const escapedName = typeof escapeQuotes === 'function' ? escapeQuotes(item.name) : item.name;
+    const desc = item.desc || item.description || '';
+
+    return `
+      <div class="bg-[#121212] border border-yellow-400/15 rounded-3xl p-5 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-yellow-400/30 transition duration-300 shadow-soft overflow-hidden group">
+        <div class="w-full md:w-7/12 space-y-3.5 order-2 md:order-1">
+          <span class="inline-block bg-brand-500/15 border border-brand-500/30 text-brand-400 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+            ${tag}
+          </span>
+          <h3 class="text-xl sm:text-3xl font-extrabold text-white group-hover:text-yellow-400 transition">
+            ${item.name}
+          </h3>
+          <p class="text-xs sm:text-sm text-neutral-300 leading-relaxed">
+            ${desc}
+          </p>
+          <div class="flex items-center gap-4 pt-2">
+            <span class="text-xl sm:text-2xl font-black text-yellow-400">Rs. ${price}/-</span>
+            <button onclick="addToCart('${escapedName}', '${price}/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-xs sm:text-sm font-bold px-6 py-2.5 rounded-full transition active:scale-95 shadow-md cursor-pointer">
+              Order Now
+            </button>
+          </div>
+        </div>
+        <div class="w-full md:w-5/12 h-48 sm:h-60 rounded-2xl overflow-hidden bg-neutral-800 relative shadow-md order-1 md:order-2 shrink-0">
+          <img 
+            src="${imgSrc}" 
+            alt="${escapedName}" 
+            class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+            onerror="this.src='images/pizza pic.jpg';"
+          />
+          <span class="absolute top-3 right-3 bg-brand-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase shadow">${badge}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function renderMegaDealsCards(items) {
+  const container = document.getElementById('home-mega-deals-grid');
+  if (!container) return;
+
+  // 1. Limousine Pizza
+  let limo = items.find(i => (i.name || '').toLowerCase().includes('limousine') || (i.name || '').toLowerCase().includes('limosine')) || {
+    name: "Limousine Pizza",
+    price: 3500,
+    desc: "Giant 1-Meter Limousine Pizza with multiple crust flavors + 2 Ltr Soft Drink.",
+    image: "images/pizza pic.jpg"
+  };
+
+  // 2. Muneeb Special Platter (No Shawarma)
+  let platter = items.find(i => {
+    const n = (i.name || '').toLowerCase();
+    return n.includes('muneeb special platter') || (n.includes('platter') && !n.includes('shawarma'));
+  }) || {
+    name: "Muneeb Special Platter",
+    price: 3000,
+    desc: "10 Nuggets, 10 Hot wings, 10 Grill wings, 1 Large Pizza, 1 Drink 1.5 Ltr",
+    image: "images/deals.jpg"
+  };
+
+  // 3. Birthday Deal
+  let birthday = items.find(i => (i.name || '').toLowerCase().includes('birthday') || (i.name || '').toLowerCase().includes('celebration')) || {
+    name: "Birthday Deal",
+    price: 6500,
+    desc: "2 Family Pizza, 5 Grill Burger, 20 Grill Wings, 1 Pound Cake, 4 Regular Fries, 2 Drink 1.5 Ltr.",
+    image: "images/deals.jpg"
+  };
+
+  const cards = [
+    { item: limo, tag: "👑 King Size Deal", badge: "MEGA FEAST" },
+    { item: platter, tag: "⭐ Muneeb Special Platter", badge: "HOT DEAL" },
+    { item: birthday, tag: "🎉 Special Birthday Deal", badge: "POPULAR" }
+  ];
+
+  container.innerHTML = cards.map(({ item, tag, badge }) => {
+    const img = (item.image && item.image.length > 5) ? item.image : (item.img || 'images/pizza pic.jpg');
+    const price = item.price || 3000;
+    const name = item.name || 'Mega Deal';
+    const desc = item.desc || item.description || '';
+    return `
+      <div class="bg-[#121212] border border-yellow-400/15 rounded-3xl p-5 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-yellow-400/30 transition duration-300 shadow-soft overflow-hidden group">
+        <div class="w-full md:w-7/12 space-y-3.5 order-2 md:order-1">
+          <span class="inline-block bg-brand-500/15 border border-brand-500/30 text-brand-400 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">${tag}</span>
+          <h3 class="text-xl sm:text-3xl font-extrabold text-white group-hover:text-yellow-400 transition">${name}</h3>
+          <p class="text-xs sm:text-sm text-neutral-300 leading-relaxed">${desc}</p>
+          <div class="flex items-center gap-4 pt-2">
+            <span class="text-xl sm:text-2xl font-black text-yellow-400">Rs. ${price}/-</span>
+            <button onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}/-')" class="bg-brand-500 hover:bg-brand-600 text-white text-xs sm:text-sm font-bold px-6 py-2.5 rounded-full transition active:scale-95 shadow-md">
+              Order Now
+            </button>
+          </div>
+        </div>
+        <div class="w-full md:w-5/12 h-48 sm:h-60 rounded-2xl overflow-hidden bg-neutral-800 relative shadow-md order-1 md:order-2 shrink-0">
+          <img src="${img}" alt="${name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='images/pizza pic.jpg';">
+          <span class="absolute top-3 right-3 bg-brand-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase shadow">${badge}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (window.lucide) lucide.createIcons();
+}
