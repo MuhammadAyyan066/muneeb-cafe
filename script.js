@@ -431,7 +431,11 @@ const fallbackMenuItems = [
   { name: "Loaded Fries", category: "Fries", price: 360, time: "10 min", rating: "4.9 (290)", desc: "Fries topped with creamy cheese sauce and chicken bits", tag: "Fries", image: "images/burgers.jpg" },
 
   // --- PASTA ---
-  { name: "Creamy Alfredo Pasta", category: "Pasta", price: 550, time: "15 min", rating: "4.9 (110)", desc: "Fettuccine pasta tossed in rich parmesan alfredo sauce and chicken chunks", tag: "Pasta", image: "images/pasta.jpg" }
+  { name: "Creamy Alfredo Pasta", category: "Pasta", price: 550, time: "15 min", rating: "4.9 (110)", desc: "Fettuccine pasta tossed in rich parmesan alfredo sauce and chicken chunks", tag: "Pasta", image: "images/pasta.jpg" },
+
+  // --- WRAPS & SANDWICHES ---
+  { name: "Grilled Chicken Wrap", category: "Wrap", price: 380, time: "12 min", rating: "4.8 (90)", desc: "Grilled chicken slices wrapped with fresh veggies and garlic dressing", tag: "Wrap", image: "images/shawarma.jpg" },
+  { name: "Club Sandwich", category: "Sandwich", price: 420, time: "12 min", rating: "4.8 (115)", desc: "Triple layer sandwich loaded with chicken chunks, egg, lettuce and cheese", tag: "Sandwich", image: "images/burgers.jpg" }
 ];
 
 // ZERO-DELAY CACHE INITIALIZATION
@@ -462,17 +466,87 @@ window.addEventListener('pageshow', function (event) {
 });
 
 // ==========================================
-// 2. ESCAPE UTILITY
+// 2. ESCAPE UTILITY & CATEGORY SORTING
 // ==========================================
 function escapeQuotes(str) {
   return String(str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
 }
 
+// Sequence hierarchy for "All Items" tab
+const CATEGORY_HIERARCHY = [
+  'deal',               // 1. Special Deals (Sab se pehle)
+  'special pizza',      // 2. Muneeb Special Pizzas
+  'pizza',              // 3. Standard Pizzas
+  'burger',             // 4. Burgers
+  'shawarma',           // 5. Shawarma
+  'pratha',             // 6. Pratha Roll
+  'roll',               // 6. Roll alternative
+  'wing',               // 7. Hot Wings
+  'fries',              // 8. Fries
+  'pasta',              // 9. Pasta
+  'limousine',          // 10. Limousine Pizza
+  'wrap',               // 11. Wrap (End se pehle)
+  'sandwich'            // 12. Sandwich (Sab se aakhir mein)
+];
+
+function getCategoryPriority(catStr) {
+  const c = String(catStr || '').toLowerCase().trim();
+  for (let i = 0; i < CATEGORY_HIERARCHY.length; i++) {
+    if (c.includes(CATEGORY_HIERARCHY[i])) {
+      return i;
+    }
+  }
+  return 999;
+}
+
+// Natural Deal number extractor: "Deal.1" -> 1, "Deal 10" -> 10, Other Deals -> 9999
+function extractDealNumber(name) {
+  if (!name) return 9999;
+  const match = String(name).match(/(?:deal|dl)[\s\._\-]*(\d+)/i);
+  return match ? parseInt(match[1], 10) : 9999;
+}
+
+// Master Menu Sorter: Groups by Category Sequence & Orders Deals 1..N
+function sortMenuItemsList(items, currentCategory = 'ALL') {
+  if (!Array.isArray(items)) return [];
+
+  return [...items].sort((a, b) => {
+    const isAll = String(currentCategory).trim().toUpperCase() === 'ALL';
+    const catA = String(a.category || '').toLowerCase().trim();
+    const catB = String(b.category || '').toLowerCase().trim();
+
+    // 1. Agar "All Items" dekh rahe hain to Category Sequence ke mutabiq group karein
+    if (isAll) {
+      const pA = getCategoryPriority(catA);
+      const pB = getCategoryPriority(catB);
+      if (pA !== pB) {
+        return pA - pB;
+      }
+    }
+
+    // 2. Deals ko natural sequence mein arrange karein: Deal 1 -> Deal 2 -> ... -> Other Deals
+    const isDealA = catA.includes('deal') || (a.name || '').toLowerCase().includes('deal');
+    const isDealB = catB.includes('deal') || (b.name || '').toLowerCase().includes('deal');
+
+    if (isDealA && isDealB) {
+      const numA = extractDealNumber(a.name);
+      const numB = extractDealNumber(b.name);
+      if (numA !== numB) {
+        return numA - numB;
+      }
+      return String(a.name || '').localeCompare(String(b.name || ''), undefined, { numeric: true });
+    }
+
+    return 0;
+  });
+}
+
 // ==========================================
-// 3. CARD RENDERER
+// 3. CARD RENDERER (MULTI-SIZE + SINGLE-PRICE)
 // ==========================================
 function renderProductCard(item) {
-  const isPizza = (item.category || '').toLowerCase().includes('pizza') || Boolean(item.hasSizes);
+  const hasExplicitSizes = Boolean(item.hasSizes) && Array.isArray(item.sizes) && item.sizes.length > 0;
+  const isPizza = (item.category || '').toLowerCase().includes('pizza') || hasExplicitSizes;
 
   let variants = [];
   if (Array.isArray(item.sizes) && item.sizes.length > 0) {
@@ -498,7 +572,8 @@ function renderProductCard(item) {
   const categoryTag = item.tag || item.category || 'Special';
   const description = item.desc || item.description || '';
 
-  if (isPizza && variants.length > 0) {
+  // Render Multi-size buttons (Pizza, Fries S/M/L, Wings 6p/12p, Pasta S/L)
+  if (variants.length > 0 && (isPizza || hasExplicitSizes)) {
     const sizeRowsHtml = variants.map(v => `
       <div class="flex items-center justify-between py-1.5 px-3 rounded-xl bg-neutral-950/80 border border-neutral-800 text-xs">
         <div class="flex items-center gap-2">
@@ -537,6 +612,7 @@ function renderProductCard(item) {
     `;
   }
 
+  // Standard Single Price Card
   const rawPrice = typeof item.price === 'number' 
     ? item.price 
     : parseInt(String(item.price || '0').replace(/[^0-9]/g, ''), 10) || 0;
@@ -571,9 +647,9 @@ function renderProductCard(item) {
 }
 
 // ==========================================
-// 4. RENDER MENU GRID
+// 4. RENDER MENU GRID WITH CATEGORY SEQUENCE
 // ==========================================
-function renderMenu(itemsToRender = activeMenuItems) {
+function renderMenu(itemsToRender = activeMenuItems, currentCategory = 'ALL') {
   const grid = document.getElementById('menu-grid');
   const heading = document.getElementById('item-count-heading');
 
@@ -585,7 +661,9 @@ function renderMenu(itemsToRender = activeMenuItems) {
     return;
   }
 
-  grid.innerHTML = itemsToRender.map(item => renderProductCard(item)).join('');
+  // Tarteeb apply karein (Deals 1..N order + Category group)
+  const sortedItems = sortMenuItemsList(itemsToRender, currentCategory);
+  grid.innerHTML = sortedItems.map(item => renderProductCard(item)).join('');
 
   if (window.lucide) {
     lucide.createIcons();
@@ -593,7 +671,7 @@ function renderMenu(itemsToRender = activeMenuItems) {
 }
 
 // ==========================================
-// 5. STICKY TOP CATEGORY SCROLL & ACCURATE FILTER
+// 5. STICKY TOP CATEGORY SCROLL & FILTERING
 // ==========================================
 function selectCategory(buttonElement, category) {
   document.querySelectorAll('.cat-pill').forEach(btn => {
@@ -626,8 +704,8 @@ function filterByCategory(category) {
         return itemCat.includes('special pizza') || itemCat.includes('muneeb special');
       }
 
-      // 2. Standard Pizzas filter (Special alag rahe)
-      if (target === 'pizza' || target === 'pizzas') {
+      // 2. Standard Pizzas filter
+      if (target === 'pizza' || target === 'pizzas' || target === "pizza's") {
         return (itemCat === 'pizzas' || itemCat === 'pizza') && !itemCat.includes('special');
       }
 
@@ -636,7 +714,17 @@ function filterByCategory(category) {
         return itemCat.includes('deal');
       }
 
-      // 4. Baki categories (Burgers, Shawarma, Wings, Fries, Pasta, Pratha Roll)
+      // 4. Wrap filter (Wrap / Wraps)
+      if (target === 'wrap' || target === 'wraps') {
+        return itemCat.includes('wrap');
+      }
+
+      // 5. Sandwich filter (Sandwich / Sandwiches)
+      if (target === 'sandwich' || target === 'sandwiches') {
+        return itemCat.includes('sandwich');
+      }
+
+      // 6. Baki categories (Burgers, Shawarma, Wings, Fries, Pasta, Pratha Roll)
       const cleanTarget = target.replace(/s$/, '');
       const cleanItemCat = itemCat.replace(/s$/, '');
 
@@ -644,7 +732,7 @@ function filterByCategory(category) {
     });
   }
 
-  renderMenu(filtered);
+  renderMenu(filtered, category);
 
   const heading = document.getElementById('item-count-heading');
   if (heading) {
@@ -664,7 +752,7 @@ function searchMenu() {
     (item.desc && item.desc.toLowerCase().includes(query)) || 
     (item.category && item.category.toLowerCase().includes(query))
   );
-  renderMenu(filtered);
+  renderMenu(filtered, 'SEARCH');
 }
 
 // ==========================================
@@ -834,11 +922,8 @@ function togglePaymentUI() {
   }
 }
 
-// Client-side Direct Cloud Uploader (ImgBB Free API)
-// Yeh function screenshot ko cloud link (URL) mein convert karta hai taake DB crash na ho
 async function uploadScreenshotToCloud(imageFile) {
-  // Free public anonymous API key for seamless receipts upload
-  const IMGBB_API_KEY ="43240ac08db7c5c9bfe4d69bce7865fc"; 
+  const IMGBB_API_KEY = "43240ac08db7c5c9bfe4d69bce7865fc"; 
   const formData = new FormData();
   formData.append('image', imageFile);
 
@@ -849,7 +934,7 @@ async function uploadScreenshotToCloud(imageFile) {
 
   const data = await res.json();
   if (data && data.success && data.data && data.data.url) {
-    return data.data.url; // Returns direct permanent image URL
+    return data.data.url;
   } else {
     throw new Error(data?.error?.message || "Screenshot upload nahi ho saka. Dobara koshish karein.");
   }
@@ -961,7 +1046,6 @@ async function placeOrder() {
   const receiptFile = receiptInput?.files?.[0];
   let paymentScreenshotUrl = "";
 
-  // Agar Bank Transfer select kiya hai toh screenshot verification
   if (paymentMethod.includes('Bank') || paymentMethod === 'Online Bank Transfer') {
     if (!receiptFile) {
       showCheckoutNotification("Barah-e-karam bank transfer ki payment slip / screenshot attach karein!", "error");
@@ -974,7 +1058,6 @@ async function placeOrder() {
         orderBtn.disabled = true;
         orderBtn.innerHTML = `<span>Uploading Receipt...</span>`;
       }
-      // Screenshot cloud par upload ho kar URL banega
       paymentScreenshotUrl = await uploadScreenshotToCloud(receiptFile);
     } catch (uploadErr) {
       console.error("Screenshot upload failed:", uploadErr);
@@ -1021,7 +1104,8 @@ async function placeOrder() {
         items: formattedItems,
         totalAmount,
         paymentMethod,
-        paymentScreenshot: paymentScreenshotUrl // Clean URL database mein save hoga
+        paymentScreenshot: paymentScreenshotUrl,
+        paymentReceipt: paymentScreenshotUrl
       })
     });
 
@@ -1079,7 +1163,6 @@ async function initializeApp() {
 
   updateCartUI();
 
-  // 35 Seconds Timeout for Vercel Cold-Starts (Prevents AbortError)
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 35000);
 
@@ -1234,7 +1317,7 @@ function renderAllComponents() {
     ? activeMenuItems
     : (typeof fallbackMenuItems !== 'undefined' ? fallbackMenuItems : []);
 
-  renderMenu(items);
+  renderMenu(items, 'ALL');
   renderHomeDeals();
   renderSignatureMegaDeals();
 }
@@ -1249,8 +1332,8 @@ function renderHomeDeals() {
   );
 
   deals.sort((a, b) => {
-    const numA = parseInt((a.name.match(/\d+/) || [999])[0], 10);
-    const numB = parseInt((b.name.match(/\d+/) || [999])[0], 10);
+    const numA = extractDealNumber(a.name);
+    const numB = extractDealNumber(b.name);
     return numA - numB;
   });
 
@@ -1300,7 +1383,6 @@ function renderSignatureMegaDeals() {
     ? activeMenuItems
     : (typeof fallbackMenuItems !== 'undefined' ? fallbackMenuItems : []);
 
-  // 1. Limousine Pizza
   let limoItem = items.find(item => {
     const n = (item.name || '').toLowerCase();
     return n.includes('limousine') || n.includes('limosine');
@@ -1311,7 +1393,6 @@ function renderSignatureMegaDeals() {
     image: "images/pizza pic.jpg"
   };
 
-  // 2. Muneeb Special Platter
   let platterItem = items.find(item => {
     const n = (item.name || '').toLowerCase();
     return n.includes('muneeb special platter') || (n.includes('platter') && !n.includes('shawarma'));
@@ -1322,7 +1403,6 @@ function renderSignatureMegaDeals() {
     image: "images/deals.jpg"
   };
 
-  // 3. Birthday Deal
   let birthdayItem = items.find(item => {
     const n = (item.name || '').toLowerCase();
     return n.includes('birthday') || n.includes('celebration');
