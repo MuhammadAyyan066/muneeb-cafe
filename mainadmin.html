@@ -154,24 +154,52 @@
           </select>
         </div>
 
-        <!-- Single Price Container -->
-        <div id="single-price-box" class="hidden">
+       <!-- Pricing Mode Switch (For Multi-size allowed items) -->
+        <div id="variant-toggle-box" class="hidden p-2.5 bg-black/40 border border-yellow-400/20 rounded-xl flex items-center justify-between">
+          <span class="text-xs text-neutral-300 font-semibold">Enable Multiple Sizes / Portions?</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="enable-sizes-toggle" onchange="toggleSizeInputs()" class="sr-only peer">
+            <div class="w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-400"></div>
+          </label>
+        </div>
+
+        <!-- Single Standard Price Container -->
+        <div id="single-price-box">
           <label class="block text-neutral-400 mb-1">Standard Price (Rs.) *</label>
           <input type="number" id="product-single-price" placeholder="450" class="w-full bg-black border border-yellow-400/20 rounded-xl px-4 py-2 text-yellow-400 focus:border-brand-500 outline-none">
         </div>
 
-        <!-- Multi-size Pizza Price Container -->
-        <div id="pizza-sizes-box" class="p-3 bg-black/60 border border-yellow-400/10 rounded-xl space-y-2">
-          <label class="block text-xs font-bold text-yellow-400">Sizes Pricing (Rs.):</label>
-          <div class="grid grid-cols-2 gap-2">
-            <div><span class="text-[10px] text-neutral-400">Small</span><input type="number" id="price-small" placeholder="550" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
-            <div><span class="text-[10px] text-neutral-400">Medium</span><input type="number" id="price-medium" placeholder="1150" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
-            <div><span class="text-[10px] text-neutral-400">Large</span><input type="number" id="price-large" placeholder="1600" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
-            <div><span class="text-[10px] text-neutral-400">Family</span><input type="number" id="price-family" placeholder="1900" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
+        <!-- Dynamic Multi-size Pricing Container -->
+        <div id="sizes-pricing-box" class="hidden p-3 bg-black/60 border border-yellow-400/10 rounded-xl space-y-3">
+          <label id="sizes-pricing-title" class="block text-xs font-bold text-yellow-400">Sizes / Portions Pricing (Rs.):</label>
+          
+          <!-- 1. Pizza Sizes (Small, Medium, Large, Family) -->
+          <div id="pizza-sizes-grid" class="grid grid-cols-2 gap-2 hidden">
+            <div><span class="text-[10px] text-neutral-400">Small</span><input type="number" id="price-pizza-small" placeholder="550" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
+            <div><span class="text-[10px] text-neutral-400">Medium</span><input type="number" id="price-pizza-medium" placeholder="1150" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
+            <div><span class="text-[10px] text-neutral-400">Large</span><input type="number" id="price-pizza-large" placeholder="1600" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
+            <div><span class="text-[10px] text-neutral-400">Family</span><input type="number" id="price-pizza-family" placeholder="1900" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
+          </div>
+
+          <!-- 2. Fries Sizes (Small, Medium, Large) -->
+          <div id="fries-sizes-grid" class="grid grid-cols-3 gap-2 hidden">
+            <div><span class="text-[10px] text-neutral-400">Small</span><input type="number" id="price-fries-small" placeholder="150" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
+            <div><span class="text-[10px] text-neutral-400">Medium</span><input type="number" id="price-fries-medium" placeholder="250" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
+            <div><span class="text-[10px] text-neutral-400">Large</span><input type="number" id="price-fries-large" placeholder="350" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
+          </div>
+
+          <!-- 3. Wings Portions (6 Pcs, 12 Pcs) -->
+          <div id="wings-sizes-grid" class="grid grid-cols-2 gap-2 hidden">
+            <div><span class="text-[10px] text-neutral-400">6 Pcs</span><input type="number" id="price-wings-6" placeholder="300" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
+            <div><span class="text-[10px] text-neutral-400">12 Pcs</span><input type="number" id="price-wings-12" placeholder="550" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
+          </div>
+
+          <!-- 4. Pasta Sizes (Small, Large) -->
+          <div id="pasta-sizes-grid" class="grid grid-cols-2 gap-2 hidden">
+            <div><span class="text-[10px] text-neutral-400">Small</span><input type="number" id="price-pasta-small" placeholder="400" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
+            <div><span class="text-[10px] text-neutral-400">Large</span><input type="number" id="price-pasta-large" placeholder="700" class="w-full bg-black border border-yellow-400/20 rounded-lg p-2 text-yellow-400 text-xs"></div>
           </div>
         </div>
-
-        <div>
           <label class="block text-neutral-400 mb-1">Description</label>
           <textarea id="product-desc" rows="2" class="w-full bg-black border border-yellow-400/20 rounded-xl px-4 py-2 text-yellow-400 focus:border-brand-500 outline-none"></textarea>
         </div>

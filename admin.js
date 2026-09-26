@@ -3,7 +3,6 @@ const MENU_ENDPOINT = `${API_URL}/api/menu`;
 
 let allProducts = [];
 
-// Safe cache handler to completely prevent QuotaExceededError
 function safeCacheMenu(data) {
   try {
     if (!Array.isArray(data)) return;
@@ -13,10 +12,7 @@ function safeCacheMenu(data) {
     }));
     localStorage.setItem('muneeb_menu_cache', JSON.stringify(lightweightData));
   } catch (err) {
-    console.warn("Storage quota full, resetting cache safely.");
-    try {
-      localStorage.removeItem('muneeb_menu_cache');
-    } catch (e) {}
+    try { localStorage.removeItem('muneeb_menu_cache'); } catch (e) {}
   }
 }
 
@@ -32,17 +28,12 @@ function showBanner(msg, isSuccess = true) {
   setTimeout(() => banner.classList.add('hidden'), 4000);
 }
 
-function selectImage(path) {
-  document.getElementById('product-image').value = path;
-  document.getElementById('image-preview').src = path;
-}
-
 function handleFileSelect(event) {
   const file = event.target.files[0];
   if (!file) return;
 
   if (file.size > 2 * 1024 * 1024) {
-    alert("Image size bohat badi hai (Max 2MB allow hai). Please compress ya choti image upload karein.");
+    alert("Image size bohat bari hai (Max 2MB). Compress karein.");
     return;
   }
 
@@ -56,14 +47,101 @@ function handleFileSelect(event) {
   reader.readAsDataURL(file);
 }
 
+// Category ke mutabiq UI Toggle
+function toggleCategoryPricing() {
+  const cat = (document.getElementById('product-category')?.value || '').toLowerCase();
+  
+  const isPizza = cat.includes('pizza');
+  const isFries = cat.includes('fries');
+  const isWings = cat.includes('wing');
+  const isPasta = cat.includes('pasta');
+
+  const variantToggleBox = document.getElementById('variant-toggle-box');
+  const toggleCheckbox = document.getElementById('enable-sizes-toggle');
+
+  // Hide all specific grids first
+  document.getElementById('pizza-sizes-grid')?.classList.add('hidden');
+  document.getElementById('fries-sizes-grid')?.classList.add('hidden');
+  document.getElementById('wings-sizes-grid')?.classList.add('hidden');
+  document.getElementById('pasta-sizes-grid')?.classList.add('hidden');
+
+  if (isPizza) {
+    // Pizza ke liye multi-sizes mandatory hain
+    variantToggleBox?.classList.add('hidden');
+    if (toggleCheckbox) toggleCheckbox.checked = true;
+    showSizesGrid('pizza');
+  } else if (isFries || isWings || isPasta) {
+    // Fries, Wings, Pasta ke liye multi-sizes optional toggle ke sath hain
+    variantToggleBox?.classList.remove('hidden');
+    if (toggleCheckbox && toggleCheckbox.checked) {
+      if (isFries) showSizesGrid('fries');
+      if (isWings) showSizesGrid('wings');
+      if (isPasta) showSizesGrid('pasta');
+    } else {
+      showSinglePriceOnly();
+    }
+  } else {
+    // Burgers, Shawarma, Roll, etc. are single price
+    variantToggleBox?.classList.add('hidden');
+    if (toggleCheckbox) toggleCheckbox.checked = false;
+    showSinglePriceOnly();
+  }
+}
+
+function toggleSizeInputs() {
+  const toggleCheckbox = document.getElementById('enable-sizes-toggle');
+  const cat = (document.getElementById('product-category')?.value || '').toLowerCase();
+
+  if (toggleCheckbox && toggleCheckbox.checked) {
+    if (cat.includes('fries')) showSizesGrid('fries');
+    else if (cat.includes('wing')) showSizesGrid('wings');
+    else if (cat.includes('pasta')) showSizesGrid('pasta');
+    else if (cat.includes('pizza')) showSizesGrid('pizza');
+  } else {
+    showSinglePriceOnly();
+  }
+}
+
+function showSizesGrid(type) {
+  document.getElementById('single-price-box')?.classList.add('hidden');
+  document.getElementById('sizes-pricing-box')?.classList.remove('hidden');
+
+  document.getElementById('pizza-sizes-grid')?.classList.add('hidden');
+  document.getElementById('fries-sizes-grid')?.classList.add('hidden');
+  document.getElementById('wings-sizes-grid')?.classList.add('hidden');
+  document.getElementById('pasta-sizes-grid')?.classList.add('hidden');
+
+  if (type === 'pizza') document.getElementById('pizza-sizes-grid')?.classList.remove('hidden');
+  if (type === 'fries') document.getElementById('fries-sizes-grid')?.classList.remove('hidden');
+  if (type === 'wings') document.getElementById('wings-sizes-grid')?.classList.remove('hidden');
+  if (type === 'pasta') document.getElementById('pasta-sizes-grid')?.classList.remove('hidden');
+}
+
+function showSinglePriceOnly() {
+  document.getElementById('single-price-box')?.classList.remove('hidden');
+  document.getElementById('sizes-pricing-box')?.classList.add('hidden');
+}
+
+function resetSizeInputs() {
+  ['price-pizza-small', 'price-pizza-medium', 'price-pizza-large', 'price-pizza-family',
+   'price-fries-small', 'price-fries-medium', 'price-fries-large',
+   'price-wings-6', 'price-wings-12',
+   'price-pasta-small', 'price-pasta-large', 'product-single-price'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+
 function openModal(item = null) {
   const modal = document.getElementById('product-modal');
   const form = document.getElementById('product-form');
   const title = document.getElementById('modal-title');
   const categorySelect = document.getElementById('product-category');
+  const toggleCheckbox = document.getElementById('enable-sizes-toggle');
   if (!modal || !form) return;
 
   form.reset();
+  resetSizeInputs();
   document.getElementById('product-id').value = '';
 
   if (item) {
@@ -72,11 +150,11 @@ function openModal(item = null) {
     document.getElementById('product-name').value = item.name || '';
     document.getElementById('product-desc').value = item.desc || item.description || '';
     
-    // Fuzzy matching for Category (handles Pratha Roll vs Paratha Roll vs Rolls)
+    // Category match
     const rawCategory = (item.category || '').trim();
     if (categorySelect) {
       categorySelect.value = rawCategory;
-      if (!categorySelect.value || categorySelect.selectedIndex === -1) {
+      if (!categorySelect.value) {
         const cleanRaw = rawCategory.toLowerCase().replace(/[^a-z]/g, '');
         for (let opt of categorySelect.options) {
           const cleanOpt = opt.value.toLowerCase().replace(/[^a-z]/g, '');
@@ -93,12 +171,37 @@ function openModal(item = null) {
     document.getElementById('product-image').value = imgSrc;
     document.getElementById('image-preview').src = imgSrc;
 
-    if (item.hasSizes && Array.isArray(item.sizes)) {
+    const hasMultiSizes = Boolean(item.hasSizes && Array.isArray(item.sizes) && item.sizes.length > 0);
+
+    if (toggleCheckbox) {
+      toggleCheckbox.checked = hasMultiSizes;
+    }
+
+    toggleCategoryPricing();
+
+    if (hasMultiSizes) {
+      const cat = (categorySelect?.value || '').toLowerCase();
+      
       item.sizes.forEach(s => {
-        if (s.size === 'Small') document.getElementById('price-small').value = s.price;
-        if (s.size === 'Medium') document.getElementById('price-medium').value = s.price;
-        if (s.size === 'Large') document.getElementById('price-large').value = s.price;
-        if (s.size === 'Family') document.getElementById('price-family').value = s.price;
+        const sz = (s.size || '').toLowerCase();
+        const p = s.price || 0;
+
+        if (cat.includes('pizza')) {
+          if (sz.includes('small')) document.getElementById('price-pizza-small').value = p;
+          if (sz.includes('medium')) document.getElementById('price-pizza-medium').value = p;
+          if (sz.includes('large')) document.getElementById('price-pizza-large').value = p;
+          if (sz.includes('family')) document.getElementById('price-pizza-family').value = p;
+        } else if (cat.includes('fries')) {
+          if (sz.includes('small')) document.getElementById('price-fries-small').value = p;
+          if (sz.includes('medium')) document.getElementById('price-fries-medium').value = p;
+          if (sz.includes('large')) document.getElementById('price-fries-large').value = p;
+        } else if (cat.includes('wing')) {
+          if (sz.includes('6')) document.getElementById('price-wings-6').value = p;
+          if (sz.includes('12')) document.getElementById('price-wings-12').value = p;
+        } else if (cat.includes('pasta')) {
+          if (sz.includes('small')) document.getElementById('price-pasta-small').value = p;
+          if (sz.includes('large')) document.getElementById('price-pasta-large').value = p;
+        }
       });
     } else {
       document.getElementById('product-single-price').value = item.price || 0;
@@ -106,36 +209,18 @@ function openModal(item = null) {
   } else {
     title.innerText = "Add New Menu Item";
     if (categorySelect) categorySelect.value = 'Pizzas';
+    if (toggleCheckbox) toggleCheckbox.checked = false;
     document.getElementById('product-image').value = 'images/pizza pic.jpg';
     document.getElementById('image-preview').src = 'images/pizza pic.jpg';
+    toggleCategoryPricing();
   }
 
-  toggleCategoryPricing();
   modal.classList.remove('hidden');
 }
 
 function closeModal() {
   const modal = document.getElementById('product-modal');
   if (modal) modal.classList.add('hidden');
-}
-
-function toggleCategoryPricing() {
-  const categoryEl = document.getElementById('product-category');
-  const cat = (categoryEl ? categoryEl.value : '').toLowerCase();
-  const isPizza = cat.includes('pizza');
-  
-  const pizzaBox = document.getElementById('pizza-sizes-box');
-  const singlePriceBox = document.getElementById('single-price-box');
-
-  if (pizzaBox && singlePriceBox) {
-    if (isPizza) {
-      pizzaBox.classList.remove('hidden');
-      singlePriceBox.classList.add('hidden');
-    } else {
-      pizzaBox.classList.add('hidden');
-      singlePriceBox.classList.remove('hidden');
-    }
-  }
 }
 
 async function loadAdminProducts() {
@@ -181,7 +266,7 @@ function renderAdminTableRows(items) {
   tbody.innerHTML = items.map((item, idx) => {
     let pricing = '';
     if (item.hasSizes && Array.isArray(item.sizes) && item.sizes.length > 0) {
-      pricing = item.sizes.map(s => `${s.size[0]}: Rs.${s.price}`).join(' | ');
+      pricing = item.sizes.map(s => `${s.size}: Rs.${s.price}`).join(' | ');
     } else {
       pricing = `Rs. ${item.price || 0}/-`;
     }
@@ -229,7 +314,50 @@ async function handleProductSubmit(e) {
   const id = document.getElementById('product-id').value;
   const isEdit = Boolean(id);
   const category = document.getElementById('product-category').value;
-  const isPizza = category.toLowerCase().includes('pizza');
+  const catLower = category.toLowerCase();
+  
+  const isPizza = catLower.includes('pizza');
+  const isFries = catLower.includes('fries');
+  const isWings = catLower.includes('wing');
+  const isPasta = catLower.includes('pasta');
+  const toggleCheckbox = document.getElementById('enable-sizes-toggle');
+
+  const shouldUseMultiSizes = isPizza || (Boolean(toggleCheckbox && toggleCheckbox.checked) && (isFries || isWings || isPasta));
+
+  let sizesArray = [];
+
+  if (shouldUseMultiSizes) {
+    if (isPizza) {
+      const s = Number(document.getElementById('price-pizza-small')?.value) || 0;
+      const m = Number(document.getElementById('price-pizza-medium')?.value) || 0;
+      const l = Number(document.getElementById('price-pizza-large')?.value) || 0;
+      const f = Number(document.getElementById('price-pizza-family')?.value) || 0;
+      if (s > 0) sizesArray.push({ size: "Small", price: s });
+      if (m > 0) sizesArray.push({ size: "Medium", price: m });
+      if (l > 0) sizesArray.push({ size: "Large", price: l });
+      if (f > 0) sizesArray.push({ size: "Family", price: f });
+    } else if (isFries) {
+      const s = Number(document.getElementById('price-fries-small')?.value) || 0;
+      const m = Number(document.getElementById('price-fries-medium')?.value) || 0;
+      const l = Number(document.getElementById('price-fries-large')?.value) || 0;
+      if (s > 0) sizesArray.push({ size: "Small", price: s });
+      if (m > 0) sizesArray.push({ size: "Medium", price: m });
+      if (l > 0) sizesArray.push({ size: "Large", price: l });
+    } else if (isWings) {
+      const p6 = Number(document.getElementById('price-wings-6')?.value) || 0;
+      const p12 = Number(document.getElementById('price-wings-12')?.value) || 0;
+      if (p6 > 0) sizesArray.push({ size: "6 Pcs", price: p6 });
+      if (p12 > 0) sizesArray.push({ size: "12 Pcs", price: p12 });
+    } else if (isPasta) {
+      const s = Number(document.getElementById('price-pasta-small')?.value) || 0;
+      const l = Number(document.getElementById('price-pasta-large')?.value) || 0;
+      if (s > 0) sizesArray.push({ size: "Small", price: s });
+      if (l > 0) sizesArray.push({ size: "Large", price: l });
+    }
+  }
+
+  const hasSizes = sizesArray.length > 0;
+  const singlePrice = Number(document.getElementById('product-single-price')?.value) || 0;
 
   const payload = {
     name: document.getElementById('product-name').value.trim(),
@@ -237,19 +365,10 @@ async function handleProductSubmit(e) {
     description: document.getElementById('product-desc').value.trim(),
     desc: document.getElementById('product-desc').value.trim(),
     image: document.getElementById('product-image').value.trim(),
-    hasSizes: isPizza
+    hasSizes: hasSizes,
+    sizes: hasSizes ? sizesArray : [],
+    price: hasSizes ? (sizesArray[0]?.price || 0) : singlePrice
   };
-
-  if (isPizza) {
-    payload.sizes = [
-      { size: 'Small', price: Number(document.getElementById('price-small').value) || 550 },
-      { size: 'Medium', price: Number(document.getElementById('price-medium').value) || 1150 },
-      { size: 'Large', price: Number(document.getElementById('price-large').value) || 1600 },
-      { size: 'Family', price: Number(document.getElementById('price-family').value) || 1900 }
-    ];
-  } else {
-    payload.price = Number(document.getElementById('product-single-price').value) || 0;
-  }
 
   try {
     const url = isEdit ? `${MENU_ENDPOINT}/${id}` : MENU_ENDPOINT;
@@ -291,9 +410,6 @@ window.addEventListener('DOMContentLoaded', () => {
   if (window.lucide) lucide.createIcons();
 });
 
-// ==============================================================
-// INSTANT ZERO-SECOND TABLE SEARCH (DIRECT DOM FILTERING)
-// ==============================================================
 function searchAdminProducts() {
   const query = (document.getElementById('admin-search-input')?.value || '').toLowerCase().trim();
   const tableBody = document.getElementById('admin-menu-table');
@@ -328,7 +444,6 @@ function searchAdminProducts() {
       tableBody.appendChild(emptyNotice);
     } else {
       emptyNotice.style.display = '';
-      emptyNotice.innerHTML = `<td colspan="4" class="py-6 text-center text-neutral-400 text-xs font-semibold">No matching items found for "${query}"</td>`;
     }
   } else if (emptyNotice) {
     emptyNotice.style.display = 'none';
