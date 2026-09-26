@@ -65,12 +65,19 @@ function updateCounts() {
         else if (s === 'done' || s === 'completed') counts.done++;
     });
 
-    document.getElementById('order-count-badge').innerText = counts.all;
-    document.getElementById('badge-all').innerText = counts.all;
-    document.getElementById('badge-pending').innerText = counts.pending;
-    document.getElementById('badge-processing').innerText = counts.processing;
-    document.getElementById('badge-delivery').innerText = counts.delivery;
-    document.getElementById('badge-done').innerText = counts.done;
+    const badgeAll = document.getElementById('badge-all');
+    const badgeCount = document.getElementById('order-count-badge');
+    const badgePending = document.getElementById('badge-pending');
+    const badgeProcessing = document.getElementById('badge-processing');
+    const badgeDelivery = document.getElementById('badge-delivery');
+    const badgeDone = document.getElementById('badge-done');
+
+    if (badgeCount) badgeCount.innerText = counts.all;
+    if (badgeAll) badgeAll.innerText = counts.all;
+    if (badgePending) badgePending.innerText = counts.pending;
+    if (badgeProcessing) badgeProcessing.innerText = counts.processing;
+    if (badgeDelivery) badgeDelivery.innerText = counts.delivery;
+    if (badgeDone) badgeDone.innerText = counts.done;
 }
 
 function openReceiptModal(imageUrl) {
@@ -253,7 +260,6 @@ function renderOrders() {
             ? `<span class="bg-purple-500/20 text-purple-300 border border-purple-500/40 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1"><i data-lucide="credit-card" class="w-3 h-3"></i> Bank Transfer</span>`
             : `<span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1"><i data-lucide="banknote" class="w-3 h-3"></i> Cash on Delivery</span>`;
 
-        // Dono fields support karta hai (paymentScreenshot aur paymentReceipt)
         let receiptUrl = order.paymentScreenshot || order.paymentReceipt || null;
         if (receiptUrl && !receiptUrl.startsWith('http')) {
             receiptUrl = `${API_URL}${receiptUrl}`;
@@ -433,8 +439,8 @@ async function deleteOrder(id) {
     }
 }
 
-// --- Real-time Instant Push, Audio & Vibration Notification System ---
-const alertAudio = new Audio('notification.mp3');
+// Online chime audio URL (no 404 missing local file error)
+const alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
 alertAudio.preload = 'auto';
 
 function requestNotificationPermission() {
@@ -443,34 +449,3 @@ function requestNotificationPermission() {
   }
 }
 document.addEventListener('click', requestNotificationPermission, { once: true });
-
-// Initialize Socket.io Connection
-const socket = io(typeof API_URL !== 'undefined' ? API_URL : 'https://muneeb-cafe-backend.vercel.app');
-
-socket.on('connect', () => {
-  socket.emit('joinAdmin');
-  socket.emit('joinAdminRoom');
-});
-
-socket.on('newOrderAlert', (newOrder) => {
-  try {
-    alertAudio.currentTime = 0;
-    alertAudio.play().catch(() => {});
-  } catch (e) {}
-
-  if ('vibrate' in navigator) {
-    navigator.vibrate([400, 200, 400, 200, 600]);
-  }
-
-  if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification('🚨 New Order Received! - Muneeb Cafe', {
-      body: `${newOrder.customerName || 'Customer'} placed an order for Rs. ${newOrder.totalAmount || 0}/- (${newOrder.paymentMethod || 'COD'})`,
-      icon: 'images/logo MFF.png',
-      badge: 'images/logo MFF.png',
-      tag: newOrder._id || Date.now(),
-      renotify: true
-    });
-  }
-
-  loadOrders();
-});
