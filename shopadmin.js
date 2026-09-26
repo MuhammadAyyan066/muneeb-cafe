@@ -78,15 +78,16 @@ function openReceiptModal(imageUrl) {
     const img = document.getElementById('receipt-modal-img');
     const link = document.getElementById('receipt-download-link');
     
-    img.src = imageUrl;
-    link.href = imageUrl;
-    modal.classList.remove('hidden');
+    if (img) img.src = imageUrl;
+    if (link) link.href = imageUrl;
+    if (modal) modal.classList.remove('hidden');
 }
 
 function closeReceiptModal() {
     const modal = document.getElementById('receipt-modal');
-    modal.classList.add('hidden');
-    document.getElementById('receipt-modal-img').src = '';
+    if (modal) modal.classList.add('hidden');
+    const img = document.getElementById('receipt-modal-img');
+    if (img) img.src = '';
 }
 
 // Customer Direct WhatsApp
@@ -132,7 +133,7 @@ function shareToRider(orderStr) {
     const order = JSON.parse(decodeURIComponent(orderStr));
     const phoneVal = order.customerPhone || order.phone || 'N/A';
     const addressVal = order.deliveryAddress || order.address || 'Fatehpur';
-    const isOnlinePaid = order.paymentMethod === 'Online Bank Transfer';
+    const isOnlinePaid = (order.paymentMethod || '').toLowerCase().includes('bank');
 
     let navigationUrl = '';
     if (order.locationCoords && order.locationCoords.lat && order.locationCoords.lng) {
@@ -245,29 +246,50 @@ function renderOrders() {
         const isInDelivery = currentStatus === 'in delivery' || currentStatus === 'delivering' || currentStatus === 'out for delivery';
         const isDone = currentStatus === 'done' || currentStatus === 'completed';
 
-        const isOnlineTransfer = order.paymentMethod === 'Online Bank Transfer';
+        const paymentMethodStr = (order.paymentMethod || '').toLowerCase();
+        const isOnlineTransfer = paymentMethodStr.includes('bank') || paymentMethodStr.includes('online');
+
         const paymentBadge = isOnlineTransfer 
             ? `<span class="bg-purple-500/20 text-purple-300 border border-purple-500/40 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1"><i data-lucide="credit-card" class="w-3 h-3"></i> Bank Transfer</span>`
             : `<span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1"><i data-lucide="banknote" class="w-3 h-3"></i> Cash on Delivery</span>`;
 
-        let receiptUrl = order.paymentReceipt || null;
+        // Dono fields support karta hai (paymentScreenshot aur paymentReceipt)
+        let receiptUrl = order.paymentScreenshot || order.paymentReceipt || null;
         if (receiptUrl && !receiptUrl.startsWith('http')) {
             receiptUrl = `${API_URL}${receiptUrl}`;
         }
 
         const receiptHtml = receiptUrl ? `
-            <div class="bg-neutral-900/90 p-3 rounded-xl border border-yellow-400/20 flex items-center justify-between gap-3">
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                    <span class="text-xs font-semibold text-neutral-300">Bank Transfer Screenshot:</span>
+            <div class="bg-neutral-900/90 p-3 rounded-xl border border-yellow-400/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <img 
+                        src="${receiptUrl}" 
+                        alt="Slip Thumbnail" 
+                        onclick="openReceiptModal('${receiptUrl}')"
+                        class="w-12 h-12 object-cover rounded-lg border border-yellow-400/30 hover:scale-105 cursor-pointer transition shadow" 
+                        onerror="this.style.display='none'"
+                    />
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            <span class="text-xs font-bold text-white">Payment Receipt Attached</span>
+                        </div>
+                        <span class="text-[11px] text-neutral-400">Click to preview full slip</span>
+                    </div>
                 </div>
-                <button onclick="openReceiptModal('${receiptUrl}')" class="bg-yellow-400/10 hover:bg-yellow-400/20 border border-yellow-400/30 text-yellow-400 hover:text-yellow-300 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
-                    <i data-lucide="image" class="w-3.5 h-3.5"></i> View Receipt
-                </button>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button type="button" onclick="openReceiptModal('${receiptUrl}')" class="flex-1 sm:flex-none bg-yellow-400/10 hover:bg-yellow-400/20 border border-yellow-400/30 text-yellow-400 hover:text-yellow-300 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition">
+                        <i data-lucide="eye" class="w-3.5 h-3.5"></i> View Full Slip
+                    </button>
+                    <a href="${receiptUrl}" target="_blank" rel="noopener noreferrer" class="p-1.5 text-neutral-400 hover:text-white bg-neutral-800 rounded-lg transition" title="Open in new tab">
+                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                    </a>
+                </div>
             </div>
         ` : (isOnlineTransfer ? `
-            <div class="bg-amber-500/10 p-2.5 rounded-xl border border-amber-500/30 text-xs text-amber-400 font-medium">
-                ⚠️ Bank Transfer selected, but no receipt image was found.
+            <div class="bg-amber-500/10 p-2.5 rounded-xl border border-amber-500/30 text-xs text-amber-400 font-medium flex items-center gap-2">
+                <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400 shrink-0"></i>
+                <span>Bank Transfer selected, but no receipt screenshot was found.</span>
             </div>
         ` : '');
 
@@ -415,7 +437,6 @@ async function deleteOrder(id) {
 const alertAudio = new Audio('notification.mp3');
 alertAudio.preload = 'auto';
 
-// Request Browser Notification Permission on First Admin Interaction
 function requestNotificationPermission() {
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission();
@@ -432,18 +453,15 @@ socket.on('connect', () => {
 });
 
 socket.on('newOrderAlert', (newOrder) => {
-  // 1. Play Audio Ringtone
   try {
     alertAudio.currentTime = 0;
     alertAudio.play().catch(() => {});
   } catch (e) {}
 
-  // 2. Mobile Device Vibration Pattern
   if ('vibrate' in navigator) {
     navigator.vibrate([400, 200, 400, 200, 600]);
   }
 
-  // 3. Native Browser Web Notification
   if ('Notification' in window && Notification.permission === 'granted') {
     new Notification('🚨 New Order Received! - Muneeb Cafe', {
       body: `${newOrder.customerName || 'Customer'} placed an order for Rs. ${newOrder.totalAmount || 0}/- (${newOrder.paymentMethod || 'COD'})`,
@@ -454,6 +472,5 @@ socket.on('newOrderAlert', (newOrder) => {
     });
   }
 
-  // 4. Refresh Dashboard UI
   loadOrders();
 });

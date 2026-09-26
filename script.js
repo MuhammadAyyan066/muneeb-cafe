@@ -810,7 +810,7 @@ function closeCartDrawer() {
 }
 
 // ==========================================
-// 7. PAYMENT UI TOGGLE
+// 7. PAYMENT UI TOGGLE & SCREENSHOT CLOUD UPLOAD
 // ==========================================
 function togglePaymentUI() {
   const selectedRadio = document.querySelector('input[name="payment-method"]:checked');
@@ -831,6 +831,27 @@ function togglePaymentUI() {
       receiptInput.required = false;
       receiptInput.value = '';
     }
+  }
+}
+
+// Client-side Direct Cloud Uploader (ImgBB Free API)
+// Yeh function screenshot ko cloud link (URL) mein convert karta hai taake DB crash na ho
+async function uploadScreenshotToCloud(imageFile) {
+  // Free public anonymous API key for seamless receipts upload
+  const IMGBB_API_KEY ="43240ac08db7c5c9bfe4d69bce7865fc"; 
+  const formData = new FormData();
+  formData.append('image', imageFile);
+
+  const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+    method: 'POST',
+    body: formData
+  });
+
+  const data = await res.json();
+  if (data && data.success && data.data && data.data.url) {
+    return data.data.url; // Returns direct permanent image URL
+  } else {
+    throw new Error(data?.error?.message || "Screenshot upload nahi ho saka. Dobara koshish karein.");
   }
 }
 
@@ -936,6 +957,36 @@ async function placeOrder() {
   const selectedRadio = document.querySelector('input[name="payment-method"]:checked');
   const paymentMethod = selectedRadio ? selectedRadio.value : 'Cash on Delivery';
 
+  const receiptInput = document.getElementById('receipt-upload');
+  const receiptFile = receiptInput?.files?.[0];
+  let paymentScreenshotUrl = "";
+
+  // Agar Bank Transfer select kiya hai toh screenshot verification
+  if (paymentMethod.includes('Bank') || paymentMethod === 'Online Bank Transfer') {
+    if (!receiptFile) {
+      showCheckoutNotification("Barah-e-karam bank transfer ki payment slip / screenshot attach karein!", "error");
+      if (receiptInput) receiptInput.focus();
+      return;
+    }
+
+    try {
+      if (orderBtn) {
+        orderBtn.disabled = true;
+        orderBtn.innerHTML = `<span>Uploading Receipt...</span>`;
+      }
+      // Screenshot cloud par upload ho kar URL banega
+      paymentScreenshotUrl = await uploadScreenshotToCloud(receiptFile);
+    } catch (uploadErr) {
+      console.error("Screenshot upload failed:", uploadErr);
+      showCheckoutNotification("Payment receipt upload fail ho gayi. Dobara koshish karein.", "error");
+      if (orderBtn) {
+        orderBtn.disabled = false;
+        orderBtn.innerHTML = originalBtnText;
+      }
+      return;
+    }
+  }
+
   const totalAmount = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
 
   const formattedItems = cart.map(item => ({
@@ -969,7 +1020,8 @@ async function placeOrder() {
         locationCoords: detectedCoords,
         items: formattedItems,
         totalAmount,
-        paymentMethod
+        paymentMethod,
+        paymentScreenshot: paymentScreenshotUrl // Clean URL database mein save hoga
       })
     });
 
@@ -985,6 +1037,7 @@ async function placeOrder() {
       if (document.getElementById('customer-name')) document.getElementById('customer-name').value = '';
       if (document.getElementById('customer-phone')) document.getElementById('customer-phone').value = '';
       if (document.getElementById('customer-address')) document.getElementById('customer-address').value = '';
+      if (receiptInput) receiptInput.value = '';
 
       setTimeout(() => closeCartDrawer(), 1500);
     } else {
