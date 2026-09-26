@@ -60,6 +60,7 @@ function openModal(item = null) {
   const modal = document.getElementById('product-modal');
   const form = document.getElementById('product-form');
   const title = document.getElementById('modal-title');
+  const categorySelect = document.getElementById('product-category');
   if (!modal || !form) return;
 
   form.reset();
@@ -69,9 +70,25 @@ function openModal(item = null) {
     title.innerText = "Edit Menu Item";
     document.getElementById('product-id').value = item._id || item.id || '';
     document.getElementById('product-name').value = item.name || '';
-    document.getElementById('product-category').value = item.category || 'Pizzas';
     document.getElementById('product-desc').value = item.desc || item.description || '';
     
+    // Fuzzy matching for Category (handles Pratha Roll vs Paratha Roll vs Rolls)
+    const rawCategory = (item.category || '').trim();
+    if (categorySelect) {
+      categorySelect.value = rawCategory;
+      if (!categorySelect.value || categorySelect.selectedIndex === -1) {
+        const cleanRaw = rawCategory.toLowerCase().replace(/[^a-z]/g, '');
+        for (let opt of categorySelect.options) {
+          const cleanOpt = opt.value.toLowerCase().replace(/[^a-z]/g, '');
+          if (cleanOpt === cleanRaw || cleanOpt.includes(cleanRaw) || cleanRaw.includes(cleanOpt)) {
+            categorySelect.value = opt.value;
+            break;
+          }
+        }
+      }
+      if (!categorySelect.value) categorySelect.value = 'Pizzas';
+    }
+
     const imgSrc = item.image || item.img || 'images/pizza pic.jpg';
     document.getElementById('product-image').value = imgSrc;
     document.getElementById('image-preview').src = imgSrc;
@@ -88,6 +105,7 @@ function openModal(item = null) {
     }
   } else {
     title.innerText = "Add New Menu Item";
+    if (categorySelect) categorySelect.value = 'Pizzas';
     document.getElementById('product-image').value = 'images/pizza pic.jpg';
     document.getElementById('image-preview').src = 'images/pizza pic.jpg';
   }
@@ -102,11 +120,22 @@ function closeModal() {
 }
 
 function toggleCategoryPricing() {
-  const catInput = document.getElementById('product-category');
-  if (!catInput) return;
-  const isPizza = catInput.value.toLowerCase().includes('pizza');
-  document.getElementById('pizza-sizes-box').classList.toggle('hidden', !isPizza);
-  document.getElementById('single-price-box').classList.toggle('hidden', isPizza);
+  const categoryEl = document.getElementById('product-category');
+  const cat = (categoryEl ? categoryEl.value : '').toLowerCase();
+  const isPizza = cat.includes('pizza');
+  
+  const pizzaBox = document.getElementById('pizza-sizes-box');
+  const singlePriceBox = document.getElementById('single-price-box');
+
+  if (pizzaBox && singlePriceBox) {
+    if (isPizza) {
+      pizzaBox.classList.remove('hidden');
+      singlePriceBox.classList.add('hidden');
+    } else {
+      pizzaBox.classList.add('hidden');
+      singlePriceBox.classList.remove('hidden');
+    }
+  }
 }
 
 async function loadAdminProducts() {
@@ -121,8 +150,6 @@ async function loadAdminProducts() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     allProducts = await res.json();
-
-    // Safe cache storage (No QuotaExceededError)
     safeCacheMenu(allProducts);
 
     if (totalCount) totalCount.innerText = allProducts.length;
@@ -140,7 +167,6 @@ async function loadAdminProducts() {
     }
 
     renderAdminTableRows(allProducts);
-
     if (window.lucide) lucide.createIcons();
   } catch (err) {
     if (statusEl) statusEl.innerHTML = `<span class="w-3 h-3 rounded-full bg-red-500"></span> Disconnected`;
@@ -239,8 +265,6 @@ async function handleProductSubmit(e) {
 
     showBanner(isEdit ? 'Item updated in MongoDB!' : 'New item saved to MongoDB!');
     closeModal();
-    
-    // Fresh MongoDB data reload
     await loadAdminProducts();
   } catch (err) {
     showBanner(`Operation Failed: ${err.message}`, false);
@@ -256,7 +280,6 @@ async function deleteProduct(id) {
     const res = await fetch(`${MENU_ENDPOINT}/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error("Could not delete from backend");
     showBanner("Item deleted successfully!");
-    
     await loadAdminProducts();
   } catch (err) {
     showBanner(`Delete Error: ${err.message}`, false);
